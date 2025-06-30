@@ -2,9 +2,9 @@
 -- Tables: warehouses, products, stocks
 
 -- Clear existing data (if needed)
--- DELETE FROM stocks;
--- DELETE FROM products;
--- DELETE FROM warehouses;
+DELETE FROM stocks;
+DELETE FROM products;
+DELETE FROM warehouses;
 
 -- Populate warehouses table
 INSERT INTO warehouses (code, name, description, address, city, state_province, postal_code, country, created_at, updated_at, is_active)
