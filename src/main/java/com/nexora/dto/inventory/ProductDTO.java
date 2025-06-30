@@ -175,4 +175,9 @@ public class ProductDTO {
     public void setSku(String sku) {
         this.sku = sku;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

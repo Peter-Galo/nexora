@@ -183,4 +183,9 @@ public class WarehouseDTO {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

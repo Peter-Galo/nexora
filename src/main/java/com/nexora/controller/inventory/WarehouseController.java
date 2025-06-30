@@ -1,7 +1,9 @@
 package com.nexora.controller.inventory;
 
+import com.nexora.dto.inventory.ProductDTO;
 import com.nexora.dto.inventory.WarehouseDTO;
 import com.nexora.service.inventory.WarehouseService;
+import com.nexora.util.ExcelExportUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,10 +12,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -191,5 +197,23 @@ public class WarehouseController {
             @Parameter(description = "Text to search for in warehouse names", required = true)
             @RequestParam String name) {
         return ResponseEntity.ok(warehouseService.searchWarehousesByName(name));
+    }
+
+    @Operation(summary = "Export warehouses as XLSX", description = "Exports all warehouses as an Excel file with all fields")
+    @ApiResponse(responseCode = "200", description = "XLSX file generated successfully")
+    @GetMapping("/export/xlsx")
+    public ResponseEntity<byte[]> exportProductsToXlsx() {
+        List<WarehouseDTO> warehouses = warehouseService.getAllWarehouses();
+        try {
+            byte[] excelData = ExcelExportUtil.exportToExcel(warehouses, "Warehouses");
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+            String filename = "warehouses_" + timestamp + ".xlsx";
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            return ResponseEntity.ok().headers(headers).body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

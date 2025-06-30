@@ -2,6 +2,7 @@ package com.nexora.controller.inventory;
 
 import com.nexora.dto.inventory.ProductDTO;
 import com.nexora.service.inventory.ProductService;
+import com.nexora.util.ExcelExportUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,10 +10,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -178,5 +188,23 @@ public class ProductController {
             @Parameter(description = "Text to search for in product names", required = true)
             @RequestParam String name) {
         return ResponseEntity.ok(productService.searchProductsByName(name));
+    }
+
+    @Operation(summary = "Export products as XLSX", description = "Exports all products as an Excel file with all fields")
+    @ApiResponse(responseCode = "200", description = "XLSX file generated successfully")
+    @GetMapping("/export/xlsx")
+    public ResponseEntity<byte[]> exportProductsToXlsx() {
+        List<ProductDTO> products = productService.getAllProducts();
+        try {
+            byte[] excelData = ExcelExportUtil.exportToExcel(products, "Products");
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+            String filename = "products_" + timestamp + ".xlsx";
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            return ResponseEntity.ok().headers(headers).body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

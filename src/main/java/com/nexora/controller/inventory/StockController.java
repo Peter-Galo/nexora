@@ -1,7 +1,9 @@
 package com.nexora.controller.inventory;
 
+import com.nexora.dto.inventory.ProductDTO;
 import com.nexora.dto.inventory.StockDTO;
 import com.nexora.service.inventory.StockService;
+import com.nexora.util.ExcelExportUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,10 +12,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -222,5 +228,23 @@ public class StockController {
     @GetMapping("/zero")
     public ResponseEntity<List<StockDTO>> getZeroStocks() {
         return ResponseEntity.ok(stockService.getZeroStocks());
+    }
+
+    @Operation(summary = "Export stock status as XLSX", description = "Exports stock status as an Excel file with all fields")
+    @ApiResponse(responseCode = "200", description = "XLSX file generated successfully")
+    @GetMapping("/export/xlsx")
+    public ResponseEntity<byte[]> exportProductsToXlsx() {
+        List<StockDTO> stocks = stockService.getAllStocks();
+        try {
+            byte[] excelData = ExcelExportUtil.exportToExcel(stocks, "Stocks");
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+            String filename = "stocks_" + timestamp + ".xlsx";
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            return ResponseEntity.ok().headers(headers).body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
