@@ -10,3 +10,15 @@ application:
         jwt:
             secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
             expiration: 86400000 # 24 hours
+
+# OpenAPI Documentation Configuration
+springdoc:
+    api-docs:
+        path: /v3/api-docs
+    swagger-ui:
+        path: /swagger-ui.html
+        operationsSorter: method
+        tagsSorter: alpha
+        tryItOutEnabled: true
+    packages-to-scan: com.nexora.controller
+    paths-to-match: /api/**
