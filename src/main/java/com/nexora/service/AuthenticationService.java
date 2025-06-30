@@ -3,12 +3,15 @@ package com.nexora.service;
 import com.nexora.dto.AuthenticationRequest;
 import com.nexora.dto.AuthenticationResponse;
 import com.nexora.dto.RegisterRequest;
+import com.nexora.exception.ApplicationException;
 import com.nexora.model.Role;
 import com.nexora.model.User;
 import com.nexora.repository.UserRepository;
 import com.nexora.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +37,7 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest request) {
         // Check if user already exists
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("User with email " + request.getEmail() + " already exists");
+            throw new ApplicationException("User with email " + request.getEmail() + " already exists", "USER_ALREADY_EXISTS");
         }
 
         // Create new user
@@ -64,17 +67,23 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        // Authenticate user
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        try {
+            // Authenticate user
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new ApplicationException("Invalid email or password", "INVALID_CREDENTIALS");
+        } catch (AuthenticationException e) {
+            throw new ApplicationException("Authentication failed: " + e.getMessage(), "AUTHENTICATION_FAILED");
+        }
 
         // Find user by email
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApplicationException("User not found", "USER_NOT_FOUND"));
 
         // Generate JWT token
         var jwtToken = jwtService.generateToken(user);
