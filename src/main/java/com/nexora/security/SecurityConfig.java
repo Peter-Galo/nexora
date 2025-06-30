@@ -23,14 +23,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    public SecurityConfig(UserRepository userRepository) {
+    public SecurityConfig(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(new JwtService(), userDetailsService());
+        return new JwtAuthenticationFilter(jwtService, userDetailsService());
     }
 
     @Bean
@@ -44,6 +46,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**").permitAll()
+                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

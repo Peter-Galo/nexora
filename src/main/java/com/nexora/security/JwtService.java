@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -25,12 +26,29 @@ public class JwtService {
     private long jwtExpiration;
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        try {
+            return extractClaim(token, Claims::getSubject);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> extractAuthorities(String token) {
+        try {
+            return extractClaim(token, claims -> (List<String>) claims.get("authorities"));
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        try {
+            final Claims claims = extractAllClaims(token);
+            return claimsResolver.apply(claims);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -41,7 +59,13 @@ public class JwtService {
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {
-        return buildToken(extraClaims, userDetails, jwtExpiration);
+        // Add user authorities to the claims
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        claims.put("authorities", userDetails.getAuthorities().stream()
+                .map(authority -> authority.getAuthority())
+                .toList());
+
+        return buildToken(claims, userDetails, jwtExpiration);
     }
 
     private String buildToken(
@@ -60,12 +84,21 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        try {
+            final String username = extractUsername(token);
+            return username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            Date expiration = extractExpiration(token);
+            return expiration != null && expiration.before(new Date());
+        } catch (Exception e) {
+            return true; // Consider expired if we can't extract expiration
+        }
     }
 
     private Date extractExpiration(String token) {
@@ -73,15 +106,22 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse JWT token", e);
+        }
     }
 
     private Key getSignInKey() {
+        if (secretKey == null || secretKey.isEmpty()) {
+            throw new IllegalStateException("JWT secret key cannot be null or empty");
+        }
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
