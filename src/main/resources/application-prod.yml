@@ -20,3 +20,23 @@ spring:
 server:
     port: ${SERVER_PORT:8080}
     shutdown: graceful
+
+rabbitmq:
+    queue:
+        export:
+            name: ${RABBITMQ_QUEUE}
+    exchange:
+        name: ${RABBITMQ_EXCHANGE}
+    routing:
+        key:
+            export: ${RABBITMQ_ROUTING_KEY}
+
+# Digital Ocean Spaces Configuration
+do:
+    spaces:
+        key: ${DO_SPACES_KEY}
+        secret: ${DO_SPACES_SECRET}
+        region: ${DO_SPACES_REGION}
+        endpoint: ${DO_SPACES_ENDPOINT}
+        bucket: ${DO_SPACES_BUCKET}
+        public-url: ${DO_SPACES_PUBLIC_URL}
