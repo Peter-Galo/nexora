@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a warehouse in the inventory system.
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 public class Warehouse {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID uuid;
 
     @NotBlank(message = "Warehouse code is required")
     @Size(min = 2, max = 50, message = "Warehouse code must be between 2 and 50 characters")
@@ -68,10 +69,10 @@ public class Warehouse {
     }
 
     // Full constructor
-    public Warehouse(Long id, String code, String name, String description, String address,
-                    String city, String stateProvince, String postalCode, String country,
-                    LocalDateTime createdAt, LocalDateTime updatedAt, boolean active) {
-        this.id = id;
+    public Warehouse(UUID uuid, String code, String name, String description, String address,
+                     String city, String stateProvince, String postalCode, String country,
+                     LocalDateTime createdAt, LocalDateTime updatedAt, boolean active) {
+        this.uuid = uuid;
         this.code = code;
         this.name = name;
         this.description = description;
@@ -86,12 +87,12 @@ public class Warehouse {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUuid(UUID id) {
+        this.uuid = id;
     }
 
     public String getCode() {
@@ -197,7 +198,7 @@ public class Warehouse {
     @Override
     public String toString() {
         return "Warehouse{" +
-                "id=" + id +
+                "id=" + uuid +
                 ", code='" + code + '\'' +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +

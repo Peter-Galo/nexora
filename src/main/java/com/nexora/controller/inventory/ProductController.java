@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for managing products.
@@ -31,8 +32,8 @@ public class ProductController {
 
     @Operation(summary = "Get all products", description = "Retrieves a list of all products")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
@@ -41,8 +42,8 @@ public class ProductController {
 
     @Operation(summary = "Get active products", description = "Retrieves a list of all active products")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of active products"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of active products"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/active")
     public ResponseEntity<List<ProductDTO>> getActiveProducts() {
@@ -51,22 +52,22 @@ public class ProductController {
 
     @Operation(summary = "Get product by ID", description = "Retrieves a product by its ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the product"),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the product"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(
-            @Parameter(description = "ID of the product to retrieve", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "UUID of the product to retrieve", required = true)
+            @PathVariable UUID id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @Operation(summary = "Get product by code", description = "Retrieves a product by its code")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the product"),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the product"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/code/{code}")
     public ResponseEntity<ProductDTO> getProductByCode(
@@ -77,9 +78,9 @@ public class ProductController {
 
     @Operation(summary = "Create a new product", description = "Creates a new product with the provided information. The product ID will be auto-generated and should not be included in the request.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Product successfully created"),
-        @ApiResponse(responseCode = "400", description = "Invalid input or product code already exists"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "201", description = "Product successfully created"),
+            @ApiResponse(responseCode = "400", description = "Invalid input or product code already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(
@@ -90,15 +91,15 @@ public class ProductController {
 
     @Operation(summary = "Update an existing product", description = "Updates an existing product with the provided information")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Product successfully updated"),
-        @ApiResponse(responseCode = "400", description = "Invalid input or product code already exists"),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Product successfully updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid input or product code already exists"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(
-            @Parameter(description = "ID of the product to update", required = true)
-            @PathVariable Long id,
+            @Parameter(description = "UUID of the product to update", required = true)
+            @PathVariable UUID id,
             @Parameter(description = "Updated product information", required = true, schema = @Schema(implementation = ProductDTO.class))
             @Valid @RequestBody ProductDTO productDTO) {
         return ResponseEntity.ok(productService.updateProduct(id, productDTO));
@@ -106,48 +107,48 @@ public class ProductController {
 
     @Operation(summary = "Delete a product", description = "Deletes a product by its ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Product successfully deleted"),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "204", description = "Product successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
-            @Parameter(description = "ID of the product to delete", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "UUID of the product to delete", required = true)
+            @PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Deactivate a product", description = "Deactivates a product by its ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Product successfully deactivated"),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Product successfully deactivated"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}/deactivate")
     public ResponseEntity<ProductDTO> deactivateProduct(
-            @Parameter(description = "ID of the product to deactivate", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "UUID of the product to deactivate", required = true)
+            @PathVariable UUID id) {
         return ResponseEntity.ok(productService.deactivateProduct(id));
     }
 
     @Operation(summary = "Activate a product", description = "Activates a product by its ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Product successfully activated"),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Product successfully activated"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}/activate")
     public ResponseEntity<ProductDTO> activateProduct(
-            @Parameter(description = "ID of the product to activate", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "UUID of the product to activate", required = true)
+            @PathVariable UUID id) {
         return ResponseEntity.ok(productService.activateProduct(id));
     }
 
     @Operation(summary = "Get products by category", description = "Retrieves a list of products in the specified category")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/category/{category}")
     public ResponseEntity<List<ProductDTO>> getProductsByCategory(
@@ -158,8 +159,8 @@ public class ProductController {
 
     @Operation(summary = "Get products by brand", description = "Retrieves a list of products of the specified brand")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/brand/{brand}")
     public ResponseEntity<List<ProductDTO>> getProductsByBrand(
@@ -170,8 +171,8 @@ public class ProductController {
 
     @Operation(summary = "Search products by name", description = "Searches for products whose names contain the specified text")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/search")
     public ResponseEntity<List<ProductDTO>> searchProductsByName(

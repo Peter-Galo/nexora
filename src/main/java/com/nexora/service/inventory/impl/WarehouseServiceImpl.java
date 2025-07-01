@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -43,7 +44,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     
     @Override
     @Transactional(readOnly = true)
-    public WarehouseDTO getWarehouseById(Long id) {
+    public WarehouseDTO getWarehouseById(UUID id) {
         return warehouseRepository.findById(id)
                 .map(this::mapToDTO)
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + id, "WAREHOUSE_NOT_FOUND"));
@@ -73,7 +74,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
     
     @Override
-    public WarehouseDTO updateWarehouse(Long id, WarehouseDTO warehouseDTO) {
+    public WarehouseDTO updateWarehouse(UUID id, WarehouseDTO warehouseDTO) {
         Warehouse existingWarehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + id, "WAREHOUSE_NOT_FOUND"));
         
@@ -100,7 +101,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
     
     @Override
-    public void deleteWarehouse(Long id) {
+    public void deleteWarehouse(UUID id) {
         if (!warehouseRepository.existsById(id)) {
             throw new ApplicationException("Warehouse not found with id: " + id, "WAREHOUSE_NOT_FOUND");
         }
@@ -109,7 +110,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
     
     @Override
-    public WarehouseDTO deactivateWarehouse(Long id) {
+    public WarehouseDTO deactivateWarehouse(UUID id) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + id, "WAREHOUSE_NOT_FOUND"));
         
@@ -121,7 +122,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
     
     @Override
-    public WarehouseDTO activateWarehouse(Long id) {
+    public WarehouseDTO activateWarehouse(UUID id) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + id, "WAREHOUSE_NOT_FOUND"));
         
@@ -172,7 +173,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     private WarehouseDTO mapToDTO(Warehouse warehouse) {
         return new WarehouseDTO(
-                warehouse.getId(),
+                warehouse.getUuid(),
                 warehouse.getCode(),
                 warehouse.getName(),
                 warehouse.getDescription(),
@@ -195,7 +196,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     private Warehouse mapToEntity(WarehouseDTO warehouseDTO) {
         Warehouse warehouse = new Warehouse();
-        warehouse.setId(warehouseDTO.getId());
+        warehouse.setUuid(warehouseDTO.getId());
         warehouse.setCode(warehouseDTO.getCode());
         warehouse.setName(warehouseDTO.getName());
         warehouse.setDescription(warehouseDTO.getDescription());

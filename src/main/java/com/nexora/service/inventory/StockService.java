@@ -3,6 +3,7 @@ package com.nexora.service.inventory;
 import com.nexora.dto.inventory.StockDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service interface for managing stock.
@@ -23,7 +24,7 @@ public interface StockService {
      * @return the stock record with the specified ID
      * @throws com.nexora.exception.ApplicationException if the stock record is not found
      */
-    StockDTO getStockById(Long id);
+    StockDTO getStockById(UUID id);
     
     /**
      * Get stock records for a specific product.
@@ -31,7 +32,7 @@ public interface StockService {
      * @param productId the product ID
      * @return a list of stock records for the product
      */
-    List<StockDTO> getStocksByProductId(Long productId);
+    List<StockDTO> getStocksByProductId(UUID productId);
     
     /**
      * Get stock records for a specific product by its code.
@@ -47,7 +48,7 @@ public interface StockService {
      * @param warehouseId the warehouse ID
      * @return a list of stock records for the warehouse
      */
-    List<StockDTO> getStocksByWarehouseId(Long warehouseId);
+    List<StockDTO> getStocksByWarehouseId(UUID warehouseId);
     
     /**
      * Get stock records for a specific warehouse by its code.
@@ -65,7 +66,7 @@ public interface StockService {
      * @return the stock record for the product in the warehouse
      * @throws com.nexora.exception.ApplicationException if the stock record is not found
      */
-    StockDTO getStockByProductAndWarehouse(Long productId, Long warehouseId);
+    StockDTO getStockByProductAndWarehouse(UUID productId, UUID warehouseId);
     
     /**
      * Create a new stock record.
@@ -84,7 +85,7 @@ public interface StockService {
      * @return the updated stock record
      * @throws com.nexora.exception.ApplicationException if the stock record is not found
      */
-    StockDTO updateStock(Long id, StockDTO stockDTO);
+    StockDTO updateStock(UUID id, StockDTO stockDTO);
     
     /**
      * Delete a stock record by its ID.
@@ -92,7 +93,7 @@ public interface StockService {
      * @param id the ID of the stock record to delete
      * @throws com.nexora.exception.ApplicationException if the stock record is not found
      */
-    void deleteStock(Long id);
+    void deleteStock(UUID id);
     
     /**
      * Add stock to a product in a warehouse.
@@ -102,7 +103,7 @@ public interface StockService {
      * @return the updated stock record
      * @throws com.nexora.exception.ApplicationException if the stock record is not found or if the quantity is negative
      */
-    StockDTO addStock(Long id, int quantity);
+    StockDTO addStock(UUID id, int quantity);
     
     /**
      * Remove stock from a product in a warehouse.
@@ -112,7 +113,7 @@ public interface StockService {
      * @return the updated stock record
      * @throws com.nexora.exception.ApplicationException if the stock record is not found, if the quantity is negative, or if there is not enough stock
      */
-    StockDTO removeStock(Long id, int quantity);
+    StockDTO removeStock(UUID id, int quantity);
     
     /**
      * Get all stock records with low stock (quantity <= minStockLevel).

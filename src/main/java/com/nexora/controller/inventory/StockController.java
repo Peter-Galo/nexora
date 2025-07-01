@@ -1,7 +1,9 @@
 package com.nexora.controller.inventory;
 
+import com.nexora.dto.inventory.ProductDTO;
 import com.nexora.dto.inventory.StockDTO;
 import com.nexora.service.inventory.StockService;
+import com.nexora.util.ExcelExportUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,11 +12,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for managing stock.
@@ -49,7 +56,7 @@ public class StockController {
     @GetMapping("/{id}")
     public ResponseEntity<StockDTO> getStockById(
             @Parameter(description = "ID of the stock record to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(stockService.getStockById(id));
     }
     
@@ -61,8 +68,8 @@ public class StockController {
     })
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<StockDTO>> getStocksByProductId(
-            @Parameter(description = "ID of the product", required = true)
-            @PathVariable Long productId) {
+            @Parameter(description = "UUID of the product", required = true)
+            @PathVariable UUID productId) {
         return ResponseEntity.ok(stockService.getStocksByProductId(productId));
     }
     
@@ -87,7 +94,7 @@ public class StockController {
     @GetMapping("/warehouse/{warehouseId}")
     public ResponseEntity<List<StockDTO>> getStocksByWarehouseId(
             @Parameter(description = "ID of the warehouse", required = true)
-            @PathVariable Long warehouseId) {
+            @PathVariable UUID warehouseId) {
         return ResponseEntity.ok(stockService.getStocksByWarehouseId(warehouseId));
     }
     
@@ -111,10 +118,10 @@ public class StockController {
     })
     @GetMapping("/product/{productId}/warehouse/{warehouseId}")
     public ResponseEntity<StockDTO> getStockByProductAndWarehouse(
-            @Parameter(description = "ID of the product", required = true)
-            @PathVariable Long productId,
-            @Parameter(description = "ID of the warehouse", required = true)
-            @PathVariable Long warehouseId) {
+            @Parameter(description = "UUID of the product", required = true)
+            @PathVariable UUID productId,
+            @Parameter(description = "UUID of the warehouse", required = true)
+            @PathVariable UUID warehouseId) {
         return ResponseEntity.ok(stockService.getStockByProductAndWarehouse(productId, warehouseId));
     }
     
@@ -142,7 +149,7 @@ public class StockController {
     @PutMapping("/{id}")
     public ResponseEntity<StockDTO> updateStock(
             @Parameter(description = "ID of the stock record to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Updated stock record information", required = true, schema = @Schema(implementation = StockDTO.class))
             @Valid @RequestBody StockDTO stockDTO) {
         return ResponseEntity.ok(stockService.updateStock(id, stockDTO));
@@ -157,7 +164,7 @@ public class StockController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStock(
             @Parameter(description = "ID of the stock record to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         stockService.deleteStock(id);
         return ResponseEntity.noContent().build();
     }
@@ -172,7 +179,7 @@ public class StockController {
     @PutMapping("/{id}/add")
     public ResponseEntity<StockDTO> addStock(
             @Parameter(description = "ID of the stock record", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Quantity to add", required = true)
             @RequestParam int quantity) {
         return ResponseEntity.ok(stockService.addStock(id, quantity));
@@ -188,7 +195,7 @@ public class StockController {
     @PutMapping("/{id}/remove")
     public ResponseEntity<StockDTO> removeStock(
             @Parameter(description = "ID of the stock record", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Quantity to remove", required = true)
             @RequestParam int quantity) {
         return ResponseEntity.ok(stockService.removeStock(id, quantity));

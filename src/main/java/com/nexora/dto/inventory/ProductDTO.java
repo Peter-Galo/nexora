@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Data Transfer Object for Product entity.
@@ -15,8 +16,8 @@ import java.time.LocalDateTime;
 @Schema(description = "Product information")
 public class ProductDTO {
 
-    @Schema(description = "Product ID (auto-generated, should not be provided in creation requests)", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-    private Long id;
+    @Schema(description = "Product ID (auto-generated, should not be provided in creation requests)", example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a", accessMode = Schema.AccessMode.READ_ONLY)
+    private UUID uuid;
 
     @Schema(description = "Product code (unique identifier)", example = "PROD-001", required = true)
     @NotBlank(message = "Product code is required")
@@ -71,10 +72,10 @@ public class ProductDTO {
     }
 
     // Full constructor
-    public ProductDTO(Long id, String code, String name, String description, BigDecimal price,
-                     LocalDateTime createdAt, LocalDateTime updatedAt, boolean active,
-                     String category, String brand, String sku) {
-        this.id = id;
+    public ProductDTO(UUID uuid, String code, String name, String description, BigDecimal price,
+                      LocalDateTime createdAt, LocalDateTime updatedAt, boolean active,
+                      String category, String brand, String sku) {
+        this.uuid = uuid;
         this.code = code;
         this.name = name;
         this.description = description;
@@ -88,12 +89,12 @@ public class ProductDTO {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getCode() {
@@ -174,5 +175,10 @@ public class ProductDTO {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

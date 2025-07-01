@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -43,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public ProductDTO getProductById(Long id) {
+    public ProductDTO getProductById(UUID id) {
         return productRepository.findById(id)
                 .map(this::mapToDTO)
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + id, "PRODUCT_NOT_FOUND"));
@@ -73,7 +74,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
+    public ProductDTO updateProduct(UUID id, ProductDTO productDTO) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + id, "PRODUCT_NOT_FOUND"));
 
@@ -99,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProduct(Long id) {
+    public void deleteProduct(UUID id) {
         if (!productRepository.existsById(id)) {
             throw new ApplicationException("Product not found with id: " + id, "PRODUCT_NOT_FOUND");
         }
@@ -108,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO deactivateProduct(Long id) {
+    public ProductDTO deactivateProduct(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + id, "PRODUCT_NOT_FOUND"));
 
@@ -120,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO activateProduct(Long id) {
+    public ProductDTO activateProduct(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + id, "PRODUCT_NOT_FOUND"));
 
@@ -163,7 +164,7 @@ public class ProductServiceImpl implements ProductService {
      */
     private ProductDTO mapToDTO(Product product) {
         return new ProductDTO(
-                product.getId(),
+                product.getUuid(),
                 product.getCode(),
                 product.getName(),
                 product.getDescription(),
@@ -187,8 +188,8 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         // Don't set ID for new products, let the database generate it
         // Only set ID for existing products (in update operations)
-        if (productDTO.getId() != null && productRepository.existsById(productDTO.getId())) {
-            product.setId(productDTO.getId());
+        if (productDTO.getUuid() != null && productRepository.existsById(productDTO.getUuid())) {
+            product.setUuid(productDTO.getUuid());
         }
         product.setCode(productDTO.getCode());
         product.setName(productDTO.getName());

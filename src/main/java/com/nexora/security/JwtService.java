@@ -10,10 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -42,6 +39,20 @@ public class JwtService {
         }
     }
 
+    /**
+     * Extract the UUID from the JWT token.
+     * 
+     * @param token the JWT token
+     * @return the UUID as a string, or null if not present or an error occurs
+     */
+    public String extractUuid(String token) {
+        try {
+            return extractClaim(token, claims -> claims.get("uuid", String.class));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         try {
             final Claims claims = extractAllClaims(token);
@@ -64,6 +75,14 @@ public class JwtService {
         claims.put("authorities", userDetails.getAuthorities().stream()
                 .map(authority -> authority.getAuthority())
                 .toList());
+
+        // Add UUID if the user is our custom User class
+        if (userDetails instanceof com.nexora.model.User) {
+            com.nexora.model.User user = (com.nexora.model.User) userDetails;
+            if (user.getUuid() != null) {
+                claims.put("uuid", user.getUuid().toString());
+            }
+        }
 
         return buildToken(claims, userDetails, jwtExpiration);
     }
@@ -124,5 +143,30 @@ public class JwtService {
         }
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public UUID extractUserUUIDFromAuthHeader(String authHeader) {
+        try {
+            String token = parseAuthHeader(authHeader);
+            if (token == null) {
+                return null;
+            }
+
+            String uuidString = extractUuid(token);
+            if (uuidString == null) {
+                return null;
+            }
+
+            return UUID.fromString(uuidString);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private String parseAuthHeader(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        return authHeader.substring(7); // Remove "Bearer " prefix
     }
 }

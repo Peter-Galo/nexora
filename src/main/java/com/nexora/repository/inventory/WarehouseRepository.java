@@ -6,12 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for Warehouse entity.
  */
 @Repository
-public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
+public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
     
     /**
      * Find a warehouse by its unique code.
