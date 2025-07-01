@@ -1,0 +1,108 @@
+package com.nexora.graphql;
+
+import com.nexora.dto.inventory.WarehouseDTO;
+import com.nexora.service.inventory.WarehouseService;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * GraphQL resolver for Warehouse entity.
+ */
+@Controller
+public class WarehouseGraphQLResolver {
+
+    private final WarehouseService warehouseService;
+
+    public WarehouseGraphQLResolver(WarehouseService warehouseService) {
+        this.warehouseService = warehouseService;
+    }
+
+    @QueryMapping
+    public List<WarehouseDTO> allWarehouses() {
+        return warehouseService.getAllWarehouses();
+    }
+
+    @QueryMapping
+    public List<WarehouseDTO> activeWarehouses() {
+        return warehouseService.getActiveWarehouses();
+    }
+
+    @QueryMapping
+    public WarehouseDTO warehouseById(@Argument String id) {
+        return warehouseService.getWarehouseById(UUID.fromString(id));
+    }
+
+    @QueryMapping
+    public WarehouseDTO warehouseByCode(@Argument String code) {
+        return warehouseService.getWarehouseByCode(code);
+    }
+
+    @QueryMapping
+    public List<WarehouseDTO> warehousesByCity(@Argument String city) {
+        return warehouseService.getWarehousesByCity(city);
+    }
+
+    @QueryMapping
+    public List<WarehouseDTO> warehousesByStateProvince(@Argument String stateProvince) {
+        return warehouseService.getWarehousesByStateProvince(stateProvince);
+    }
+
+    @QueryMapping
+    public List<WarehouseDTO> warehousesByCountry(@Argument String country) {
+        return warehouseService.getWarehousesByCountry(country);
+    }
+
+    @QueryMapping
+    public List<WarehouseDTO> searchWarehousesByName(@Argument String name) {
+        return warehouseService.searchWarehousesByName(name);
+    }
+
+    @MutationMapping
+    public WarehouseDTO createWarehouse(@Argument("warehouse") WarehouseInput input) {
+        WarehouseDTO warehouseDTO = new WarehouseDTO();
+        warehouseDTO.setCode(input.getCode());
+        warehouseDTO.setName(input.getName());
+        warehouseDTO.setDescription(input.getDescription());
+        warehouseDTO.setAddress(input.getAddress());
+        warehouseDTO.setCity(input.getCity());
+        warehouseDTO.setStateProvince(input.getStateProvince());
+        warehouseDTO.setPostalCode(input.getPostalCode());
+        warehouseDTO.setCountry(input.getCountry());
+        return warehouseService.createWarehouse(warehouseDTO);
+    }
+
+    @MutationMapping
+    public WarehouseDTO updateWarehouse(@Argument String id, @Argument("warehouse") WarehouseInput input) {
+        WarehouseDTO warehouseDTO = new WarehouseDTO();
+        warehouseDTO.setCode(input.getCode());
+        warehouseDTO.setName(input.getName());
+        warehouseDTO.setDescription(input.getDescription());
+        warehouseDTO.setAddress(input.getAddress());
+        warehouseDTO.setCity(input.getCity());
+        warehouseDTO.setStateProvince(input.getStateProvince());
+        warehouseDTO.setPostalCode(input.getPostalCode());
+        warehouseDTO.setCountry(input.getCountry());
+        return warehouseService.updateWarehouse(UUID.fromString(id), warehouseDTO);
+    }
+
+    @MutationMapping
+    public boolean deleteWarehouse(@Argument String id) {
+        warehouseService.deleteWarehouse(UUID.fromString(id));
+        return true;
+    }
+
+    @MutationMapping
+    public WarehouseDTO activateWarehouse(@Argument String id) {
+        return warehouseService.activateWarehouse(UUID.fromString(id));
+    }
+
+    @MutationMapping
+    public WarehouseDTO deactivateWarehouse(@Argument String id) {
+        return warehouseService.deactivateWarehouse(UUID.fromString(id));
+    }
+}
