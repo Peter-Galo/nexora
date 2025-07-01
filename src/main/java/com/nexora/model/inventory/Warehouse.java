@@ -91,8 +91,8 @@ public class Warehouse {
         return uuid;
     }
 
-    public void setUuid(UUID id) {
-        this.uuid = id;
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getCode() {
@@ -198,7 +198,7 @@ public class Warehouse {
     @Override
     public String toString() {
         return "Warehouse{" +
-                "id=" + uuid +
+                "uuid=" + uuid +
                 ", code='" + code + '\'' +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
