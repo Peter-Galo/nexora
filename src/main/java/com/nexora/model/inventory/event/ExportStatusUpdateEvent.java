@@ -1,35 +1,39 @@
 package com.nexora.model.inventory.event;
 
+import com.nexora.model.inventory.Status;
+
+import java.util.UUID;
+
 // Event for export status updates
 public class ExportStatusUpdateEvent {
-    private String jobId;
-    private String status;
+    private UUID jobId;
+    private Status status;
     private String fileUrl;
     private String errorMessage;
 
     public ExportStatusUpdateEvent() {
     }
 
-    public ExportStatusUpdateEvent(String jobId, String status, String fileUrl, String errorMessage) {
+    public ExportStatusUpdateEvent(UUID jobId, Status status, String fileUrl, String errorMessage) {
         this.jobId = jobId;
         this.status = status;
         this.fileUrl = fileUrl;
         this.errorMessage = errorMessage;
     }
 
-    public String getJobId() {
+    public UUID getJobId() {
         return jobId;
     }
 
-    public void setJobId(String jobId) {
+    public void setJobId(UUID jobId) {
         this.jobId = jobId;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -52,8 +56,8 @@ public class ExportStatusUpdateEvent {
     @Override
     public String toString() {
         return "ExportStatusUpdateEvent{" +
-                "jobId='" + jobId + '\'' +
-                ", status='" + status + '\'' +
+                "jobId=" + jobId +
+                ", status=" + status +
                 ", fileUrl='" + fileUrl + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
                 '}';

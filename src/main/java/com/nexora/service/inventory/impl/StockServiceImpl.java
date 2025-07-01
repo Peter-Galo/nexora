@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -47,7 +48,7 @@ public class StockServiceImpl implements StockService {
     
     @Override
     @Transactional(readOnly = true)
-    public StockDTO getStockById(Long id) {
+    public StockDTO getStockById(UUID id) {
         return stockRepository.findById(id)
                 .map(this::mapToDTO)
                 .orElseThrow(() -> new ApplicationException("Stock not found with id: " + id, "STOCK_NOT_FOUND"));
@@ -55,7 +56,7 @@ public class StockServiceImpl implements StockService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<StockDTO> getStocksByProductId(Long productId) {
+    public List<StockDTO> getStocksByProductId(UUID productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + productId, "PRODUCT_NOT_FOUND"));
         
@@ -74,7 +75,7 @@ public class StockServiceImpl implements StockService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<StockDTO> getStocksByWarehouseId(Long warehouseId) {
+    public List<StockDTO> getStocksByWarehouseId(UUID warehouseId) {
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseId, "WAREHOUSE_NOT_FOUND"));
         
@@ -93,7 +94,7 @@ public class StockServiceImpl implements StockService {
     
     @Override
     @Transactional(readOnly = true)
-    public StockDTO getStockByProductAndWarehouse(Long productId, Long warehouseId) {
+    public StockDTO getStockByProductAndWarehouse(UUID productId, UUID warehouseId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + productId, "PRODUCT_NOT_FOUND"));
         
@@ -137,7 +138,7 @@ public class StockServiceImpl implements StockService {
     }
     
     @Override
-    public StockDTO updateStock(Long id, StockDTO stockDTO) {
+    public StockDTO updateStock(UUID id, StockDTO stockDTO) {
         Stock existingStock = stockRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("Stock not found with id: " + id, "STOCK_NOT_FOUND"));
         
@@ -146,8 +147,8 @@ public class StockServiceImpl implements StockService {
         Warehouse warehouse = getWarehouseFromDTO(stockDTO.getWarehouse());
         
         // Check if changing product or warehouse would create a duplicate
-        if ((existingStock.getProduct().getId() != product.getId() || 
-             existingStock.getWarehouse().getId() != warehouse.getId()) && 
+        if ((existingStock.getProduct().getUuid() != product.getUuid() ||
+             existingStock.getWarehouse().getUuid() != warehouse.getUuid()) &&
             stockRepository.findByProductAndWarehouse(product, warehouse).isPresent()) {
             throw new ApplicationException(
                     "Stock already exists for product code: " + product.getCode() + 
@@ -169,7 +170,7 @@ public class StockServiceImpl implements StockService {
     }
     
     @Override
-    public void deleteStock(Long id) {
+    public void deleteStock(UUID id) {
         if (!stockRepository.existsById(id)) {
             throw new ApplicationException("Stock not found with id: " + id, "STOCK_NOT_FOUND");
         }
@@ -178,7 +179,7 @@ public class StockServiceImpl implements StockService {
     }
     
     @Override
-    public StockDTO addStock(Long id, int quantity) {
+    public StockDTO addStock(UUID id, int quantity) {
         if (quantity < 0) {
             throw new ApplicationException("Cannot add negative stock amount", "INVALID_QUANTITY");
         }
@@ -192,7 +193,7 @@ public class StockServiceImpl implements StockService {
     }
     
     @Override
-    public StockDTO removeStock(Long id, int quantity) {
+    public StockDTO removeStock(UUID id, int quantity) {
         if (quantity < 0) {
             throw new ApplicationException("Cannot remove negative stock amount", "INVALID_QUANTITY");
         }
@@ -244,7 +245,7 @@ public class StockServiceImpl implements StockService {
         WarehouseDTO warehouseDTO = mapWarehouseToDTO(stock.getWarehouse());
         
         return new StockDTO(
-                stock.getId(),
+                stock.getUuid(),
                 productDTO,
                 warehouseDTO,
                 stock.getQuantity(),
@@ -264,7 +265,7 @@ public class StockServiceImpl implements StockService {
      */
     private ProductDTO mapProductToDTO(Product product) {
         return new ProductDTO(
-                product.getId(),
+                product.getUuid(),
                 product.getCode(),
                 product.getName(),
                 product.getDescription(),
@@ -286,7 +287,7 @@ public class StockServiceImpl implements StockService {
      */
     private WarehouseDTO mapWarehouseToDTO(Warehouse warehouse) {
         return new WarehouseDTO(
-                warehouse.getId(),
+                warehouse.getUuid(),
                 warehouse.getCode(),
                 warehouse.getName(),
                 warehouse.getDescription(),
@@ -309,9 +310,9 @@ public class StockServiceImpl implements StockService {
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
     private Product getProductFromDTO(ProductDTO productDTO) {
-        if (productDTO.getId() != null) {
-            return productRepository.findById(productDTO.getId())
-                    .orElseThrow(() -> new ApplicationException("Product not found with id: " + productDTO.getId(), "PRODUCT_NOT_FOUND"));
+        if (productDTO.getUuid() != null) {
+            return productRepository.findById(productDTO.getUuid())
+                    .orElseThrow(() -> new ApplicationException("Product not found with id: " + productDTO.getUuid(), "PRODUCT_NOT_FOUND"));
         } else if (productDTO.getCode() != null) {
             return productRepository.findByCode(productDTO.getCode())
                     .orElseThrow(() -> new ApplicationException("Product not found with code: " + productDTO.getCode(), "PRODUCT_NOT_FOUND"));

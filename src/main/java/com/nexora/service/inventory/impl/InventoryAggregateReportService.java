@@ -31,7 +31,7 @@ public class InventoryAggregateReportService {
         Map<String, List<Map<String, Object>>> lowStockByWarehouse = new HashMap<>();
         for (Warehouse w : warehouses) {
             List<Map<String, Object>> lowStocks = stocks.stream()
-                    .filter(s -> s.getWarehouse().getId().equals(w.getId()) && s.isLowStock())
+                    .filter(s -> s.getWarehouse().getUuid().equals(w.getUuid()) && s.isLowStock())
                     .map(s -> {
                         Map<String, Object> map = new HashMap<>();
                         map.put("productCode", s.getProduct().getCode());
@@ -48,7 +48,7 @@ public class InventoryAggregateReportService {
         Map<String, BigDecimal> valueByWarehouse = new HashMap<>();
         for (Warehouse w : warehouses) {
             BigDecimal value = stocks.stream()
-                    .filter(s -> s.getWarehouse().getId().equals(w.getId()))
+                    .filter(s -> s.getWarehouse().getUuid().equals(w.getUuid()))
                     .map(s -> s.getProduct().getPrice().multiply(BigDecimal.valueOf(s.getQuantity())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             valueByWarehouse.put(w.getName(), value);

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing stock levels of products in warehouses.
@@ -16,17 +17,17 @@ import java.time.LocalDateTime;
 public class Stock {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID uuid;
 
     @NotNull(message = "Product is required")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_uuid", nullable = false)
     private Product product;
 
     @NotNull(message = "Warehouse is required")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "warehouse_id", nullable = false)
+    @JoinColumn(name = "warehouse_uuid", nullable = false)
     private Warehouse warehouse;
 
     @Min(value = 0, message = "Quantity cannot be negative")
@@ -64,10 +65,10 @@ public class Stock {
     }
 
     // Full constructor
-    public Stock(Long id, Product product, Warehouse warehouse, Integer quantity,
-                Integer minStockLevel, Integer maxStockLevel, LocalDateTime lastRestockDate,
-                LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
+    public Stock(UUID uuid, Product product, Warehouse warehouse, Integer quantity,
+                 Integer minStockLevel, Integer maxStockLevel, LocalDateTime lastRestockDate,
+                 LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.uuid = uuid;
         this.product = product;
         this.warehouse = warehouse;
         this.quantity = quantity;
@@ -79,12 +80,12 @@ public class Stock {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUuid(UUID id) {
+        this.uuid = id;
     }
 
     public Product getProduct() {
@@ -195,7 +196,7 @@ public class Stock {
     @Override
     public String toString() {
         return "Stock{" +
-                "id=" + id +
+                "id=" + uuid +
                 ", product=" + (product != null ? product.getCode() : "null") +
                 ", warehouse=" + (warehouse != null ? warehouse.getCode() : "null") +
                 ", quantity=" + quantity +

@@ -3,6 +3,7 @@ package com.nexora.service.inventory;
 import com.nexora.dto.inventory.WarehouseDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service interface for managing warehouses.
@@ -24,13 +25,13 @@ public interface WarehouseService {
     List<WarehouseDTO> getActiveWarehouses();
     
     /**
-     * Get a warehouse by its ID.
+     * Get a warehouse by its UUID.
      *
-     * @param id the warehouse ID
-     * @return the warehouse with the specified ID
+     * @param uuid the warehouse UUID
+     * @return the warehouse with the specified UUID
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
-    WarehouseDTO getWarehouseById(Long id);
+    WarehouseDTO getWarehouseById(UUID uuid);
     
     /**
      * Get a warehouse by its code.
@@ -53,38 +54,38 @@ public interface WarehouseService {
     /**
      * Update an existing warehouse.
      *
-     * @param id the ID of the warehouse to update
+     * @param uuid the UUID of the warehouse to update
      * @param warehouseDTO the updated warehouse data
      * @return the updated warehouse
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
-    WarehouseDTO updateWarehouse(Long id, WarehouseDTO warehouseDTO);
+    WarehouseDTO updateWarehouse(UUID uuid, WarehouseDTO warehouseDTO);
     
     /**
-     * Delete a warehouse by its ID.
+     * Delete a warehouse by its UUID.
      *
-     * @param id the ID of the warehouse to delete
+     * @param uuid the UUID of the warehouse to delete
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
-    void deleteWarehouse(Long id);
+    void deleteWarehouse(UUID uuid);
     
     /**
-     * Deactivate a warehouse by its ID.
+     * Deactivate a warehouse by its UUID.
      *
-     * @param id the ID of the warehouse to deactivate
+     * @param uuid the UUID of the warehouse to deactivate
      * @return the deactivated warehouse
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
-    WarehouseDTO deactivateWarehouse(Long id);
+    WarehouseDTO deactivateWarehouse(UUID uuid);
     
     /**
-     * Activate a warehouse by its ID.
+     * Activate a warehouse by its UUID.
      *
-     * @param id the ID of the warehouse to activate
+     * @param uuid the UUID of the warehouse to activate
      * @return the activated warehouse
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
-    WarehouseDTO activateWarehouse(Long id);
+    WarehouseDTO activateWarehouse(UUID uuid);
     
     /**
      * Find warehouses by city.

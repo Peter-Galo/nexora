@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for managing warehouses.
@@ -64,8 +65,8 @@ public class WarehouseController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<WarehouseDTO> getWarehouseById(
-            @Parameter(description = "ID of the warehouse to retrieve", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "UUID of the warehouse to retrieve", required = true)
+            @PathVariable UUID id) {
         return ResponseEntity.ok(warehouseService.getWarehouseById(id));
     }
     
@@ -104,8 +105,8 @@ public class WarehouseController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<WarehouseDTO> updateWarehouse(
-            @Parameter(description = "ID of the warehouse to update", required = true)
-            @PathVariable Long id,
+            @Parameter(description = "UUID of the warehouse to update", required = true)
+            @PathVariable UUID id,
             @Parameter(description = "Updated warehouse information", required = true, schema = @Schema(implementation = WarehouseDTO.class))
             @Valid @RequestBody WarehouseDTO warehouseDTO) {
         return ResponseEntity.ok(warehouseService.updateWarehouse(id, warehouseDTO));
@@ -119,8 +120,8 @@ public class WarehouseController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWarehouse(
-            @Parameter(description = "ID of the warehouse to delete", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "UUID of the warehouse to delete", required = true)
+            @PathVariable UUID id) {
         warehouseService.deleteWarehouse(id);
         return ResponseEntity.noContent().build();
     }
@@ -134,7 +135,7 @@ public class WarehouseController {
     @PutMapping("/{id}/deactivate")
     public ResponseEntity<WarehouseDTO> deactivateWarehouse(
             @Parameter(description = "ID of the warehouse to deactivate", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(warehouseService.deactivateWarehouse(id));
     }
     
@@ -147,7 +148,7 @@ public class WarehouseController {
     @PutMapping("/{id}/activate")
     public ResponseEntity<WarehouseDTO> activateWarehouse(
             @Parameter(description = "ID of the warehouse to activate", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(warehouseService.activateWarehouse(id));
     }
     

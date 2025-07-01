@@ -3,6 +3,7 @@ package com.nexora.service.inventory;
 import com.nexora.dto.inventory.ProductDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service interface for managing products.
@@ -24,13 +25,13 @@ public interface ProductService {
     List<ProductDTO> getActiveProducts();
     
     /**
-     * Get a product by its ID.
+     * Get a product by its UUID.
      *
-     * @param id the product ID
-     * @return the product with the specified ID
+     * @param uuid the product UUID
+     * @return the product with the specified UUID
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
-    ProductDTO getProductById(Long id);
+    ProductDTO getProductById(UUID uuid);
     
     /**
      * Get a product by its code.
@@ -53,38 +54,38 @@ public interface ProductService {
     /**
      * Update an existing product.
      *
-     * @param id the ID of the product to update
+     * @param uuid the UUID of the product to update
      * @param productDTO the updated product data
      * @return the updated product
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
-    ProductDTO updateProduct(Long id, ProductDTO productDTO);
+    ProductDTO updateProduct(UUID uuid, ProductDTO productDTO);
     
     /**
-     * Delete a product by its ID.
+     * Delete a product by its UUID.
      *
-     * @param id the ID of the product to delete
+     * @param uuid the UUID of the product to delete
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
-    void deleteProduct(Long id);
+    void deleteProduct(UUID uuid);
     
     /**
-     * Deactivate a product by its ID.
+     * Deactivate a product by its UUID.
      *
-     * @param id the ID of the product to deactivate
+     * @param uuid the UUID of the product to deactivate
      * @return the deactivated product
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
-    ProductDTO deactivateProduct(Long id);
+    ProductDTO deactivateProduct(UUID uuid);
     
     /**
-     * Activate a product by its ID.
+     * Activate a product by its UUID.
      *
-     * @param id the ID of the product to activate
+     * @param uuid the UUID of the product to activate
      * @return the activated product
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
-    ProductDTO activateProduct(Long id);
+    ProductDTO activateProduct(UUID uuid);
     
     /**
      * Find products by category.

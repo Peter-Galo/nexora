@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Data Transfer Object for Stock entity.
@@ -12,8 +13,8 @@ import java.time.LocalDateTime;
 @Schema(description = "Stock information for a product in a warehouse")
 public class StockDTO {
     
-    @Schema(description = "Stock ID", example = "1")
-    private Long id;
+    @Schema(description = "Stock ID", example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a")
+    private UUID id;
     
     @Schema(description = "Product information", required = true)
     @NotNull(message = "Product is required")
@@ -62,9 +63,9 @@ public class StockDTO {
     }
     
     // Full constructor
-    public StockDTO(Long id, ProductDTO product, WarehouseDTO warehouse, Integer quantity,
-                   Integer minStockLevel, Integer maxStockLevel, LocalDateTime lastRestockDate,
-                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StockDTO(UUID id, ProductDTO product, WarehouseDTO warehouse, Integer quantity,
+                    Integer minStockLevel, Integer maxStockLevel, LocalDateTime lastRestockDate,
+                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.product = product;
         this.warehouse = warehouse;
@@ -84,11 +85,11 @@ public class StockDTO {
     }
     
     // Getters and Setters
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
     

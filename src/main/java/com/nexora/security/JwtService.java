@@ -10,10 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -148,11 +145,22 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractUserUUIDFromAuthHeader(String authHeader) {
+    public UUID extractUserUUIDFromAuthHeader(String authHeader) {
+        try {
+            String token = parseAuthHeader(authHeader);
+            if (token == null) {
+                return null;
+            }
 
-        String token = parseAuthHeader(authHeader);
+            String uuidString = extractUuid(token);
+            if (uuidString == null) {
+                return null;
+            }
 
-        return extractUuid(token);
+            return UUID.fromString(uuidString);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private String parseAuthHeader(String authHeader) {

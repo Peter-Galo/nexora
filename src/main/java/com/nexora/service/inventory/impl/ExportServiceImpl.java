@@ -1,6 +1,8 @@
 package com.nexora.service.inventory.impl;
 
+import com.nexora.model.inventory.Category;
 import com.nexora.model.inventory.ExportJob;
+import com.nexora.model.inventory.Status;
 import com.nexora.repository.inventory.ExportJobRepository;
 import com.nexora.service.inventory.ExportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -32,22 +33,19 @@ public class ExportServiceImpl implements ExportService {
         this.s3Client = s3Client;
     }
 
-    public String initiateExport(String userId, String exportType) {
-        String jobId = UUID.randomUUID().toString();
-
+    public UUID initiateExport(UUID userId, Category category, String exportType) {
         ExportJob job = new ExportJob();
-        job.setJobId(jobId);
-        job.setUserId(userId);
+        job.setUserUuid(userId);
         job.setExportType(exportType);
-        job.setStatus("PENDING");
-        job.setCreatedAt(LocalDateTime.now());
+        job.setStatus(Status.PENDING);
+        job.setCategory(category);
 
-        exportJobRepository.save(job);
+        job = exportJobRepository.save(job);
 
-        return jobId;
+        return job.getUuid();
     }
 
-    public void uploadToSpaces(String jobId, String userId, byte[] fileData, String filename) {
+    public void uploadToSpaces(UUID jobId, UUID userId, byte[] fileData, String filename) {
         try {
             String key = "exports/" + userId + "/" + filename;
 
@@ -65,20 +63,18 @@ public class ExportServiceImpl implements ExportService {
             String fileUrl = spacesPublicUrl + "/" + key;
 
             // Update job with file URL
-            ExportJob job = exportJobRepository.findByJobId(jobId)
+            ExportJob job = exportJobRepository.findById(jobId)
                     .orElseThrow(() -> new RuntimeException("Job not found"));
             job.setFileUrl(fileUrl);
-            job.setStatus("COMPLETED");
-            job.setUpdatedAt(LocalDateTime.now());
+            job.setStatus(Status.COMPLETED);
             exportJobRepository.save(job);
 
         } catch (Exception e) {
             // Update job with error
-            ExportJob job = exportJobRepository.findByJobId(jobId)
+            ExportJob job = exportJobRepository.findById(jobId)
                     .orElseThrow(() -> new RuntimeException("Job not found"));
-            job.setStatus("FAILED");
+            job.setStatus(Status.FAILED);
             job.setErrorMessage(e.getMessage());
-            job.setUpdatedAt(LocalDateTime.now());
             exportJobRepository.save(job);
 
             throw new RuntimeException("Failed to upload file to Digital Ocean Spaces", e);

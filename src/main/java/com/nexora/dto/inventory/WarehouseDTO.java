@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Data Transfer Object for Warehouse entity.
@@ -12,8 +13,8 @@ import java.time.LocalDateTime;
 @Schema(description = "Warehouse information")
 public class WarehouseDTO {
     
-    @Schema(description = "Warehouse ID", example = "1")
-    private Long id;
+    @Schema(description = "Warehouse UUID", example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a")
+    private UUID id;
     
     @Schema(description = "Warehouse code (unique identifier)", example = "WH-001", required = true)
     @NotBlank(message = "Warehouse code is required")
@@ -70,7 +71,7 @@ public class WarehouseDTO {
     }
     
     // Full constructor
-    public WarehouseDTO(Long id, String code, String name, String description, String address,
+    public WarehouseDTO(UUID id, String code, String name, String description, String address,
                        String city, String stateProvince, String postalCode, String country,
                        LocalDateTime createdAt, LocalDateTime updatedAt, boolean active) {
         this.id = id;
@@ -88,11 +89,11 @@ public class WarehouseDTO {
     }
     
     // Getters and Setters
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
     

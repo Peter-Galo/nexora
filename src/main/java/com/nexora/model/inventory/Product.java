@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a product in the inventory system.
@@ -17,8 +18,8 @@ import java.time.LocalDateTime;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID uuid;
 
     @NotBlank(message = "Product code is required")
     @Size(min = 2, max = 50, message = "Product code must be between 2 and 50 characters")
@@ -71,10 +72,10 @@ public class Product {
     }
 
     // Full constructor
-    public Product(Long id, String code, String name, String description, BigDecimal price,
-                  LocalDateTime createdAt, LocalDateTime updatedAt, boolean active,
-                  String category, String brand, String sku) {
-        this.id = id;
+    public Product(UUID uuid, String code, String name, String description, BigDecimal price,
+                   LocalDateTime createdAt, LocalDateTime updatedAt, boolean active,
+                   String category, String brand, String sku) {
+        this.uuid = uuid;
         this.code = code;
         this.name = name;
         this.description = description;
@@ -88,12 +89,12 @@ public class Product {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUuid(UUID id) {
+        this.uuid = id;
     }
 
     public String getCode() {
@@ -191,7 +192,7 @@ public class Product {
     @Override
     public String toString() {
         return "Product{" +
-                "id=" + id +
+                "uuid=" + uuid +
                 ", code='" + code + '\'' +
                 ", name='" + name + '\'' +
                 ", price=" + price +
