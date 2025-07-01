@@ -42,7 +42,7 @@ public class AuthenticationService {
 
         // Create new user
         var user = new User(
-            null, // ID will be generated
+            null, // UUID will be generated
             request.getFirstName(),
             request.getLastName(),
             request.getEmail(),
@@ -59,6 +59,7 @@ public class AuthenticationService {
         // Return authentication response
         return new AuthenticationResponse(
                 jwtToken,
+                user.getUuid(),
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
@@ -91,6 +92,7 @@ public class AuthenticationService {
         // Return authentication response
         return new AuthenticationResponse(
                 jwtToken,
+                user.getUuid(),
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),

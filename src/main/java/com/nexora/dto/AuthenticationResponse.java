@@ -2,10 +2,15 @@ package com.nexora.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.UUID;
+
 @Schema(description = "Response object returned after successful authentication or registration")
 public class AuthenticationResponse {
     @Schema(description = "JWT token for authentication", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
     private String token;
+
+    @Schema(description = "User's UUID", example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a")
+    private UUID uuid;
 
     @Schema(description = "User's email address", example = "john.doe@example.com")
     private String email;
@@ -22,8 +27,9 @@ public class AuthenticationResponse {
     public AuthenticationResponse() {
     }
 
-    public AuthenticationResponse(String token, String email, String firstName, String lastName, String role) {
+    public AuthenticationResponse(String token, UUID uuid, String email, String firstName, String lastName, String role) {
         this.token = token;
+        this.uuid = uuid;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;

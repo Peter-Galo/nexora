@@ -1,8 +1,14 @@
 package com.nexora.controller.inventory;
 
 import com.nexora.dto.inventory.ProductDTO;
+import com.nexora.model.inventory.ExportJob;
+import com.nexora.model.inventory.event.ExportRequestEvent;
+import com.nexora.repository.UserRepository;
+import com.nexora.repository.inventory.ExportJobRepository;
+import com.nexora.security.JwtService;
+import com.nexora.service.event.ExportMessageProducer;
+import com.nexora.service.inventory.ExportService;
 import com.nexora.service.inventory.ProductService;
-import com.nexora.util.ExcelExportUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,20 +16,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for managing products.
@@ -34,9 +34,25 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ExportService exportService;
+    private final ExportMessageProducer exportMessageProducer;
+    private final ExportJobRepository exportJobRepository;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public ProductController(ProductService productService) {
+    public ProductController(
+            ProductService productService, 
+            ExportService exportService, 
+            ExportMessageProducer exportMessageProducer, 
+            ExportJobRepository exportJobRepository,
+            JwtService jwtService,
+            UserRepository userRepository) {
         this.productService = productService;
+        this.exportService = exportService;
+        this.exportMessageProducer = exportMessageProducer;
+        this.exportJobRepository = exportJobRepository;
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Operation(summary = "Get all products", description = "Retrieves a list of all products")
@@ -190,21 +206,56 @@ public class ProductController {
         return ResponseEntity.ok(productService.searchProductsByName(name));
     }
 
-    @Operation(summary = "Export products as XLSX", description = "Exports all products as an Excel file with all fields")
-    @ApiResponse(responseCode = "200", description = "XLSX file generated successfully")
+    @Operation(summary = "Request product export as XLSX",
+            description = "Initiates an asynchronous export of all products as Excel")
+    @ApiResponse(responseCode = "202", description = "Export job accepted")
     @GetMapping("/export/xlsx")
-    public ResponseEntity<byte[]> exportProductsToXlsx() {
-        List<ProductDTO> products = productService.getAllProducts();
-        try {
-            byte[] excelData = ExcelExportUtil.exportToExcel(products, "Products");
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
-            String filename = "products_" + timestamp + ".xlsx";
-            HttpHeaders headers = new HttpHeaders();
-            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            return ResponseEntity.ok().headers(headers).body(excelData);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<Map<String, Object>> requestProductExport(
+            @RequestHeader("Authorization") String authHeader) {
+
+        // Extract user ID from JWT token
+        String userId = jwtService.extractUserUUIDFromAuthHeader(authHeader);
+
+        // Initiate export job
+        String jobId = exportService.initiateExport(userId, "XLSX");
+
+        // Send message to queue
+        ExportRequestEvent event = new ExportRequestEvent();
+        event.setJobId(jobId);
+        event.setUserId(userId);
+        event.setExportType("XLSX");
+        exportMessageProducer.sendExportRequest(event);
+
+        // Return job ID to client
+        Map<String, Object> response = new HashMap<>();
+        response.put("jobId", jobId);
+        response.put("message", "Export job initiated successfully");
+
+        return ResponseEntity.accepted().body(response);
+    }
+
+    @Operation(summary = "Get export job status",
+            description = "Retrieves the current status of an export job")
+    @ApiResponse(responseCode = "200", description = "Job status retrieved successfully")
+    @ApiResponse(responseCode = "404", description = "Export job not found")
+    @GetMapping("/export/status/{jobId}")
+    public ResponseEntity<ExportJob> getExportStatus(@PathVariable String jobId) {
+        return exportJobRepository.findByJobId(jobId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Download exported file",
+            description = "Downloads a completed export file")
+    @ApiResponse(responseCode = "302", description = "Redirect to file download")
+    @ApiResponse(responseCode = "404", description = "Export job not found or not completed")
+    @GetMapping("/export/download/{jobId}")
+    public ResponseEntity<?> downloadExportedFile(@PathVariable String jobId) {
+        return exportJobRepository.findByJobId(jobId)
+                .filter(job -> "COMPLETED".equals(job.getStatus()))
+                .map(job -> ResponseEntity.status(HttpStatus.FOUND)
+                        .location(URI.create(job.getFileUrl()))
+                        .build())
+                .orElse(ResponseEntity.notFound().build());
     }
 }
