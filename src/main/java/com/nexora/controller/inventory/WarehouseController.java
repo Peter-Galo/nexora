@@ -199,22 +199,4 @@ public class WarehouseController {
             @RequestParam String name) {
         return ResponseEntity.ok(warehouseService.searchWarehousesByName(name));
     }
-
-    @Operation(summary = "Export warehouses as XLSX", description = "Exports all warehouses as an Excel file with all fields")
-    @ApiResponse(responseCode = "200", description = "XLSX file generated successfully")
-    @GetMapping("/export/xlsx")
-    public ResponseEntity<byte[]> exportProductsToXlsx() {
-        List<WarehouseDTO> warehouses = warehouseService.getAllWarehouses();
-        try {
-            byte[] excelData = ExcelExportUtil.exportToExcel(warehouses, "Warehouses");
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
-            String filename = "warehouses_" + timestamp + ".xlsx";
-            HttpHeaders headers = new HttpHeaders();
-            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            return ResponseEntity.ok().headers(headers).body(excelData);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
 }

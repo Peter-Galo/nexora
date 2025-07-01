@@ -230,22 +230,4 @@ public class StockController {
     public ResponseEntity<List<StockDTO>> getZeroStocks() {
         return ResponseEntity.ok(stockService.getZeroStocks());
     }
-
-    @Operation(summary = "Export stock status as XLSX", description = "Exports stock status as an Excel file with all fields")
-    @ApiResponse(responseCode = "200", description = "XLSX file generated successfully")
-    @GetMapping("/export/xlsx")
-    public ResponseEntity<byte[]> exportProductsToXlsx() {
-        List<StockDTO> stocks = stockService.getAllStocks();
-        try {
-            byte[] excelData = ExcelExportUtil.exportToExcel(stocks, "Stocks");
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
-            String filename = "stocks_" + timestamp + ".xlsx";
-            HttpHeaders headers = new HttpHeaders();
-            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            return ResponseEntity.ok().headers(headers).body(excelData);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
 }
