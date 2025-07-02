@@ -1,7 +1,7 @@
 # Nexora - Enterprise Inventory Management System
 
 <p align="center">
-  <img src="https://via.placeholder.com/200x200.png?text=Nexora" alt="Nexora Logo" width="200"/>
+  <img src="/assets/images/nexora-logo.png?text=Nexora" alt="Nexora Logo" width="100"/>
 </p>
 
 <p align="center">
@@ -64,22 +64,22 @@ Designed for scalability and performance, Nexora helps businesses efficiently tr
 Nexora follows a modern microservices-inspired architecture with clear separation of concerns:
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Client     │────▶│  API Layer  │────▶│  Service    │
-│  Applications│     │  (REST/     │     │  Layer      │
-└─────────────┘     │   GraphQL)  │     └──────┬──────┘
-                    └─────────────┘            │
-                           ▲                   ▼
-                           │            ┌─────────────┐
-                           │            │  Repository │
-                           │            │  Layer      │
-                           │            └──────┬──────┘
-                           │                   │
-                           │                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Security   │     │  Integration│     │  Database   │
-│  Layer      │     │  Services   │     │  (PostgreSQL)│
-└─────────────┘     └─────────────┘     └─────────────┘
+┌───────────────┐   ┌─────────────┐      ┌─────────────┐
+│  Client       │──▶│  API Layer  │─────▶│  Service    │
+│  Applications │   │  (REST/     │      │  Layer      │
+└───────────────┘   │   GraphQL)  │      └──────┬──────┘
+                    └─────────────┘             │
+                           ▲                    ▼
+                           │             ┌─────────────┐
+                           │             │  Repository │
+                           │             │  Layer      │
+                           │             └──────┬──────┘
+                           │                    │
+                           │                    ▼
+┌─────────────┐     ┌───────────────┐    ┌────────────────┐
+│  Security   │     │  Integration  │    │  Database      │
+│  Layer      │     │  Services     │    │  (PostgreSQL)  │
+└─────────────┘     └───────────────┘    └────────────────┘
       │                    │
       ▼                    ▼
 ┌─────────────┐     ┌─────────────┐
