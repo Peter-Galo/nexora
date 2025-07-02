@@ -1,61 +1,72 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
-interface LoginRequest {
+export interface User {
   email: string;
-  password: string;
+  firstName: string;
+  lastName: string;
+  role: string;
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   token: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-  };
+  user?: User;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/api/v1/auth';
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_KEY = 'auth_user';
+  private static readonly API_URL = 'http://localhost:8080/api/v1/auth';
+  private static readonly TOKEN_KEY = 'auth_token';
+  private static readonly USER_KEY = 'auth_user';
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  private _isAuthenticatedSubject = new BehaviorSubject<boolean>(
+    this.hasToken(),
+  );
+  readonly isAuthenticated$ = this._isAuthenticatedSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/authenticate`, { email, password })
+    return this.http
+      .post<AuthResponse>(`${AuthService.API_URL}/authenticate`, {
+        email,
+        password,
+      })
       .pipe(
-        tap(response => this.setSession(response)),
-        catchError(error => {
-          console.error('Login failed:', error);
-          return throwError(() => new Error('Login failed. Please check your credentials.'));
-        })
+        tap((response) => this.setSession(response)),
+        catchError((error) => {
+          return throwError(
+            () => new Error('Login failed. Please check your credentials.'),
+          );
+        }),
       );
   }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this.isAuthenticatedSubject.next(false);
+    this.clearSession();
+    this._isAuthenticatedSubject.next(false);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(AuthService.TOKEN_KEY);
   }
 
-  getUser(): any {
-    const userStr = localStorage.getItem(this.USER_KEY);
-    return userStr ? JSON.parse(userStr) : null;
+  getUser(): User | null {
+    const userStr = localStorage.getItem(AuthService.USER_KEY);
+    if (!userStr || userStr === 'undefined') {
+      return null;
+    }
+    try {
+      return JSON.parse(userStr) as User;
+    } catch {
+      return null;
+    }
   }
 
   isAuthenticated(): boolean {
@@ -63,9 +74,23 @@ export class AuthService {
   }
 
   private setSession(authResult: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, authResult.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(authResult.user));
-    this.isAuthenticatedSubject.next(true);
+    localStorage.setItem(AuthService.TOKEN_KEY, authResult.token);
+    let user: User | undefined = authResult.user;
+    if (!user) {
+      user = {
+        email: authResult.email ?? '',
+        firstName: authResult.firstName ?? '',
+        lastName: authResult.lastName ?? '',
+        role: authResult.role ?? '',
+      };
+    }
+    localStorage.setItem(AuthService.USER_KEY, JSON.stringify(user));
+    this._isAuthenticatedSubject.next(true);
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem(AuthService.TOKEN_KEY);
+    localStorage.removeItem(AuthService.USER_KEY);
   }
 
   private hasToken(): boolean {
