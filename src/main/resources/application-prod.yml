@@ -4,6 +4,13 @@ spring:
         username: ${USER_NAME}
         password: ${USER_PW}
         driver-class-name: org.postgresql.Driver
+        hikari:
+            connection-timeout: 30000  # 30 seconds
+            minimum-idle: 10
+            maximum-pool-size: 20
+            idle-timeout: 600000  # 10 minutes
+            max-lifetime: 1800000  # 30 minutes
+            auto-commit: true
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
