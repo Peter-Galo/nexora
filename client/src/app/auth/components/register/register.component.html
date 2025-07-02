@@ -1,130 +1,151 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-10">
       <div class="card shadow">
-        <div class="card-header bg-success text-white text-center">
-          <h3>Register for Nexora</h3>
-        </div>
-        <div class="card-body">
-          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-            <!-- Error message -->
-            <div *ngIf="errorMessage" class="alert alert-danger">
-              {{ errorMessage }}
-            </div>
+        <div class="row g-0">
+          <!-- Image Column (50%) -->
+          <div
+            class="col-md-6 d-flex align-items-center justify-content-center"
+          >
+            <img
+              src="register.png"
+              alt="Register Image"
+              class="img-fluid p-3"
+            />
+          </div>
 
-            <!-- First Name field -->
-            <div class="mb-3">
-              <label for="firstName" class="form-label">First Name</label>
-              <input
-                type="text"
-                id="firstName"
-                formControlName="firstName"
-                class="form-control"
-                [ngClass]="{
-                  'is-invalid':
-                    (registerForm.get('firstName')?.invalid &&
-                    registerForm.get('firstName')?.touched) ||
-                    fieldErrors['firstName'],
-                }"
-                placeholder="Enter your first name"
-              />
-              <div
-                *ngIf="getFieldError('firstName')"
-                class="invalid-feedback"
-              >
-                {{ getFieldError('firstName') }}
+          <!-- Register Form Column (50%) -->
+          <div class="col-md-6">
+            <div class="card-header text-center mt-4">
+              <h3>Register</h3>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                <!-- Error message -->
+                <div
+                  *ngIf="errorMessage"
+                  class="alert alert-danger p-2 text-center"
+                >
+                  {{ errorMessage }}
+                </div>
+
+                <!-- First Name field -->
+                <div class="mb-3">
+                  <label for="firstName" class="form-label">First Name</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    formControlName="firstName"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid':
+                        (registerForm.get('firstName')?.invalid &&
+                          registerForm.get('firstName')?.touched) ||
+                        fieldErrors['firstName'],
+                    }"
+                    placeholder="Enter your first name"
+                  />
+                  <div
+                    *ngIf="getFieldError('firstName')"
+                    class="invalid-feedback"
+                  >
+                    {{ getFieldError("firstName") }}
+                  </div>
+                </div>
+
+                <!-- Last Name field -->
+                <div class="mb-3">
+                  <label for="lastName" class="form-label">Last Name</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    formControlName="lastName"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid':
+                        (registerForm.get('lastName')?.invalid &&
+                          registerForm.get('lastName')?.touched) ||
+                        fieldErrors['lastName'],
+                    }"
+                    placeholder="Enter your last name"
+                  />
+                  <div
+                    *ngIf="getFieldError('lastName')"
+                    class="invalid-feedback"
+                  >
+                    {{ getFieldError("lastName") }}
+                  </div>
+                </div>
+
+                <!-- Email field -->
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    formControlName="email"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid':
+                        (registerForm.get('email')?.invalid &&
+                          registerForm.get('email')?.touched) ||
+                        fieldErrors['email'],
+                    }"
+                    placeholder="Enter your email"
+                  />
+                  <div *ngIf="getFieldError('email')" class="invalid-feedback">
+                    {{ getFieldError("email") }}
+                  </div>
+                </div>
+
+                <!-- Password field -->
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input
+                    type="password"
+                    id="password"
+                    formControlName="password"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid':
+                        (registerForm.get('password')?.invalid &&
+                          registerForm.get('password')?.touched) ||
+                        fieldErrors['password'],
+                    }"
+                    placeholder="Enter your password"
+                  />
+                  <div
+                    *ngIf="getFieldError('password')"
+                    class="invalid-feedback"
+                  >
+                    {{ getFieldError("password") }}
+                  </div>
+                </div>
+
+                <!-- Submit button -->
+                <div class="d-grid gap-2">
+                  <button
+                    type="submit"
+                    class="btn btn-success"
+                    [disabled]="registerForm.invalid || isLoading"
+                  >
+                    <span
+                      *ngIf="isLoading"
+                      class="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Register
+                  </button>
+                </div>
+              </form>
+              <div class="text-center mt-2">
+                <a class="text-muted" routerLink="/login">
+                  Already have an account?
+                </a>
               </div>
             </div>
-
-            <!-- Last Name field -->
-            <div class="mb-3">
-              <label for="lastName" class="form-label">Last Name</label>
-              <input
-                type="text"
-                id="lastName"
-                formControlName="lastName"
-                class="form-control"
-                [ngClass]="{
-                  'is-invalid':
-                    (registerForm.get('lastName')?.invalid &&
-                    registerForm.get('lastName')?.touched) ||
-                    fieldErrors['lastName'],
-                }"
-                placeholder="Enter your last name"
-              />
-              <div
-                *ngIf="getFieldError('lastName')"
-                class="invalid-feedback"
-              >
-                {{ getFieldError('lastName') }}
-              </div>
-            </div>
-
-            <!-- Email field -->
-            <div class="mb-3">
-              <label for="email" class="form-label">Email</label>
-              <input
-                type="email"
-                id="email"
-                formControlName="email"
-                class="form-control"
-                [ngClass]="{
-                  'is-invalid':
-                    (registerForm.get('email')?.invalid &&
-                    registerForm.get('email')?.touched) ||
-                    fieldErrors['email'],
-                }"
-                placeholder="Enter your email"
-              />
-              <div
-                *ngIf="getFieldError('email')"
-                class="invalid-feedback"
-              >
-                {{ getFieldError('email') }}
-              </div>
-            </div>
-
-            <!-- Password field -->
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input
-                type="password"
-                id="password"
-                formControlName="password"
-                class="form-control"
-                [ngClass]="{
-                  'is-invalid':
-                    (registerForm.get('password')?.invalid &&
-                    registerForm.get('password')?.touched) ||
-                    fieldErrors['password'],
-                }"
-                placeholder="Enter your password"
-              />
-              <div
-                *ngIf="getFieldError('password')"
-                class="invalid-feedback"
-              >
-                {{ getFieldError('password') }}
-              </div>
-            </div>
-
-            <!-- Submit button -->
-            <div class="d-grid gap-2">
-              <button
-                type="submit"
-                class="btn btn-success"
-                [disabled]="registerForm.invalid || isLoading"
-              >
-                <span
-                  *ngIf="isLoading"
-                  class="spinner-border spinner-border-sm me-2"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                Register
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

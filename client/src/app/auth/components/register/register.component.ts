@@ -5,14 +5,14 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
 })
@@ -84,7 +84,9 @@ export class RegisterComponent {
         } else if (backend && typeof backend === 'object') {
           this.fieldErrors = backend;
           this.errorMessage =
-            backend.error || backend.message || 'Please correct the errors below.';
+            backend.error ||
+            backend.message ||
+            'Please correct the errors below.';
         } else {
           this.errorMessage =
             error.message || 'An error occurred during registration';

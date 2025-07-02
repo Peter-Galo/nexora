@@ -4,6 +4,51 @@
   font-family: "Rubik", sans-serif;
 }
 
+body {
+  background-color: #eeeeee;
+  color: #333;
+}
+
+.card {
+  border: none !important;
+  border-radius: 1px !important;
+}
+
+.card-header {
+  border: none !important;
+  background: none !important;
+}
+
 .active {
   font-weight: bold;
+}
+
+
+.navbar.sticky-top {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .3);
+}
+
+.form-control {
+  border: none !important;
+  background: #eeeeee;
+  border-radius: 1px;
+}
+
+.btn {
+  border: none;
+  border-radius: 1px;
+  background-color: rgba(76, 15, 251, 0.5) !important;
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  color: #eeeeee;
+}
+
+.btn:hover,
+.btn:active {
+  background-color: rgba(76, 15, 251, 0.8) !important;
+  color: #eeeeee;
+}
+
+.alert {
+  border: none !important;
+  border-radius: 1px !important;
 }
