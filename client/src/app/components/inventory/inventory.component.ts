@@ -4,13 +4,13 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-inventory',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'],
+  templateUrl: './inventory.component.html',
+  styleUrls: ['./inventory.component.css'],
 })
-export class DashboardComponent implements OnInit {
+export class InventoryComponent implements OnInit {
   user: any = null;
 
   constructor(

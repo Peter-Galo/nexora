@@ -48,6 +48,23 @@ export class AuthService {
       );
   }
 
+  register(data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${AuthService.API_URL}/register`, data)
+      .pipe(
+        tap((response) => this.setSession(response)),
+        catchError((error) => {
+          // Pass through the original error to allow components to handle specific error formats
+          return throwError(() => error);
+        }),
+      );
+  }
+
   logout(): void {
     this.clearSession();
     this._isAuthenticatedSubject.next(false);
