@@ -3,6 +3,7 @@ package com.nexora.security;
 import com.nexora.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -40,6 +41,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/swagger-ui/**",
@@ -47,7 +49,19 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**").permitAll()
-                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("USER", "ADMIN")
+
+                        // READ operations - accessible to all authenticated users
+                        .requestMatchers(HttpMethod.GET, "/api/v1/inventory/**").hasAnyAuthority("USER", "MANAGER", "ADMIN")
+
+                        // UPDATE operations - accessible to MANAGER and ADMIN
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/inventory/**").hasAnyAuthority("MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/inventory/**").hasAnyAuthority("MANAGER", "ADMIN")
+
+                        // CREATE and DELETE operations - accessible only to ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/v1/inventory/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/inventory/**").hasAuthority("ADMIN")
+
+                        // All other requests require authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

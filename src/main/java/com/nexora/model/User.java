@@ -9,9 +9,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -40,30 +41,19 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<UserRole> userRoles = new HashSet<>();
 
+    // Constructors
     public User() {
     }
 
-    public User(UUID uuid, String firstName, String lastName, String email, String password, Role role) {
+    public User(UUID uuid, String firstName, String lastName, String email, String password) {
         this.uuid = uuid;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.role = role;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public String getUsername() {
-        // Email is used as the username
-        return email;
     }
 
     public UUID getUuid() {
@@ -98,6 +88,42 @@ public class User implements UserDetails {
         this.email = email;
     }
 
+    public Set<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<UserRole> userRoles) {
+        this.userRoles = userRoles;
+    }
+
+    // Helper methods for managing roles
+    public void addRole(Role role) {
+        UserRole userRole = new UserRole(this, role);
+        userRoles.add(userRole);
+    }
+
+    public void removeRole(Role role) {
+        userRoles.removeIf(userRole -> userRole.getRole() == role);
+    }
+
+    public Set<Role> getRoles() {
+        return userRoles.stream()
+                .map(UserRole::getRole)
+                .collect(Collectors.toSet());
+    }
+
+    public boolean hasRole(Role role) {
+        return userRoles.stream()
+                .anyMatch(userRole -> userRole.getRole() == role);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return userRoles.stream()
+                .map(userRole -> new SimpleGrantedAuthority(userRole.getRole().name()))
+                .collect(Collectors.toList());
+    }
+
     @Override
     public String getPassword() {
         return password;
@@ -107,31 +133,28 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return UserDetails.super.isAccountNonExpired();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return UserDetails.super.isAccountNonLocked();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return UserDetails.super.isCredentialsNonExpired();
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return UserDetails.super.isEnabled();
     }
 }

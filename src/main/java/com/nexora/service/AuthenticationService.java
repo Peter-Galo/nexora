@@ -14,6 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
 
 @Service
 public class AuthenticationService {
@@ -34,6 +37,7 @@ public class AuthenticationService {
         this.authenticationManager = authenticationManager;
     }
 
+    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
         // Check if user already exists
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -42,13 +46,15 @@ public class AuthenticationService {
 
         // Create new user
         var user = new User(
-            null, // UUID will be generated
-            request.getFirstName(),
-            request.getLastName(),
-            request.getEmail(),
-            passwordEncoder.encode(request.getPassword()),
-            Role.USER // Default role for new users
+                null, // UUID will be generated
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword())
         );
+
+        // Add default USER role
+        user.addRole(Role.USER);
 
         // Save user to database
         userRepository.save(user);
@@ -63,7 +69,7 @@ public class AuthenticationService {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getRole().name()
+                user.getRoles().stream().map(Enum::name).collect(Collectors.joining(","))
         );
     }
 
@@ -96,7 +102,7 @@ public class AuthenticationService {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getRole().name()
+                user.getRoles().stream().map(Enum::name).collect(Collectors.joining(","))
         );
     }
 }
