@@ -1,49 +1,63 @@
-spring:
-    datasource:
-        url: ${DB_URL}
-        username: ${USER_NAME}
-        password: ${USER_PW}
-        driver-class-name: org.postgresql.Driver
-        hikari:
-            connection-timeout: 30000  # 30 seconds
-            minimum-idle: 10
-            maximum-pool-size: 20
-            idle-timeout: 600000  # 10 minutes
-            max-lifetime: 1800000  # 30 minutes
-            auto-commit: true
-    jpa:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-        hibernate:
-            ddl-auto: validate
-        properties:
-            hibernate:
-                default_schema: ${SCHEMA}
-                format_sql: false
-        show-sql: false
-    # Kubernetes-specific settings
-    lifecycle:
-        timeout-per-shutdown-phase: ${SHUTDOWN_TIMEOUT:30s}
 # Server configuration
 server:
-    port: ${SERVER_PORT:8080}
-    shutdown: graceful
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+# JWT Configuration
+application:
+  security:
+    jwt:
+      secret-key: ${SECRET_KEY}
+      expiration: ${EXPIRATION} # 24 hours
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${USER_NAME}
+    password: ${USER_PW}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000  # 30 seconds
+      minimum-idle: 10
+      maximum-pool-size: 20
+      idle-timeout: 600000  # 10 minutes
+      max-lifetime: 1800000  # 30 minutes
+      auto-commit: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: ${SCHEMA}
+        format_sql: false
+    show-sql: false
+  # Kubernetes-specific settings
+  lifecycle:
+    timeout-per-shutdown-phase: ${SHUTDOWN_TIMEOUT:30s}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
 
 rabbitmq:
-    queue:
-        export:
-            name: ${RABBITMQ_QUEUE}
-    exchange:
-        name: ${RABBITMQ_EXCHANGE}
-    routing:
-        key:
-            export: ${RABBITMQ_ROUTING_KEY}
+  queue:
+    export:
+      name: ${RABBITMQ_QUEUE}
+  exchange:
+    name: ${RABBITMQ_EXCHANGE}
+  routing:
+    key:
+      export: ${RABBITMQ_ROUTING_KEY}
 
 # Digital Ocean Spaces Configuration
 do:
-    spaces:
-        key: ${DO_SPACES_KEY}
-        secret: ${DO_SPACES_SECRET}
-        region: ${DO_SPACES_REGION}
-        endpoint: ${DO_SPACES_ENDPOINT}
-        bucket: ${DO_SPACES_BUCKET}
-        public-url: ${DO_SPACES_PUBLIC_URL}
+  spaces:
+    key: ${DO_SPACES_KEY}
+    secret: ${DO_SPACES_SECRET}
+    region: ${DO_SPACES_REGION}
+    endpoint: ${DO_SPACES_ENDPOINT}
+    bucket: ${DO_SPACES_BUCKET}
+    public-url: ${DO_SPACES_PUBLIC_URL}

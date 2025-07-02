@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "stocks", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"product_id", "warehouse_id"})
+    @UniqueConstraint(columnNames = {"product_uuid", "warehouse_uuid"})
 })
 public class Stock {
 
