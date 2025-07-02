@@ -31,9 +31,9 @@ public class ExportMessageConsumer {
     private final SimpMessagingTemplate messagingTemplate;
     private final ExportJobRepository exportJobRepository;
 
-    public ExportMessageConsumer(ExportJobRepository exportJobRepository, SimpMessagingTemplate messagingTemplate, 
-                                ExportService exportService, ProductService productService,
-                                StockService stockService, WarehouseService warehouseService) {
+    public ExportMessageConsumer(ExportJobRepository exportJobRepository, SimpMessagingTemplate messagingTemplate,
+                                 ExportService exportService, ProductService productService,
+                                 StockService stockService, WarehouseService warehouseService) {
         this.exportJobRepository = exportJobRepository;
         this.messagingTemplate = messagingTemplate;
         this.exportService = exportService;
@@ -61,7 +61,7 @@ public class ExportMessageConsumer {
 
     /**
      * Generates export data based on the specified category.
-     * 
+     *
      * @param category the category to export
      * @return ExportData containing the Excel data and filename
      * @throws Exception if an error occurs during export
@@ -73,14 +73,14 @@ public class ExportMessageConsumer {
 
         List<?> data = getDataForCategory(category);
         byte[] excelData = ExcelExportUtil.exportToExcel(data, sheetName);
-        String filename = categoryName + timestamp + ".xlsx";
+        String filename = categoryName + "_" + timestamp + ".xlsx";
 
         return new ExportData(excelData, filename);
     }
 
     /**
      * Gets the appropriate data for the specified category.
-     * 
+     *
      * @param category the category to get data for
      * @return a list of data items for the category
      */
@@ -95,9 +95,9 @@ public class ExportMessageConsumer {
 
     /**
      * Updates the status of an export job.
-     * 
-     * @param jobId the ID of the job to update
-     * @param status the new status
+     *
+     * @param jobId        the ID of the job to update
+     * @param status       the new status
      * @param errorMessage the error message (if any)
      */
     private void updateJobStatus(UUID jobId, Status status, String errorMessage) {
@@ -112,8 +112,8 @@ public class ExportMessageConsumer {
 
     /**
      * Handles export errors by updating the job status and sending a WebSocket notification.
-     * 
-     * @param jobId the ID of the job that failed
+     *
+     * @param jobId     the ID of the job that failed
      * @param exception the exception that occurred
      */
     private void handleExportError(UUID jobId, Exception exception) {
@@ -130,10 +130,10 @@ public class ExportMessageConsumer {
         messagingTemplate.convertAndSend("/topic/export-status/" + jobId, updateEvent);
     }
 
-        /**
-         * Inner class to hold export data and filename.
-         */
-        private record ExportData(byte[] data, String filename) {
+    /**
+     * Inner class to hold export data and filename.
+     */
+    private record ExportData(byte[] data, String filename) {
     }
 
 }

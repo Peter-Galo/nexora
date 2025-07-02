@@ -8,7 +8,6 @@ import { AuthService } from '../../auth/services/auth.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './inventory.component.html',
-  styleUrls: ['./inventory.component.css'],
 })
 export class InventoryComponent implements OnInit {
   user: any = null;
