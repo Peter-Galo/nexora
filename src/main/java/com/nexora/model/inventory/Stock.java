@@ -84,8 +84,8 @@ public class Stock {
         return uuid;
     }
 
-    public void setUuid(UUID id) {
-        this.uuid = id;
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public Product getProduct() {
@@ -196,7 +196,7 @@ public class Stock {
     @Override
     public String toString() {
         return "Stock{" +
-                "id=" + uuid +
+                "uuid=" + uuid +
                 ", product=" + (product != null ? product.getCode() : "null") +
                 ", warehouse=" + (warehouse != null ? warehouse.getCode() : "null") +
                 ", quantity=" + quantity +

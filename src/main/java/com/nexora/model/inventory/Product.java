@@ -93,8 +93,8 @@ public class Product {
         return uuid;
     }
 
-    public void setUuid(UUID id) {
-        this.uuid = id;
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getCode() {

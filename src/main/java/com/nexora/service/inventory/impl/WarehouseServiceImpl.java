@@ -196,7 +196,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     private Warehouse mapToEntity(WarehouseDTO warehouseDTO) {
         Warehouse warehouse = new Warehouse();
-        warehouse.setUuid(warehouseDTO.getId());
+        warehouse.setUuid(warehouseDTO.getUuid());
         warehouse.setCode(warehouseDTO.getCode());
         warehouse.setName(warehouseDTO.getName());
         warehouse.setDescription(warehouseDTO.getDescription());

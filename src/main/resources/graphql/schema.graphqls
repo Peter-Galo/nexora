@@ -1,0 +1,127 @@
+type Product {
+    uuid: ID!
+    code: String!
+    name: String!
+    description: String
+    price: Float!
+    createdAt: String
+    updatedAt: String
+    active: Boolean!
+    category: String
+    brand: String
+    sku: String
+}
+
+type Warehouse {
+    uuid: ID!
+    code: String!
+    name: String!
+    description: String
+    address: String
+    city: String
+    stateProvince: String
+    postalCode: String
+    country: String
+    createdAt: String
+    updatedAt: String
+    active: Boolean!
+}
+
+type Stock {
+    uuid: ID!
+    product: Product!
+    warehouse: Warehouse!
+    quantity: Int!
+    minStockLevel: Int
+    maxStockLevel: Int
+    lastRestockDate: String
+    createdAt: String
+    updatedAt: String
+    lowStock: Boolean!
+    overStock: Boolean!
+}
+
+input ProductInput {
+    code: String!
+    name: String!
+    description: String
+    price: Float!
+    category: String
+    brand: String
+    sku: String
+}
+
+input WarehouseInput {
+    code: String!
+    name: String!
+    description: String
+    address: String
+    city: String
+    stateProvince: String
+    postalCode: String
+    country: String
+}
+
+input StockInput {
+    productId: ID!
+    warehouseId: ID!
+    quantity: Int!
+    minStockLevel: Int
+    maxStockLevel: Int
+}
+
+type Query {
+    # Product queries
+    allProducts: [Product]
+    productById(id: ID!): Product
+    productByCode(code: String!): Product
+    activeProducts: [Product]
+    productsByCategory(category: String!): [Product]
+    productsByBrand(brand: String!): [Product]
+    searchProductsByName(name: String!): [Product]
+
+    # Warehouse queries
+    allWarehouses: [Warehouse]
+    activeWarehouses: [Warehouse]
+    warehouseById(id: ID!): Warehouse
+    warehouseByCode(code: String!): Warehouse
+    warehousesByCity(city: String!): [Warehouse]
+    warehousesByStateProvince(stateProvince: String!): [Warehouse]
+    warehousesByCountry(country: String!): [Warehouse]
+    searchWarehousesByName(name: String!): [Warehouse]
+
+    # Stock queries
+    allStocks: [Stock]
+    stockById(id: ID!): Stock
+    stocksByProductId(productId: ID!): [Stock]
+    stocksByProductCode(productCode: String!): [Stock]
+    stocksByWarehouseId(warehouseId: ID!): [Stock]
+    stocksByWarehouseCode(warehouseCode: String!): [Stock]
+    stockByProductAndWarehouse(productId: ID!, warehouseId: ID!): Stock
+    lowStocks: [Stock]
+    overStocks: [Stock]
+    zeroStocks: [Stock]
+}
+
+type Mutation {
+    # Product mutations
+    createProduct(product: ProductInput!): Product
+    updateProduct(id: ID!, product: ProductInput!): Product
+    deleteProduct(id: ID!): Boolean
+    activateProduct(id: ID!): Product
+    deactivateProduct(id: ID!): Product
+
+    # Warehouse mutations
+    createWarehouse(warehouse: WarehouseInput!): Warehouse
+    updateWarehouse(id: ID!, warehouse: WarehouseInput!): Warehouse
+    deleteWarehouse(id: ID!): Boolean
+    activateWarehouse(id: ID!): Warehouse
+    deactivateWarehouse(id: ID!): Warehouse
+
+    # Stock mutations
+    createStock(stock: StockInput!): Stock
+    updateStock(id: ID!, stock: StockInput!): Stock
+    deleteStock(id: ID!): Boolean
+    addStock(id: ID!, quantity: Int!): Stock
+    removeStock(id: ID!, quantity: Int!): Stock
+}

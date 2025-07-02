@@ -329,9 +329,9 @@ public class StockServiceImpl implements StockService {
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
     private Warehouse getWarehouseFromDTO(WarehouseDTO warehouseDTO) {
-        if (warehouseDTO.getId() != null) {
-            return warehouseRepository.findById(warehouseDTO.getId())
-                    .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseDTO.getId(), "WAREHOUSE_NOT_FOUND"));
+        if (warehouseDTO.getUuid() != null) {
+            return warehouseRepository.findById(warehouseDTO.getUuid())
+                    .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseDTO.getUuid(), "WAREHOUSE_NOT_FOUND"));
         } else if (warehouseDTO.getCode() != null) {
             return warehouseRepository.findByCode(warehouseDTO.getCode())
                     .orElseThrow(() -> new ApplicationException("Warehouse not found with code: " + warehouseDTO.getCode(), "WAREHOUSE_NOT_FOUND"));
