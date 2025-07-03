@@ -1,58 +1,41 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InventoryService } from '../services/inventory.service';
-import { AggregateReportData } from '../models/inventory.models';
 import { catchError, of } from 'rxjs';
+import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { AggregateDataService } from '../services/aggregate-data.service';
+import {
+  INVENTORY_VALUE_COLUMNS,
+  PRODUCT_SUMMARY_COLUMNS,
+  STOCK_COLUMNS,
+  WAREHOUSE_COLUMNS,
+} from '../../shared/data-table/table-columns/model';
+import { DataAccordionComponent } from '../../shared/data-accordion/data-accordion.component';
 
 @Component({
   selector: 'app-aggregate',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe],
+  imports: [
+    CommonModule,
+    CurrencyPipe,
+    DataTableComponent,
+    DataAccordionComponent,
+  ],
+  providers: [AggregateDataService],
   templateUrl: './aggregate.component.html',
-  styleUrl: './aggregate.component.css',
 })
 export class AggregateComponent implements OnInit {
-  // Use signals for reactive state management
-  protected readonly aggregateData = signal<AggregateReportData | null>(null);
+  // Expose column definitions
+  protected readonly warehouseColumns = WAREHOUSE_COLUMNS;
+  protected readonly inventoryValueColumns = INVENTORY_VALUE_COLUMNS;
+  protected readonly productSummaryColumns = PRODUCT_SUMMARY_COLUMNS;
+  protected readonly lowStockColumns = STOCK_COLUMNS.low;
+  protected readonly highStockColumns = STOCK_COLUMNS.high;
 
-  // Computed values derived from aggregateData
-  protected readonly stockLevels = computed(
-    () => this.aggregateData()?.stockLevels || null,
-  );
-  protected readonly warehouseOverview = computed(
-    () => this.aggregateData()?.warehouseOverview || [],
-  );
-  protected readonly inventoryValue = computed(
-    () => this.aggregateData()?.inventoryValue || null,
-  );
-  protected readonly productSummary = computed(
-    () => this.aggregateData()?.productSummary || [],
-  );
-
-  // Computed sorted values
-  protected readonly sortedInventoryValueByWarehouse = computed(() => {
-    const byWarehouse = this.inventoryValue()?.byWarehouse;
-    if (!byWarehouse) return [];
-    return Object.entries(byWarehouse).sort((a, b) => b[1] - a[1]);
-  });
-
-  protected readonly sortedLowStockByWarehouse = computed(() => {
-    const lowStockByWarehouse = this.stockLevels()?.lowStockByWarehouse;
-    if (!lowStockByWarehouse) return [];
-    return Object.entries(lowStockByWarehouse).sort(
-      (a, b) => b[1].length - a[1].length,
-    );
-  });
-
-  protected readonly sortedHighStockByWarehouse = computed(() => {
-    const highStockByWarehouse = this.stockLevels()?.highStockByWarehouse;
-    if (!highStockByWarehouse) return [];
-    return Object.entries(highStockByWarehouse).sort(
-      (a, b) => b[1].length - a[1].length,
-    );
-  });
-
-  constructor(private inventoryService: InventoryService) {}
+  constructor(
+    private inventoryService: InventoryService,
+    protected dataService: AggregateDataService,
+  ) {}
 
   ngOnInit(): void {
     this.fetchAggregateData();
@@ -64,19 +47,13 @@ export class AggregateComponent implements OnInit {
       .pipe(
         catchError((err) => {
           console.error('Error fetching aggregate data:', err);
-
           return of(null);
         }),
       )
       .subscribe((data) => {
         if (data) {
-          this.aggregateData.set(data);
+          this.dataService.updateData(data);
         }
       });
-  }
-
-  // Helper method for accordion IDs to avoid template duplication
-  protected getAccordionItemId(prefix: string, index: number): string {
-    return `${prefix}${index}`;
   }
 }
