@@ -1,31 +1,58 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, OnInit, signal } from '@angular/core';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InventoryService } from '../services/inventory.service';
-import {
-  AggregateReportData,
-  InventoryValue,
-  ProductSummary,
-  StockLevels,
-  WarehouseOverview,
-} from '../models/inventory.models';
+import { AggregateReportData } from '../models/inventory.models';
+import { catchError, finalize, of } from 'rxjs';
 
 @Component({
   selector: 'app-aggregate',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CurrencyPipe],
   templateUrl: './aggregate.component.html',
   styleUrl: './aggregate.component.css',
 })
 export class AggregateComponent implements OnInit {
-  loading = true;
-  error = false;
-  aggregateData: AggregateReportData | null = null;
+  // Use signals for reactive state management
+  protected readonly loading = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly aggregateData = signal<AggregateReportData | null>(null);
 
-  // Store individual sections of the aggregate data
-  stockLevels: StockLevels | null = null;
-  warehouseOverview: WarehouseOverview[] = [];
-  inventoryValue: InventoryValue | null = null;
-  productSummary: ProductSummary[] = [];
+  // Computed values derived from aggregateData
+  protected readonly stockLevels = computed(
+    () => this.aggregateData()?.stockLevels || null,
+  );
+  protected readonly warehouseOverview = computed(
+    () => this.aggregateData()?.warehouseOverview || [],
+  );
+  protected readonly inventoryValue = computed(
+    () => this.aggregateData()?.inventoryValue || null,
+  );
+  protected readonly productSummary = computed(
+    () => this.aggregateData()?.productSummary || [],
+  );
+
+  // Computed sorted values
+  protected readonly sortedInventoryValueByWarehouse = computed(() => {
+    const byWarehouse = this.inventoryValue()?.byWarehouse;
+    if (!byWarehouse) return [];
+    return Object.entries(byWarehouse).sort((a, b) => b[1] - a[1]);
+  });
+
+  protected readonly sortedLowStockByWarehouse = computed(() => {
+    const lowStockByWarehouse = this.stockLevels()?.lowStockByWarehouse;
+    if (!lowStockByWarehouse) return [];
+    return Object.entries(lowStockByWarehouse).sort(
+      (a, b) => b[1].length - a[1].length,
+    );
+  });
+
+  protected readonly sortedHighStockByWarehouse = computed(() => {
+    const highStockByWarehouse = this.stockLevels()?.highStockByWarehouse;
+    if (!highStockByWarehouse) return [];
+    return Object.entries(highStockByWarehouse).sort(
+      (a, b) => b[1].length - a[1].length,
+    );
+  });
 
   constructor(private inventoryService: InventoryService) {}
 
@@ -34,47 +61,30 @@ export class AggregateComponent implements OnInit {
   }
 
   fetchAggregateData(): void {
-    this.loading = true;
-    this.error = false;
+    this.loading.set(true);
+    this.error.set(null);
 
-    this.inventoryService.getAggregateReport().subscribe({
-      next: (data) => {
-        this.aggregateData = data;
-
-        // Extract individual sections
-        this.stockLevels = data.stockLevels;
-        this.warehouseOverview = data.warehouseOverview || [];
-        this.inventoryValue = data.inventoryValue;
-        this.productSummary = data.productSummary || [];
-
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error fetching aggregate data:', err);
-        this.error = true;
-        this.loading = false;
-      },
-    });
+    this.inventoryService
+      .getAggregateReport()
+      .pipe(
+        catchError((err) => {
+          console.error('Error fetching aggregate data:', err);
+          this.error.set(
+            'Failed to load inventory data. Please try again later.',
+          );
+          return of(null);
+        }),
+        finalize(() => this.loading.set(false)),
+      )
+      .subscribe((data) => {
+        if (data) {
+          this.aggregateData.set(data);
+        }
+      });
   }
 
-  get sortedInventoryValueByWarehouse() {
-    if (!this.inventoryValue?.byWarehouse) return [];
-    return Object.entries(this.inventoryValue.byWarehouse).sort(
-      (a, b) => b[1] - a[1],
-    ); // Sort descending by value
-  }
-
-  get sortedLowStockByWarehouse() {
-    if (!this.stockLevels?.lowStockByWarehouse) return [];
-    return Object.entries(this.stockLevels.lowStockByWarehouse).sort(
-      (a, b) => b[1].length - a[1].length,
-    );
-  }
-
-  get sortedHighStockByWarehouse() {
-    if (!this.stockLevels?.highStockByWarehouse) return [];
-    return Object.entries(this.stockLevels.highStockByWarehouse).sort(
-      (a, b) => b[1].length - a[1].length,
-    );
+  // Helper method for accordion IDs to avoid template duplication
+  protected getAccordionItemId(prefix: string, index: number): string {
+    return `${prefix}${index}`;
   }
 }
