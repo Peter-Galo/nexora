@@ -2,11 +2,11 @@
   <h3 class="mb-4 text-dark">Inventory Aggregate Report</h3>
 
   <!-- Main Content -->
-  <div *ngIf="!loading() && !error()" class="row">
+  <div class="row">
     <!-- Warehouse Overview Section -->
     <div class="col-md-6 mb-4">
-      <div class="card h-100">
-        <div class="card-header">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header bg-light">
           <h5 class="mb-0">Warehouse Overview</h5>
         </div>
         <div class="card-body">
@@ -15,7 +15,7 @@
               <caption class="visually-hidden">
                 Warehouse Overview
               </caption>
-              <thead>
+              <thead class="table-light">
                 <tr>
                   <th scope="col">Warehouse</th>
                   <th scope="col">Product Count</th>
@@ -23,16 +23,20 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let warehouse of warehouseOverview()">
-                  <td>{{ warehouse.name }}</td>
-                  <td>{{ warehouse.totalProductQuantity }}</td>
-                  <td>{{ warehouse.totalStockValue | currency }}</td>
-                </tr>
-                <tr *ngIf="warehouseOverview().length === 0">
-                  <td colspan="3" class="text-center">
-                    No warehouse data available
-                  </td>
-                </tr>
+                @for (warehouse of warehouseOverview(); track warehouse.uuid) {
+                  <tr>
+                    <td>{{ warehouse.name }}</td>
+                    <td>{{ warehouse.totalProductQuantity }}</td>
+                    <td>{{ warehouse.totalStockValue | currency }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" class="text-center py-3">
+                      <i class="bi bi-info-circle me-2"></i>No warehouse data
+                      available
+                    </td>
+                  </tr>
+                }
               </tbody>
             </table>
           </div>
@@ -42,35 +46,43 @@
 
     <!-- Inventory Value Section -->
     <div class="col-md-6 mb-4">
-      <div class="card h-100">
-        <div class="card-header">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header bg-light">
           <h5 class="mb-0">Inventory Value</h5>
         </div>
         <div class="card-body">
           <h4 class="text-center mb-4">
-            Total Value: {{ inventoryValue()?.totalInventoryValue | currency }}
+            Total Value:
+            {{ inventoryValue()?.totalInventoryValue | currency }}
           </h4>
           <div class="table-responsive">
             <table class="table table-striped table-hover">
               <caption class="visually-hidden">
                 Inventory Value by Warehouse
               </caption>
-              <thead>
+              <thead class="table-light">
                 <tr>
                   <th scope="col">Warehouse</th>
                   <th scope="col">Value</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let entry of sortedInventoryValueByWarehouse()">
-                  <td>{{ entry[0] }}</td>
-                  <td>{{ entry[1] | currency }}</td>
-                </tr>
-                <tr *ngIf="sortedInventoryValueByWarehouse().length === 0">
-                  <td colspan="2" class="text-center">
-                    No inventory value data available
-                  </td>
-                </tr>
+                @for (
+                  entry of sortedInventoryValueByWarehouse();
+                  track entry[0]
+                ) {
+                  <tr>
+                    <td>{{ entry[0] }}</td>
+                    <td>{{ entry[1] | currency }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="2" class="text-center py-3">
+                      <i class="bi bi-info-circle me-2"></i>No inventory value
+                      data available
+                    </td>
+                  </tr>
+                }
               </tbody>
             </table>
           </div>
@@ -80,14 +92,14 @@
 
     <!-- Stock Levels Section -->
     <div class="col-12 mb-4">
-      <div class="card">
+      <div class="card shadow-sm">
         <div class="card-header bg-warning">
           <h5 class="mb-0">Stock Levels</h5>
         </div>
         <div class="card-body">
-          <div class="row mb-4">
+          <div class="row mb-4 g-3">
             <div class="col-md-3">
-              <div class="card bg-light">
+              <div class="card bg-light h-100">
                 <div class="card-body text-center">
                   <h6>Total Products</h6>
                   <h3>{{ stockLevels()?.totalProducts || 0 }}</h3>
@@ -95,7 +107,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card bg-light">
+              <div class="card bg-light h-100">
                 <div class="card-body text-center">
                   <h6>Total Stock Entries</h6>
                   <h3>{{ stockLevels()?.totalStockEntries || 0 }}</h3>
@@ -103,7 +115,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card bg-danger text-white">
+              <div class="card bg-danger text-white h-100">
                 <div class="card-body text-center">
                   <h6>Low Stock Products</h6>
                   <h3>{{ stockLevels()?.totalLowStockProducts || 0 }}</h3>
@@ -111,7 +123,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card bg-primary text-white">
+              <div class="card bg-primary text-white h-100">
                 <div class="card-body text-center">
                   <h6>High Stock Products</h6>
                   <h3>{{ stockLevels()?.totalHighStockProducts || 0 }}</h3>
@@ -122,145 +134,157 @@
 
           <!-- Low Stock by Warehouse -->
           <h5 class="mt-4 mb-3">Low Stock by Warehouse</h5>
-          <div class="accordion" id="lowStockAccordion">
-            <div
-              class="accordion-item"
-              *ngFor="let entry of sortedLowStockByWarehouse(); let i = index"
-            >
-              <h2 class="accordion-header">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  [attr.data-bs-target]="
-                    '#' + getAccordionItemId('lowStock', i)
-                  "
-                  [attr.aria-expanded]="false"
-                  [attr.aria-controls]="getAccordionItemId('lowStock', i)"
-                >
-                  {{ entry[0] }} ({{ entry[1].length }} items)
-                </button>
-              </h2>
-              <div
-                [id]="getAccordionItemId('lowStock', i)"
-                class="accordion-collapse collapse"
-                data-bs-parent="#lowStockAccordion"
-              >
-                <div class="accordion-body">
-                  <div class="table-responsive" *ngIf="entry[1].length > 0">
-                    <table class="table table-sm table-striped">
-                      <caption class="visually-hidden">
-                        Low Stock Items for
-                        {{
-                          entry[0]
-                        }}
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">Product</th>
-                          <th scope="col">Code</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Min Stock</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let item of entry[1]">
-                          <td>{{ item.productName }}</td>
-                          <td>{{ item.productCode }}</td>
-                          <td>{{ item.quantity }}</td>
-                          <td>{{ item.minStockLevel }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+          @if (sortedLowStockByWarehouse().length > 0) {
+            <div class="accordion" id="lowStockAccordion">
+              @for (
+                entry of sortedLowStockByWarehouse();
+                track entry[0];
+                let i = $index
+              ) {
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button
+                      class="accordion-button collapsed"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      [attr.data-bs-target]="
+                        '#' + getAccordionItemId('lowStock', i)
+                      "
+                      aria-expanded="false"
+                      [attr.aria-controls]="getAccordionItemId('lowStock', i)"
+                    >
+                      {{ entry[0] }} ({{ entry[1].length }} items)
+                    </button>
+                  </h2>
+                  <div
+                    [id]="getAccordionItemId('lowStock', i)"
+                    class="accordion-collapse collapse"
+                    data-bs-parent="#lowStockAccordion"
+                  >
+                    <div class="accordion-body">
+                      @if (entry[1].length > 0) {
+                        <div class="table-responsive">
+                          <table class="table table-sm table-striped">
+                            <caption class="visually-hidden">
+                              Low Stock Items for
+                              {{
+                                entry[0]
+                              }}
+                            </caption>
+                            <thead class="table-light">
+                              <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Code</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Min Stock</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (item of entry[1]; track item.productUuid) {
+                                <tr>
+                                  <td>{{ item.productName }}</td>
+                                  <td>{{ item.productCode }}</td>
+                                  <td>{{ item.quantity }}</td>
+                                  <td>{{ item.minStockLevel }}</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      } @else {
+                        <p class="text-muted">
+                          No low stock items in this warehouse.
+                        </p>
+                      }
+                    </div>
                   </div>
-                  <p *ngIf="entry[1].length === 0" class="text-muted">
-                    No low stock items in this warehouse.
-                  </p>
                 </div>
-              </div>
+              }
             </div>
-            <p
-              *ngIf="sortedLowStockByWarehouse().length === 0"
-              class="text-muted"
-            >
-              No low stock data available.
-            </p>
-          </div>
+          } @else {
+            <p class="text-muted">No low stock data available.</p>
+          }
 
           <!-- High Stock by Warehouse -->
           <h5 class="mt-4 mb-3">High Stock by Warehouse</h5>
-          <div class="accordion" id="highStockAccordion">
-            <div
-              class="accordion-item"
-              *ngFor="let entry of sortedHighStockByWarehouse(); let i = index"
-            >
-              <h2 class="accordion-header">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  [attr.data-bs-target]="
-                    '#' + getAccordionItemId('highStock', i)
-                  "
-                  [attr.aria-expanded]="false"
-                  [attr.aria-controls]="getAccordionItemId('highStock', i)"
-                >
-                  {{ entry[0] }} ({{ entry[1].length }} items)
-                </button>
-              </h2>
-              <div
-                [id]="getAccordionItemId('highStock', i)"
-                class="accordion-collapse collapse"
-                data-bs-parent="#highStockAccordion"
-              >
-                <div class="accordion-body">
-                  <div class="table-responsive" *ngIf="entry[1].length > 0">
-                    <table class="table table-sm table-striped">
-                      <caption class="visually-hidden">
-                        High Stock Items for
-                        {{
-                          entry[0]
-                        }}
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">Product</th>
-                          <th scope="col">Code</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Max Stock</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let item of entry[1]">
-                          <td>{{ item.productName }}</td>
-                          <td>{{ item.productCode }}</td>
-                          <td>{{ item.quantity }}</td>
-                          <td>{{ item.maxStockLevel }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+          @if (sortedHighStockByWarehouse().length > 0) {
+            <div class="accordion" id="highStockAccordion">
+              @for (
+                entry of sortedHighStockByWarehouse();
+                track entry[0];
+                let i = $index
+              ) {
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button
+                      class="accordion-button collapsed"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      [attr.data-bs-target]="
+                        '#' + getAccordionItemId('highStock', i)
+                      "
+                      aria-expanded="false"
+                      [attr.aria-controls]="getAccordionItemId('highStock', i)"
+                    >
+                      {{ entry[0] }} ({{ entry[1].length }} items)
+                    </button>
+                  </h2>
+                  <div
+                    [id]="getAccordionItemId('highStock', i)"
+                    class="accordion-collapse collapse"
+                    data-bs-parent="#highStockAccordion"
+                  >
+                    <div class="accordion-body">
+                      @if (entry[1].length > 0) {
+                        <div class="table-responsive">
+                          <table class="table table-sm table-striped">
+                            <caption class="visually-hidden">
+                              High Stock Items for
+                              {{
+                                entry[0]
+                              }}
+                            </caption>
+                            <thead class="table-light">
+                              <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Code</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Max Stock</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (item of entry[1]; track item.productUuid) {
+                                <tr>
+                                  <td>{{ item.productName }}</td>
+                                  <td>{{ item.productCode }}</td>
+                                  <td>{{ item.quantity }}</td>
+                                  <td>{{ item.maxStockLevel }}</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      } @else {
+                        <p class="text-muted">
+                          No high stock items in this warehouse.
+                        </p>
+                      }
+                    </div>
                   </div>
-                  <p *ngIf="entry[1].length === 0" class="text-muted">
-                    No high stock items in this warehouse.
-                  </p>
                 </div>
-              </div>
+              }
             </div>
-            <p
-              *ngIf="sortedHighStockByWarehouse().length === 0"
-              class="text-muted"
-            >
-              No high stock data available.
-            </p>
-          </div>
+          } @else {
+            <p class="text-muted">No high stock data available.</p>
+          }
         </div>
       </div>
     </div>
 
     <!-- Product Summary Section -->
     <div class="col-12 mb-4">
-      <div class="card">
-        <div class="card-header bg-info text-white">
+      <div class="card shadow-sm">
+        <div class="card-header">
           <h5 class="mb-0">Product Summary</h5>
         </div>
         <div class="card-body">
@@ -269,7 +293,7 @@
               <caption class="visually-hidden">
                 Product Summary
               </caption>
-              <thead>
+              <thead class="table-light">
                 <tr>
                   <th scope="col">Product</th>
                   <th scope="col">Code</th>
@@ -279,27 +303,30 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let product of productSummary()">
-                  <td>{{ product.name }}</td>
-                  <td>{{ product.code }}</td>
-                  <td>{{ product.totalQuantity }}</td>
-                  <td>{{ product.totalValue | currency }}</td>
-                  <td>
-                    <span
-                      *ngFor="
-                        let wh of product.warehousesPresentIn;
-                        let last = last
-                      "
-                    >
-                      {{ wh.name }}{{ !last ? ", " : "" }}
-                    </span>
-                  </td>
-                </tr>
-                <tr *ngIf="productSummary().length === 0">
-                  <td colspan="5" class="text-center">
-                    No product summary data available
-                  </td>
-                </tr>
+                @for (product of productSummary(); track product.uuid) {
+                  <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.code }}</td>
+                    <td>{{ product.totalQuantity }}</td>
+                    <td>{{ product.totalValue | currency }}</td>
+                    <td>
+                      @for (
+                        wh of product.warehousesPresentIn;
+                        track wh.uuid;
+                        let last = $last
+                      ) {
+                        {{ wh.name }}{{ !last ? ", " : "" }}
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="text-center py-3">
+                      <i class="bi bi-info-circle me-2"></i>No product summary
+                      data available
+                    </td>
+                  </tr>
+                }
               </tbody>
             </table>
           </div>

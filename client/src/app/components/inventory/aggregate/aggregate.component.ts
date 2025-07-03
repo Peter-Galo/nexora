@@ -2,7 +2,7 @@ import { Component, computed, OnInit, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InventoryService } from '../services/inventory.service';
 import { AggregateReportData } from '../models/inventory.models';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-aggregate',
@@ -13,8 +13,6 @@ import { catchError, finalize, of } from 'rxjs';
 })
 export class AggregateComponent implements OnInit {
   // Use signals for reactive state management
-  protected readonly loading = signal(false);
-  protected readonly error = signal<string | null>(null);
   protected readonly aggregateData = signal<AggregateReportData | null>(null);
 
   // Computed values derived from aggregateData
@@ -61,20 +59,14 @@ export class AggregateComponent implements OnInit {
   }
 
   fetchAggregateData(): void {
-    this.loading.set(true);
-    this.error.set(null);
-
     this.inventoryService
       .getAggregateReport()
       .pipe(
         catchError((err) => {
           console.error('Error fetching aggregate data:', err);
-          this.error.set(
-            'Failed to load inventory data. Please try again later.',
-          );
+
           return of(null);
         }),
-        finalize(() => this.loading.set(false)),
       )
       .subscribe((data) => {
         if (data) {
