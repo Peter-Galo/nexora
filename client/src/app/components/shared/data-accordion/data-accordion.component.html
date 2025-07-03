@@ -1,0 +1,51 @@
+<h5 class="mt-4 mb-3">{{ title }}</h5>
+@if (stockData.length > 0) {
+  <div class="accordion accordion-flush shadow-md" [id]="accordionId">
+    @for (entry of stockData; track entry[0]; let i = $index) {
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            [attr.data-bs-target]="
+              '#' + dataService.getAccordionItemId(accordionPrefix, i)
+            "
+            aria-expanded="false"
+            [attr.aria-controls]="
+              dataService.getAccordionItemId(accordionPrefix, i)
+            "
+          >
+            {{ entry[0] }} ({{ entry[1].length }} items)
+          </button>
+        </h2>
+        <div
+          [id]="dataService.getAccordionItemId(accordionPrefix, i)"
+          class="accordion-collapse collapse"
+          [attr.data-bs-parent]="'#' + accordionId"
+        >
+          <div class="accordion-body">
+            @if (entry[1].length > 0) {
+              <app-data-table
+                [data]="entry[1]"
+                [columns]="columns"
+                [trackBy]="'productUuid'"
+                [title]="itemTitle + ' for ' + entry[0]"
+                [emptyMessage]="
+                  'No ' + itemTitle.toLowerCase() + ' items in this warehouse.'
+                "
+              >
+              </app-data-table>
+            } @else {
+              <p class="text-muted">
+                No {{ itemTitle.toLowerCase() }} items in this warehouse.
+              </p>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <p class="text-muted">No {{ itemTitle.toLowerCase() }} data available.</p>
+}

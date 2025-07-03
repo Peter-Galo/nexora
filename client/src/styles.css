@@ -1,1 +1,68 @@
-/* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+
+* {
+  font-family: "Rubik", sans-serif;
+}
+
+body {
+  background-color: #eeeeee;
+  color: #333;
+}
+
+.card {
+  border: none !important;
+  border-radius: 1px !important;
+}
+
+.card-header {
+  border: none !important;
+  background: none !important;
+}
+
+.active {
+  font-weight: bold;
+}
+
+.navbar.sticky-top {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.form-control {
+  border: none !important;
+  background: #eeeeee;
+  border-radius: 1px;
+}
+
+.btn {
+  border: none;
+  border-radius: 1px;
+  background-color: rgba(76, 15, 251, 0.5) !important;
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  color: #eeeeee;
+}
+
+.btn:hover,
+.btn:active {
+  background-color: rgba(76, 15, 251, 0.8) !important;
+  color: #eeeeee !important;
+}
+
+.active {
+  border: none !important;
+}
+
+.list-group-item.active {
+  background-color: rgba(76, 15, 251, 0.8) !important;
+}
+
+.list-group-item:hover {
+  background-color: rgba(76, 15, 251, 0.2) !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  color: #333;
+}
+
+.alert {
+  border: none !important;
+  border-radius: 1px !important;
+}

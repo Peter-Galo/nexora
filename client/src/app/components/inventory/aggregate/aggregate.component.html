@@ -1,0 +1,151 @@
+<div class="container-fluid">
+  <h3 class="mb-4 text-dark">Inventory Aggregate Report</h3>
+
+  <!-- Main Content -->
+  <div class="row">
+    <!-- Warehouse Overview Section -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100 shadow-md">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Warehouse Overview</h5>
+        </div>
+        <div class="card-body">
+          <app-data-table
+            [data]="dataService.warehouseOverview()"
+            [columns]="warehouseColumns"
+            [trackBy]="'uuid'"
+            title="Warehouse Overview"
+            emptyMessage="No warehouse data available"
+          >
+          </app-data-table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Value Section -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100 shadow-md">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Inventory Value</h5>
+        </div>
+        <div class="card-body">
+          <h4 class="text-center mb-4">
+            Total Value:
+            {{ dataService.inventoryValue()?.totalInventoryValue | currency }}
+          </h4>
+          <div class="table-responsive">
+            <app-data-table
+              [data]="dataService.sortedInventoryValueByWarehouse()"
+              [columns]="inventoryValueColumns"
+              [trackBy]="'0'"
+              title="Inventory Value by Warehouse"
+              emptyMessage="No inventory value data available"
+            >
+            </app-data-table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock Levels Section -->
+    <div class="col-12 mb-4">
+      <div class="card shadow-md">
+        <div class="card-header bg-warning">
+          <h5 class="mb-0">Stock Levels</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4 g-3">
+            <div class="col-md-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <h6>Total Products</h6>
+                  <h3>{{ dataService.stockLevels()?.totalProducts || 0 }}</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <h6>Total Stock Entries</h6>
+                  <h3>
+                    {{ dataService.stockLevels()?.totalStockEntries || 0 }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-danger text-white h-100">
+                <div class="card-body text-center">
+                  <h6>Low Stock Products</h6>
+                  <h3>
+                    {{ dataService.stockLevels()?.totalLowStockProducts || 0 }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                  <h6>High Stock Products</h6>
+                  <h3>
+                    {{ dataService.stockLevels()?.totalHighStockProducts || 0 }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Low Stock by Warehouse -->
+          <app-data-accordion
+            [stockData]="dataService.sortedLowStockByWarehouse()"
+            [columns]="lowStockColumns"
+            title="Low Stock by Warehouse"
+            itemTitle="Low Stock Items"
+            accordionId="lowStockAccordion"
+            accordionPrefix="lowStock"
+          ></app-data-accordion>
+
+          <!-- High Stock by Warehouse -->
+          <app-data-accordion
+            [stockData]="dataService.sortedHighStockByWarehouse()"
+            [columns]="highStockColumns"
+            title="High Stock by Warehouse"
+            itemTitle="High Stock Items"
+            accordionId="highStockAccordion"
+            accordionPrefix="highStock"
+          ></app-data-accordion>
+
+          <!-- Product Summary Section -->
+          <div class="col-12 my-4">
+            <div class="card shadow-md">
+              <div class="card-header">
+                <h5 class="mb-0">Product Summary</h5>
+              </div>
+              <div class="card-body">
+                <app-data-table
+                  [data]="dataService.productSummary()"
+                  [columns]="productSummaryColumns"
+                  [trackBy]="'uuid'"
+                  title="Product Summary"
+                  emptyMessage="No product summary data available"
+                >
+                  <ng-template #customCell let-product let-field="field">
+                    @if (field === "warehousesPresentIn") {
+                      @for (
+                        wh of product.warehousesPresentIn;
+                        track wh.uuid;
+                        let last = $last
+                      ) {
+                        {{ wh.name }}{{ !last ? ", " : "" }}
+                      }
+                    }
+                  </ng-template>
+                </app-data-table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

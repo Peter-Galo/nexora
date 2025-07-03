@@ -17,16 +17,16 @@ import java.util.UUID;
  */
 @Repository
 public interface StockRepository extends JpaRepository<Stock, UUID> {
-    
+
     /**
      * Find stock by product and warehouse.
      *
-     * @param product the product
+     * @param product   the product
      * @param warehouse the warehouse
      * @return an Optional containing the stock if found, or empty if not found
      */
     Optional<Stock> findByProductAndWarehouse(Product product, Warehouse warehouse);
-    
+
     /**
      * Find all stock records for a specific product.
      *
@@ -34,7 +34,7 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
      * @return a list of stock records for the product
      */
     List<Stock> findByProduct(Product product);
-    
+
     /**
      * Find all stock records for a specific warehouse.
      *
@@ -42,7 +42,7 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
      * @return a list of stock records for the warehouse
      */
     List<Stock> findByWarehouse(Warehouse warehouse);
-    
+
     /**
      * Find all stock records where quantity is less than or equal to minimum stock level.
      *
@@ -50,7 +50,7 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
      */
     @Query("SELECT s FROM Stock s WHERE s.quantity <= s.minStockLevel")
     List<Stock> findLowStock();
-    
+
     /**
      * Find all stock records where quantity is greater than or equal to maximum stock level.
      *
@@ -58,7 +58,7 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
      */
     @Query("SELECT s FROM Stock s WHERE s.maxStockLevel IS NOT NULL AND s.quantity >= s.maxStockLevel")
     List<Stock> findOverStock();
-    
+
     /**
      * Find all stock records for a product by product code.
      *
@@ -67,7 +67,7 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
      */
     @Query("SELECT s FROM Stock s JOIN s.product p WHERE p.code = :productCode")
     List<Stock> findByProductCode(@Param("productCode") String productCode);
-    
+
     /**
      * Find all stock records for a warehouse by warehouse code.
      *
@@ -76,11 +76,14 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
      */
     @Query("SELECT s FROM Stock s JOIN s.warehouse w WHERE w.code = :warehouseCode")
     List<Stock> findByWarehouseCode(@Param("warehouseCode") String warehouseCode);
-    
+
     /**
      * Find all stock records where quantity is zero.
      *
      * @return a list of stock records with zero quantity
      */
     List<Stock> findByQuantity(Integer quantity);
+
+    @Query("SELECT s FROM Stock s JOIN FETCH s.product JOIN FETCH s.warehouse")
+    List<Stock> findAllWithProductAndWarehouse();
 }
