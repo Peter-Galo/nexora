@@ -104,6 +104,25 @@ public class InventoryAggregateReportService {
             highStockEntries += highStocks.size();
         }
 
+        // Sort by number of products descending
+        lowStockByWarehouse = lowStockByWarehouse.entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> a,
+                        LinkedHashMap::new
+                ));
+
+        highStockByWarehouse = highStockByWarehouse.entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> a,
+                        LinkedHashMap::new
+                ));
+
         Set<String> lowStockProductCodes = lowStockProductUuids.stream()
                 .map(uuid -> productMap.get(uuid).getCode())
                 .collect(Collectors.toSet());
