@@ -45,7 +45,23 @@ body {
 .btn:hover,
 .btn:active {
   background-color: rgba(76, 15, 251, 0.8) !important;
-  color: #eeeeee;
+  color: #eeeeee !important;
+}
+
+.active {
+  border: none !important;
+}
+
+.list-group-item.active {
+  background-color: rgba(76, 15, 251, 0.8) !important;
+}
+
+.list-group-item:hover {
+  background-color: rgba(76, 15, 251, 0.2) !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  color: #333;
+
 }
 
 .alert {
