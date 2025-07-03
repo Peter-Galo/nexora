@@ -23,9 +23,8 @@ body {
   font-weight: bold;
 }
 
-
 .navbar.sticky-top {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .form-control {
@@ -61,7 +60,6 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
   color: #333;
-
 }
 
 .alert {

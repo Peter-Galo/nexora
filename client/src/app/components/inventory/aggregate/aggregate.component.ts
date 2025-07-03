@@ -23,6 +23,7 @@ import { DataAccordionComponent } from '../../shared/data-accordion/data-accordi
   ],
   providers: [AggregateDataService],
   templateUrl: './aggregate.component.html',
+  styleUrl: './aggregate.component.css',
 })
 export class AggregateComponent implements OnInit {
   // Expose column definitions
