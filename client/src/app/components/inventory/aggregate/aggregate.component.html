@@ -29,10 +29,10 @@
           <h5 class="mb-0">Inventory Value</h5>
         </div>
         <div class="card-body">
-          <h4 class="text-center mb-4">
+          <h6 class="mb-4">
             Total Value:
             {{ dataService.inventoryValue()?.totalInventoryValue | currency }}
-          </h4>
+          </h6>
           <div class="table-responsive">
             <app-data-table
               [data]="dataService.sortedInventoryValueByWarehouse()"
