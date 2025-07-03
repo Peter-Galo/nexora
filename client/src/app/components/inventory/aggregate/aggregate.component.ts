@@ -63,4 +63,18 @@ export class AggregateComponent implements OnInit {
       (a, b) => b[1] - a[1],
     ); // Sort descending by value
   }
+
+  get sortedLowStockByWarehouse() {
+    if (!this.stockLevels?.lowStockByWarehouse) return [];
+    return Object.entries(this.stockLevels.lowStockByWarehouse).sort(
+      (a, b) => b[1].length - a[1].length,
+    );
+  }
+
+  get sortedHighStockByWarehouse() {
+    if (!this.stockLevels?.highStockByWarehouse) return [];
+    return Object.entries(this.stockLevels.highStockByWarehouse).sort(
+      (a, b) => b[1].length - a[1].length,
+    );
+  }
 }
