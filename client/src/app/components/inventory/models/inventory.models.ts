@@ -4,7 +4,7 @@
 export interface WarehouseOverview {
   uuid: string;
   name: string;
-  productCount: number;
+  totalProductQuantity: number;
   totalStockValue: number;
 }
 

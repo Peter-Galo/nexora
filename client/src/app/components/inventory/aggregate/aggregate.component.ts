@@ -56,4 +56,11 @@ export class AggregateComponent implements OnInit {
       },
     });
   }
+
+  get sortedInventoryValueByWarehouse() {
+    if (!this.inventoryValue?.byWarehouse) return [];
+    return Object.entries(this.inventoryValue.byWarehouse).sort(
+      (a, b) => b[1] - a[1],
+    ); // Sort descending by value
+  }
 }

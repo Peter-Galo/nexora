@@ -34,7 +34,7 @@
               <tbody>
                 <tr *ngFor="let warehouse of warehouseOverview">
                   <td>{{ warehouse.name }}</td>
-                  <td>{{ warehouse.productCount }}</td>
+                  <td>{{ warehouse.totalProductQuantity }}</td>
                   <td>{{ warehouse.totalStockValue | currency }}</td>
                 </tr>
               </tbody>
@@ -63,11 +63,9 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  *ngFor="let entry of inventoryValue?.byWarehouse | keyvalue"
-                >
-                  <td>{{ entry.key }}</td>
-                  <td>{{ entry.value | currency }}</td>
+                <tr *ngFor="let entry of sortedInventoryValueByWarehouse">
+                  <td>{{ entry[0] }}</td>
+                  <td>{{ entry[1] | currency }}</td>
                 </tr>
               </tbody>
             </table>
