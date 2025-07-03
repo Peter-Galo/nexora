@@ -129,7 +129,7 @@
               <h2 class="accordion-header">
                 <button
                   class="accordion-button"
-                  [class.collapsed]="i > 0"
+                  [class.collapsed]="true"
                   type="button"
                   data-bs-toggle="collapse"
                   [attr.data-bs-target]="'#lowStock' + i"
@@ -140,7 +140,6 @@
               <div
                 [id]="'lowStock' + i"
                 class="accordion-collapse collapse"
-                [class.show]="i === 0"
                 [attr.data-bs-parent]="'#lowStockAccordion'"
               >
                 <div class="accordion-body">
@@ -185,7 +184,7 @@
               <h2 class="accordion-header">
                 <button
                   class="accordion-button"
-                  [class.collapsed]="i > 0"
+                  [class.collapsed]="true"
                   type="button"
                   data-bs-toggle="collapse"
                   [attr.data-bs-target]="'#highStock' + i"
@@ -196,7 +195,6 @@
               <div
                 [id]="'highStock' + i"
                 class="accordion-collapse collapse"
-                [class.show]="i === 0"
                 [attr.data-bs-parent]="'#highStockAccordion'"
               >
                 <div class="accordion-body">
