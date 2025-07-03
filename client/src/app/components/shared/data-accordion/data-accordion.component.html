@@ -1,6 +1,6 @@
 <h5 class="mt-4 mb-3">{{ title }}</h5>
 @if (stockData.length > 0) {
-  <div class="accordion" [id]="accordionId">
+  <div class="accordion accordion-flush shadow-md" [id]="accordionId">
     @for (entry of stockData; track entry[0]; let i = $index) {
       <div class="accordion-item">
         <h2 class="accordion-header">

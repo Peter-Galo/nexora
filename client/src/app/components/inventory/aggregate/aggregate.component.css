@@ -29,8 +29,3 @@
   font-weight: 700;
   margin-top: 0.5rem;
 }
-
-/* Accordion styles */
-.accordion-button:not(.collapsed) {
-  font-weight: 600;
-}
