@@ -68,7 +68,7 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
      * @param name the text to search for in warehouse names
      * @return a list of warehouses whose names contain the specified text
      */
-    List<Warehouse> findByNameContainingIgnoreCase(String name);
+    List<Warehouse> findByNameContainingIgnoreCaseOrderByName(String name);
 
     @Query("SELECT w FROM Warehouse w ORDER BY w.active DESC, w.name ASC")
     List<Warehouse> findAllOrderedByActiveAndName();

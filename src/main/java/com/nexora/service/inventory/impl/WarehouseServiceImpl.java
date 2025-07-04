@@ -160,7 +160,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     @Transactional(readOnly = true)
     public List<WarehouseDTO> searchWarehousesByName(String name) {
-        return warehouseRepository.findByNameContainingIgnoreCase(name).stream()
+        return warehouseRepository.findByNameContainingIgnoreCaseOrderByName(name).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

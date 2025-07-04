@@ -497,7 +497,7 @@ class WarehouseServiceTest {
     void searchWarehousesByName_shouldReturnWarehousesWithNameContainingText() {
         // Arrange
         String searchText = "Test";
-        when(warehouseRepository.findByNameContainingIgnoreCase(searchText)).thenReturn(Arrays.asList(testWarehouse));
+        when(warehouseRepository.findByNameContainingIgnoreCaseOrderByName(searchText)).thenReturn(Arrays.asList(testWarehouse));
 
         // Act
         List<WarehouseDTO> result = warehouseService.searchWarehousesByName(searchText);
@@ -506,6 +506,6 @@ class WarehouseServiceTest {
         assertEquals(1, result.size());
         assertEquals(testWarehouse.getUuid(), result.get(0).getUuid());
         assertTrue(result.get(0).getName().contains(searchText));
-        verify(warehouseRepository).findByNameContainingIgnoreCase(searchText);
+        verify(warehouseRepository).findByNameContainingIgnoreCaseOrderByName(searchText);
     }
 }
