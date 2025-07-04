@@ -35,15 +35,15 @@ body {
 
 .btn {
   border: none;
-  border-radius: 1px;
-  background-color: rgba(76, 15, 251, 0.5) !important;
+  border-radius: 3px;
+  background-color: rgba(76, 15, 251, 0.7) !important;
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
   color: #eeeeee;
 }
 
 .btn:hover,
 .btn:active {
-  background-color: rgba(76, 15, 251, 0.8) !important;
+  background-color: rgba(76, 15, 251, 0.9) !important;
   color: #eeeeee !important;
 }
 
@@ -86,4 +86,8 @@ body {
 
 .form-check-input:hover {
   border-color: rgba(76, 15, 251); /* Darker shade of blue on hover */
+}
+
+.badge.bg-success {
+  background-color: rgb(48, 214, 131) !important;
 }

@@ -13,5 +13,6 @@ export class InventoryComponent {
     { key: 'warehouse', label: 'Warehouse' },
     { key: 'stock', label: 'Stock' },
     { key: 'product', label: 'Product' },
+    { key: 'export-jobs', label: 'Export Jobs' },
   ];
 }

@@ -32,10 +32,14 @@ public class Warehouse {
     @Column(length = 500)
     private String description;
 
+    @NotBlank(message = "Address is required")
     @Size(max = 200, message = "Address cannot exceed 200 characters")
+    @Column(nullable = false)
     private String address;
 
+    @NotBlank(message = "City is required")
     @Size(max = 100, message = "City cannot exceed 100 characters")
+    @Column(nullable = false)
     private String city;
 
     @Size(max = 100, message = "State/Province cannot exceed 100 characters")
@@ -44,7 +48,9 @@ public class Warehouse {
     @Size(max = 20, message = "Postal code cannot exceed 20 characters")
     private String postalCode;
 
+    @NotBlank(message = "Country is required")
     @Size(max = 100, message = "Country cannot exceed 100 characters")
+    @Column(nullable = false)
     private String country;
 
     @Column(name = "created_at")

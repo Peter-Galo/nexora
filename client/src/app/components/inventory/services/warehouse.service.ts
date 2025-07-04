@@ -8,11 +8,11 @@ export interface WarehouseDTO {
   code: string;
   name: string;
   description?: string;
-  address?: string;
-  city?: string;
+  address: string;
+  city: string;
   stateProvince?: string;
   postalCode?: string;
-  country?: string;
+  country: string;
   active?: boolean;
   createdAt?: string;
   updatedAt?: string;

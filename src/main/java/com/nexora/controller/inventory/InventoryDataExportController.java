@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -89,5 +90,19 @@ public class InventoryDataExportController {
                         .location(URI.create(job.getFileUrl()))
                         .build())
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Get all export jobs for authenticated user",
+            description = "Retrieves all export jobs for the authenticated user, ordered by creation date descending")
+    @ApiResponse(responseCode = "200", description = "Export jobs retrieved successfully")
+    @GetMapping("/jobs")
+    public ResponseEntity<List<ExportJob>> getUserExportJobs(@RequestHeader("Authorization") String authHeader) {
+        // Extract user ID from JWT token
+        UUID userId = jwtService.extractUserUUIDFromAuthHeader(authHeader);
+
+        // Get all export jobs for the user
+        List<ExportJob> exportJobs = exportJobRepository.findByUserUuidOrderByCreatedAtDesc(userId);
+
+        return ResponseEntity.ok(exportJobs);
     }
 }

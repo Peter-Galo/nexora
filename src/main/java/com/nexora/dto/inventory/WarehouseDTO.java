@@ -30,11 +30,13 @@ public class WarehouseDTO {
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
-    @Schema(description = "Warehouse address", example = "123 Storage Lane")
+    @Schema(description = "Warehouse address", example = "123 Storage Lane", required = true)
+    @NotBlank(message = "Address is required")
     @Size(max = 200, message = "Address cannot exceed 200 characters")
     private String address;
 
-    @Schema(description = "City where the warehouse is located", example = "Boston")
+    @Schema(description = "City where the warehouse is located", example = "Boston", required = true)
+    @NotBlank(message = "City is required")
     @Size(max = 100, message = "City cannot exceed 100 characters")
     private String city;
 
@@ -46,7 +48,8 @@ public class WarehouseDTO {
     @Size(max = 20, message = "Postal code cannot exceed 20 characters")
     private String postalCode;
 
-    @Schema(description = "Country where the warehouse is located", example = "USA")
+    @Schema(description = "Country where the warehouse is located", example = "USA", required = true)
+    @NotBlank(message = "Country is required")
     @Size(max = 100, message = "Country cannot exceed 100 characters")
     private String country;
 

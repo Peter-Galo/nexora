@@ -8,6 +8,7 @@ import { WarehouseComponent } from './components/inventory/warehouse/warehouse.c
 import { StockComponent } from './components/inventory/stock/stock.component';
 import { ProductComponent } from './components/inventory/product/product.component';
 import { AggregateComponent } from './components/inventory/aggregate/aggregate.component';
+import { ExportJobsComponent } from './components/inventory/export-jobs/export-jobs.component';
 
 export const routes: Routes = [
   {
@@ -27,6 +28,7 @@ export const routes: Routes = [
       { path: 'product', component: ProductComponent },
       { path: 'stock', component: StockComponent },
       { path: 'warehouse', component: WarehouseComponent },
+      { path: 'export-jobs', component: ExportJobsComponent },
     ],
   },
   { path: '', component: HomeComponent },
