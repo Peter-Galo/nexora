@@ -8,10 +8,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -107,7 +105,7 @@ class WarehouseRepositoryTest {
     @Test
     void findByActiveTrue_shouldReturnOnlyActiveWarehouses() {
         // Act
-        List<Warehouse> activeWarehouses = warehouseRepository.findByActiveTrue();
+        List<Warehouse> activeWarehouses = warehouseRepository.findByActiveTrueOrderByName();
 
         // Assert
         assertEquals(2, activeWarehouses.size());
