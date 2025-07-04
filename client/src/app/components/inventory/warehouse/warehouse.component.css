@@ -1,0 +1,9 @@
+#searchClearButton {
+  background: none !important;
+  padding: 5px !important;
+}
+
+#searchClearButton,
+#searchClearButton:hover {
+  color: #333333 !important;
+}

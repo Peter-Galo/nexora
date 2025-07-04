@@ -1,1 +1,153 @@
-<h3 class="mb-0 text-dark">Warehouse</h3>
+<div class="container-fluid px-0">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 text-dark">Warehouse Management</h3>
+    <button class="btn btn-primary" (click)="refresh()">
+      <i class="fas fa-sync-alt"></i> Refresh
+    </button>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error() }}
+      <button
+        type="button"
+        class="btn-close"
+        (click)="error.set(null)"
+      ></button>
+    </div>
+  }
+
+  <!-- Filters and Search -->
+  <div class="card mb-4">
+    <div class="card-body p-0">
+      <div class="row g-3">
+        <!-- Search -->
+
+        <div class="col-md-6">
+          <label for="searchInput" class="form-label">Search Warehouses</label>
+          <div class="position-relative">
+            <input
+              id="searchInput"
+              type="text"
+              class="form-control pe-4"
+              placeholder="Search by warehouse name"
+              [value]="searchTerm()"
+              (input)="onSearchInput($any($event.target).value)"
+            />
+            <!-- clear button, shown only when there's a value -->
+            <button
+              id="searchClearButton"
+              *ngIf="searchTerm()"
+              type="button"
+              class="btn btn-sm btn-link p-0 position-absolute top-50 end-0 translate-middle-y me-2"
+              (click)="clearSearch()"
+              aria-label="Clear search"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Filter -->
+        <div class="col-md-6">
+          <label class="form-label">Filter Options</label>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="activeOnlyCheck"
+              [checked]="showActiveOnly()"
+              (change)="toggleActiveFilter()"
+            />
+            <label class="form-check-label" for="activeOnlyCheck">
+              Show active warehouses only
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouses Table -->
+  <div class="card">
+    <div class="card-header bg-light px-0">
+      <h5 class="mb-0">
+        Warehouses
+        @if (loading()) {
+          <span class="spinner-border spinner-border-sm ms-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </span>
+        }
+      </h5>
+    </div>
+    <div class="card-body px-0">
+      @if (loading() && warehouses().length === 0) {
+        <div class="text-center py-4">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading warehouses...</span>
+          </div>
+          <p class="mt-2 text-muted">Loading warehouses...</p>
+        </div>
+      } @else {
+        <app-data-table
+          [data]="warehouses()"
+          [columns]="warehouseColumns()"
+          [trackBy]="'uuid'"
+          title="Warehouse List"
+          emptyMessage="No warehouses found"
+        >
+          <!-- Custom templates for status and actions -->
+          <ng-template #customCell let-warehouse let-field="field">
+            @if (field === "active") {
+              <span
+                class="badge"
+                [class]="warehouse.active ? 'bg-success' : 'bg-secondary'"
+              >
+                {{ warehouse.active ? "Active" : "Inactive" }}
+              </span>
+            }
+            @if (field === "actions") {
+              <div class="btn-group btn-group-sm" role="group">
+                @if (canModifyWarehouses()) {
+                  @if (warehouse.active) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-warning"
+                      (click)="deactivateWarehouse(warehouse)"
+                      title="Deactivate warehouse"
+                    >
+                      <i class="fas fa-pause"></i> Deactivate
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn btn-outline-success"
+                      (click)="activateWarehouse(warehouse)"
+                      title="Activate warehouse"
+                    >
+                      <i class="fas fa-play"></i> Activate
+                    </button>
+                  }
+                }
+                @if (canDeleteWarehouses()) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    (click)="deleteWarehouse(warehouse)"
+                    title="Delete warehouse"
+                  >
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                }
+                @if (!canModifyWarehouses() && !canDeleteWarehouses()) {
+                  <span class="text-muted small">No actions available</span>
+                }
+              </div>
+            }
+          </ng-template>
+        </app-data-table>
+      }
+    </div>
+  </div>
+</div>
