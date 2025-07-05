@@ -1,7 +1,14 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { StockService, StockDTO } from '../services/stock.service';
+import { StockDTO, StockService } from '../services/stock.service';
 import { interval, Subscription } from 'rxjs';
 
 interface StockMetrics {
@@ -24,7 +31,7 @@ interface StockAlert {
   selector: 'app-stock',
   imports: [CommonModule, FormsModule],
   templateUrl: './stock.component.html',
-  styleUrl: './stock.component.css'
+  styleUrl: './stock.component.css',
 })
 export class StockComponent implements OnInit, OnDestroy {
   private stockService = inject(StockService);
@@ -38,24 +45,34 @@ export class StockComponent implements OnInit, OnDestroy {
   allStocks = signal<StockDTO[]>([]);
 
   // UI state
-  selectedView = signal<'dashboard' | 'all' | 'low' | 'over' | 'zero'>('dashboard');
+  selectedView = signal<'dashboard' | 'all' | 'low' | 'over' | 'zero'>(
+    'dashboard',
+  );
   searchTerm = signal('');
   selectedWarehouse = signal<string>('all');
   autoRefresh = signal(true);
 
   // Computed categorized stocks
   lowStocks = computed(() =>
-    this.allStocks().filter(stock => stock.lowStock ||
-      (stock.minStockLevel && stock.quantity <= stock.minStockLevel && stock.quantity > 0))
+    this.allStocks().filter(
+      (stock) =>
+        stock.lowStock ||
+        (stock.minStockLevel &&
+          stock.quantity <= stock.minStockLevel &&
+          stock.quantity > 0),
+    ),
   );
 
   overStocks = computed(() =>
-    this.allStocks().filter(stock => stock.overStock ||
-      (stock.maxStockLevel && stock.quantity >= stock.maxStockLevel))
+    this.allStocks().filter(
+      (stock) =>
+        stock.overStock ||
+        (stock.maxStockLevel && stock.quantity >= stock.maxStockLevel),
+    ),
   );
 
   zeroStocks = computed(() =>
-    this.allStocks().filter(stock => stock.quantity === 0)
+    this.allStocks().filter((stock) => stock.quantity === 0),
   );
 
   // Computed metrics for business intelligence
@@ -68,7 +85,7 @@ export class StockComponent implements OnInit, OnDestroy {
     // Calculate total value using actual product prices
     const totalValue = all.reduce((sum, stock) => {
       const price = stock.product?.price || 0;
-      return sum + (stock.quantity * price);
+      return sum + stock.quantity * price;
     }, 0);
 
     return {
@@ -77,7 +94,7 @@ export class StockComponent implements OnInit, OnDestroy {
       overStockCount: over.length,
       zeroStockCount: zero.length,
       totalValue,
-      criticalAlerts: low.length + zero.length
+      criticalAlerts: low.length + zero.length,
     };
   });
 
@@ -93,7 +110,7 @@ export class StockComponent implements OnInit, OnDestroy {
         type: 'critical',
         message: 'Products are completely out of stock',
         count: zero.length,
-        action: 'Reorder immediately'
+        action: 'Reorder immediately',
       });
     }
 
@@ -102,7 +119,7 @@ export class StockComponent implements OnInit, OnDestroy {
         type: 'warning',
         message: 'Products are running low on stock',
         count: low.length,
-        action: 'Plan reorder soon'
+        action: 'Plan reorder soon',
       });
     }
 
@@ -111,7 +128,7 @@ export class StockComponent implements OnInit, OnDestroy {
         type: 'info',
         message: 'Products have excess inventory',
         count: over.length,
-        action: 'Consider promotions'
+        action: 'Consider promotions',
       });
     }
 
@@ -125,21 +142,23 @@ export class StockComponent implements OnInit, OnDestroy {
     const warehouse = this.selectedWarehouse();
 
     if (search) {
-      stocks = stocks.filter(stock =>
-        stock.product?.name?.toLowerCase().includes(search) ||
-        stock.product?.code?.toLowerCase().includes(search) ||
-        stock.warehouse?.name?.toLowerCase().includes(search) ||
-        // Fallback to computed fields for backward compatibility
-        stock.productName?.toLowerCase().includes(search) ||
-        stock.productCode?.toLowerCase().includes(search) ||
-        stock.warehouseName?.toLowerCase().includes(search)
+      stocks = stocks.filter(
+        (stock) =>
+          stock.product?.name?.toLowerCase().includes(search) ||
+          stock.product?.code?.toLowerCase().includes(search) ||
+          stock.warehouse?.name?.toLowerCase().includes(search) ||
+          // Fallback to computed fields for backward compatibility
+          stock.productName?.toLowerCase().includes(search) ||
+          stock.productCode?.toLowerCase().includes(search) ||
+          stock.warehouseName?.toLowerCase().includes(search),
       );
     }
 
     if (warehouse !== 'all') {
-      stocks = stocks.filter(stock =>
-        stock.warehouse?.uuid === warehouse ||
-        stock.warehouseUuid === warehouse
+      stocks = stocks.filter(
+        (stock) =>
+          stock.warehouse?.uuid === warehouse ||
+          stock.warehouseUuid === warehouse,
       );
     }
 
@@ -150,13 +169,13 @@ export class StockComponent implements OnInit, OnDestroy {
   warehouses = computed(() => {
     const all = this.allStocks();
     const unique = new Map();
-    all.forEach(stock => {
+    all.forEach((stock) => {
       const warehouse = stock.warehouse;
       if (warehouse && !unique.has(warehouse.uuid)) {
         unique.set(warehouse.uuid, {
           uuid: warehouse.uuid,
           name: warehouse.name,
-          code: warehouse.code
+          code: warehouse.code,
         });
       }
     });
@@ -167,12 +186,11 @@ export class StockComponent implements OnInit, OnDestroy {
     this.loadAllStockData();
 
     // Auto-refresh every 30 seconds if enabled
-    this.autoRefreshSubscription = interval(30000)
-      .subscribe(() => {
-        if (this.autoRefresh()) {
-          this.loadAllStockData();
-        }
-      });
+    this.autoRefreshSubscription = interval(30000).subscribe(() => {
+      if (this.autoRefresh()) {
+        this.loadAllStockData();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -191,53 +209,65 @@ export class StockComponent implements OnInit, OnDestroy {
       next: (stocks) => {
         try {
           // Transform and validate data to ensure backward compatibility
-          const transformedStocks = stocks.map(stock => {
-            // Validate required fields
-            if (!stock.product || !stock.warehouse) {
-              console.warn('Invalid stock data:', stock);
-              return null;
-            }
+          const transformedStocks = stocks
+            .map((stock) => {
+              // Validate required fields
+              if (!stock.product || !stock.warehouse) {
+                console.warn('Invalid stock data:', stock);
+                return null;
+              }
 
-            return {
-              ...stock,
-              // Computed fields for backward compatibility
-              productUuid: stock.product.uuid || '',
-              productCode: stock.product.code || '',
-              productName: stock.product.name || '',
-              warehouseUuid: stock.warehouse.uuid || '',
-              warehouseName: stock.warehouse.name || '',
-              warehouseCode: stock.warehouse.code || '',
-              lastUpdated: stock.updatedAt || stock.createdAt
-            };
-          }).filter(Boolean) as StockDTO[]; // Remove null entries
+              return {
+                ...stock,
+                // Computed fields for backward compatibility
+                productUuid: stock.product.uuid || '',
+                productCode: stock.product.code || '',
+                productName: stock.product.name || '',
+                warehouseUuid: stock.warehouse.uuid || '',
+                warehouseName: stock.warehouse.name || '',
+                warehouseCode: stock.warehouse.code || '',
+                lastUpdated: stock.updatedAt || stock.createdAt,
+              };
+            })
+            .filter(Boolean) as StockDTO[]; // Remove null entries
 
           this.allStocks.set(transformedStocks);
           this.loading.set(false);
 
           // Log success for debugging
-          console.log(`Successfully loaded ${transformedStocks.length} stock items`);
+          console.log(
+            `Successfully loaded ${transformedStocks.length} stock items`,
+          );
         } catch (transformError) {
           console.error('Error transforming stock data:', transformError);
-          this.error.set('Failed to process stock data. Please refresh the page.');
+          this.error.set(
+            'Failed to process stock data. Please refresh the page.',
+          );
           this.loading.set(false);
         }
       },
       error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Unknown error occurred';
+        const errorMessage =
+          error?.error?.message || error?.message || 'Unknown error occurred';
         this.error.set(`Failed to load stock data: ${errorMessage}`);
         this.loading.set(false);
         console.error('Error loading stock data:', error);
-      }
+      },
     });
   }
 
   private getCurrentViewStocks(): StockDTO[] {
     switch (this.selectedView()) {
-      case 'all': return this.allStocks();
-      case 'low': return this.lowStocks();
-      case 'over': return this.overStocks();
-      case 'zero': return this.zeroStocks();
-      default: return this.allStocks();
+      case 'all':
+        return this.allStocks();
+      case 'low':
+        return this.lowStocks();
+      case 'over':
+        return this.overStocks();
+      case 'zero':
+        return this.zeroStocks();
+      default:
+        return this.allStocks();
     }
   }
 
@@ -263,7 +293,7 @@ export class StockComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.error.set('Failed to add stock. Please try again.');
         console.error('Error adding stock:', error);
-      }
+      },
     });
   }
 
@@ -275,7 +305,7 @@ export class StockComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.error.set('Failed to remove stock. Please try again.');
         console.error('Error removing stock:', error);
-      }
+      },
     });
   }
 
@@ -284,11 +314,19 @@ export class StockComponent implements OnInit, OnDestroy {
     if (stock.quantity === 0) return 'text-danger';
 
     // Use computed fields from backend if available, otherwise fallback to manual calculation
-    if (stock.lowStock || (stock.minStockLevel && stock.quantity <= stock.minStockLevel && stock.quantity > 0)) {
+    if (
+      stock.lowStock ||
+      (stock.minStockLevel &&
+        stock.quantity <= stock.minStockLevel &&
+        stock.quantity > 0)
+    ) {
       return 'text-warning';
     }
 
-    if (stock.overStock || (stock.maxStockLevel && stock.quantity >= stock.maxStockLevel)) {
+    if (
+      stock.overStock ||
+      (stock.maxStockLevel && stock.quantity >= stock.maxStockLevel)
+    ) {
       return 'text-info';
     }
 
@@ -299,11 +337,19 @@ export class StockComponent implements OnInit, OnDestroy {
     if (stock.quantity === 0) return 'fas fa-exclamation-triangle';
 
     // Use computed fields from backend if available, otherwise fallback to manual calculation
-    if (stock.lowStock || (stock.minStockLevel && stock.quantity <= stock.minStockLevel && stock.quantity > 0)) {
+    if (
+      stock.lowStock ||
+      (stock.minStockLevel &&
+        stock.quantity <= stock.minStockLevel &&
+        stock.quantity > 0)
+    ) {
       return 'fas fa-exclamation-circle';
     }
 
-    if (stock.overStock || (stock.maxStockLevel && stock.quantity >= stock.maxStockLevel)) {
+    if (
+      stock.overStock ||
+      (stock.maxStockLevel && stock.quantity >= stock.maxStockLevel)
+    ) {
       return 'fas fa-info-circle';
     }
 
@@ -313,7 +359,7 @@ export class StockComponent implements OnInit, OnDestroy {
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
     }).format(value);
   }
 
@@ -326,7 +372,7 @@ export class StockComponent implements OnInit, OnDestroy {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     } catch (error) {
       console.warn('Invalid date string:', dateString);
