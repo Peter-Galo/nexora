@@ -1,7 +1,10 @@
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { WarehouseDTO, WarehouseService } from '../services/warehouse.service';
+import {
+  WarehouseDTO,
+  WarehouseService,
+} from '../../../services/inventory/warehouse.service';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
 import { WAREHOUSE_MANAGEMENT_COLUMNS } from '../../shared/data-table/table-columns/model';
 import {
@@ -14,14 +17,13 @@ import {
   takeUntil,
 } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
-import { ExportJob, ExportService } from '../services/export.service';
+import { ExportUtilityService } from '../../../services/inventory/export-utility.service';
 
 @Component({
   selector: 'app-warehouse',
   standalone: true,
   imports: [CommonModule, FormsModule, DataTableComponent],
   templateUrl: './warehouse.component.html',
-  styleUrl: './warehouse.component.css',
 })
 export class WarehouseComponent implements OnInit, OnDestroy {
   // Data signals
@@ -55,12 +57,7 @@ export class WarehouseComponent implements OnInit, OnDestroy {
   fieldTouched = signal<{ [key: string]: boolean }>({});
 
   // Export state
-  exportLoading = signal<boolean>(false);
-  exportJobId = signal<string | null>(null);
-  exportStatus = signal<string | null>(null);
-  exportedFiles = signal<
-    Array<{ jobId: string; fileName: string; fileUrl: string; createdAt: Date }>
-  >([]);
+  exportState: ReturnType<typeof this.exportUtilityService.createExportState>;
 
   // Column definitions - dynamically filtered based on user permissions
   protected readonly warehouseColumns = computed(() => {
@@ -85,8 +82,10 @@ export class WarehouseComponent implements OnInit, OnDestroy {
   constructor(
     private warehouseService: WarehouseService,
     private authService: AuthService,
-    private exportService: ExportService,
+    private exportUtilityService: ExportUtilityService,
   ) {
+    this.exportState = this.exportUtilityService.createExportState();
+
     // Set up debounced search with 0.2 second delay
     this.searchSubject
       .pipe(
@@ -648,122 +647,25 @@ export class WarehouseComponent implements OnInit, OnDestroy {
    * Export warehouse data to Excel
    */
   exportWarehouses(): void {
-    this.exportLoading.set(true);
-    this.error.set(null);
-    this.exportJobId.set(null);
-    this.exportStatus.set(null);
-
-    this.exportService
-      .requestWarehouseExport()
-      .pipe(
-        catchError((err) => {
-          console.error('Error requesting warehouse export:', err);
-
-          this.error.set(
-            'Failed to request warehouse export. Please try again.',
-          );
-
-          return of(null);
-        }),
-      )
-      .subscribe((response) => {
-        this.exportLoading.set(false);
-        if (response) {
-          this.exportJobId.set(response.jobId);
-          this.exportStatus.set('PENDING');
-
-          // Start polling for export status
-          this.pollExportStatus(response.jobId);
-
-          // Show success message
-          console.log('Warehouse export initiated successfully:', response);
-        }
-      });
-  }
-
-  /**
-   * Poll export status until completion
-   */
-  private pollExportStatus(jobId: string): void {
-    const pollInterval = setInterval(() => {
-      this.exportService
-        .getExportStatus(jobId)
-        .pipe(
-          catchError((err) => {
-            console.error('Error checking export status:', err);
-            clearInterval(pollInterval);
-            this.exportStatus.set('FAILED');
-            this.error.set('Failed to check export status.');
-            return of(null);
-          }),
-        )
-        .subscribe((job) => {
-          if (job) {
-            this.exportStatus.set(job.status);
-
-            if (job.status === 'COMPLETED') {
-              clearInterval(pollInterval);
-              // Add file to the exported files list instead of auto-downloading
-              this.addExportedFile(job);
-            } else if (job.status === 'FAILED') {
-              clearInterval(pollInterval);
-              this.error.set(
-                job.errorMessage || 'Export failed. Please try again.',
-              );
-            }
-          }
-        });
-    }, 2000); // Poll every 2 seconds
-
-    // Stop polling after 5 minutes to prevent infinite polling
-    setTimeout(() => {
-      clearInterval(pollInterval);
-      if (
-        this.exportStatus() === 'PROCESSING' ||
-        this.exportStatus() === 'PENDING'
-      ) {
-        this.exportStatus.set('TIMEOUT');
-        this.error.set(
-          'Export is taking longer than expected. Please check back later.',
-        );
-      }
-    }, 300000); // 5 minutes
-  }
-
-  /**
-   * Add completed export to the exported files list
-   */
-  private addExportedFile(job: ExportJob): void {
-    if (job.fileUrl) {
-      const fileName = `warehouse_export_${new Date().toISOString().split('T')[0]}.xlsx`;
-      const exportedFile = {
-        jobId: job.uuid,
-        fileName: fileName,
-        fileUrl: job.fileUrl,
-        createdAt: new Date(),
-      };
-
-      const currentFiles = this.exportedFiles();
-      this.exportedFiles.set([exportedFile, ...currentFiles]);
-
-      // Clear export status after adding to list
-      this.exportStatus.set(null);
-      this.exportJobId.set(null);
-    }
+    this.exportUtilityService.initiateExport(
+      'WAREHOUSE',
+      this.exportState,
+      this.destroy$,
+    );
   }
 
   /**
    * Download the exported file
    */
   downloadExport(jobId: string): void {
-    this.exportService.triggerFileDownload(jobId);
+    this.exportUtilityService.downloadExport(jobId);
   }
 
   /**
    * Download file by URL
    */
   downloadFileByUrl(fileUrl: string): void {
-    window.open(fileUrl, '_blank');
+    this.exportUtilityService.downloadFileByUrl(fileUrl);
   }
 
   /**
@@ -781,34 +683,11 @@ export class WarehouseComponent implements OnInit, OnDestroy {
       return; // User doesn't have permission to export, so don't load export jobs
     }
 
-    this.exportService
-      .getUserExportJobs()
-      .pipe(
-        catchError((err) => {
-          console.error('Error loading existing export jobs:', err);
-          // Don't show error to user for this background operation
-          return of([]);
-        }),
-        takeUntil(this.destroy$),
-      )
-      .subscribe((jobs) => {
-        // Filter for warehouse export jobs and convert to the expected format
-        const warehouseExportJobs = jobs
-          .filter(
-            (job) =>
-              job.category === 'WAREHOUSE' &&
-              job.status === 'COMPLETED' &&
-              job.fileUrl,
-          )
-          .map((job) => ({
-            jobId: job.uuid,
-            fileName: `warehouse_export_${new Date(job.createdAt).toISOString().split('T')[0]}.xlsx`,
-            fileUrl: job.fileUrl!,
-            createdAt: new Date(job.createdAt),
-          }));
-
-        this.exportedFiles.set(warehouseExportJobs);
-      });
+    this.exportUtilityService.loadExistingExportJobs(
+      'WAREHOUSE',
+      this.exportState,
+      this.destroy$,
+    );
   }
 
   protected readonly Object = Object;

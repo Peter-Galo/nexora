@@ -4,7 +4,7 @@ import {
   DataTableComponent,
   TableColumn,
 } from '../data-table/data-table.component';
-import { AggregateDataService } from '../../inventory/services/aggregate-data.service';
+import { AggregateDataService } from '../../../services/inventory/aggregate-data.service';
 
 @Component({
   selector: 'app-data-accordion',

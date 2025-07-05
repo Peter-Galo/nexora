@@ -1,14 +1,16 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExportJob, ExportService } from '../services/export.service';
-import { Subject, takeUntil, catchError, of } from 'rxjs';
+import {
+  ExportJob,
+  ExportService,
+} from '../../../services/inventory/export.service';
+import { catchError, of, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-export-jobs',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './export-jobs.component.html',
-  styleUrl: './export-jobs.component.css',
 })
 export class ExportJobsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

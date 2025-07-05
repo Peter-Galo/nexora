@@ -14,7 +14,6 @@ export interface TableColumn {
   standalone: true,
   imports: [CommonModule, CurrencyPipe],
   templateUrl: './data-table.component.html',
-  styleUrl: './data-table.component.css',
 })
 export class DataTableComponent {
   @Input() data: any[] = [];
@@ -23,12 +22,10 @@ export class DataTableComponent {
   @Input() trackBy: string = 'id';
   @Input() emptyMessage: string = 'No data available';
 
-  @ContentChild('customCell') customCell:
-    | TemplateRef<{
+  @ContentChild('customCell') customCell: TemplateRef<{
     $implicit: any;
     field: string;
-  }>
-    | null = null;
+  }> | null = null;
 
   // Helper method to get a nested property value using dot notation (e.g., "user.address.city")
   getPropertyValue(item: any, field: string): any {

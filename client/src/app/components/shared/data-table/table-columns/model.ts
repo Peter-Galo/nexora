@@ -45,3 +45,23 @@ export const STOCK_COLUMNS = {
     { header: 'Max Stock', field: 'maxStockLevel' },
   ],
 };
+
+export const PRODUCT_COLUMNS: TableColumn[] = [
+  { header: 'Code', field: 'code' },
+  { header: 'Name', field: 'name' },
+  { header: 'Category', field: 'category' },
+  { header: 'Brand', field: 'brand' },
+  { header: 'Price', field: 'price', isCurrency: true },
+  { header: 'SKU', field: 'sku' },
+  { header: 'Status', field: 'active', customTemplate: true },
+  { header: 'Created', field: 'createdAt', customTemplate: true },
+];
+
+export const PRODUCT_SUMMARY_SIMPLE_COLUMNS: TableColumn[] = [
+  { header: 'Code', field: 'code' },
+  { header: 'Name', field: 'name' },
+  { header: 'Category', field: 'category' },
+  { header: 'Brand', field: 'brand' },
+  { header: 'Price', field: 'price', isCurrency: true },
+  { header: 'Status', field: 'active', customTemplate: true },
+];

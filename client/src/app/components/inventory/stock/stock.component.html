@@ -1,23 +1,32 @@
-<div class="container-fluid px-0">
+<div class="container-fluid p-0">
   <!-- Header Section -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h3 class="mb-0 text-dark">Stock Management</h3>
     </div>
     <div class="d-flex gap-2">
+      @if (canExportData()) {
+        <button
+          class="btn btn-info"
+          (click)="exportStocks()"
+          [disabled]="exportState.exportLoading()"
+        >
+          @if (exportState.exportLoading()) {
+            <span class="spinner-border spinner-border-sm me-2" role="status">
+              <span class="visually-hidden">Exporting...</span>
+            </span>
+            Exporting...
+          } @else {
+            <i class="fas fa-download"></i> Export to Excel
+          }
+        </button>
+      }
       <button class="btn" (click)="toggleAutoRefresh()">
         <i class="fas fa-sync-alt me-1" [class.fa-spin]="autoRefresh()"></i>
         Auto-refresh {{ autoRefresh() ? "ON" : "OFF" }}
       </button>
-      <button class="btn" (click)="refresh()" [disabled]="loading()">
-        @if (loading()) {
-          <span class="spinner-border spinner-border-sm me-2" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </span>
-          Refreshing...
-        } @else {
-          <i class="fas fa-sync-alt me-1"></i> Refresh
-        }
+      <button class="btn" (click)="refresh()">
+        <i class="fas fa-sync-alt me-1"></i> Refresh
       </button>
     </div>
   </div>
@@ -31,6 +40,60 @@
         class="btn-close"
         (click)="error.set(null)"
       ></button>
+    </div>
+  }
+
+  <!-- Export Status Alert -->
+  @if (
+    exportState.exportStatus() && exportState.exportStatus() !== "COMPLETED"
+  ) {
+    <div
+      class="alert"
+      [class]="
+        exportState.exportStatus() === 'FAILED' ||
+        exportState.exportStatus() === 'TIMEOUT'
+          ? 'alert-danger'
+          : 'alert-info'
+      "
+      role="alert"
+    >
+      <div class="d-flex align-items-center">
+        @if (
+          exportState.exportStatus() === "PENDING" ||
+          exportState.exportStatus() === "PROCESSING"
+        ) {
+          <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        }
+        @if (exportState.exportStatus() === "PENDING") {
+          <span>Export request submitted. Preparing stock data...</span>
+        } @else if (exportState.exportStatus() === "PROCESSING") {
+          <span>Processing stock export. This may take a few moments...</span>
+        } @else if (exportState.exportStatus() === "FAILED") {
+          <span
+            ><i class="fas fa-exclamation-triangle me-2"></i>Export failed.
+            Please try again.</span
+          >
+        } @else if (exportState.exportStatus() === "TIMEOUT") {
+          <span
+            ><i class="fas fa-clock me-2"></i>Export is taking longer than
+            expected. Please check back later.</span
+          >
+        }
+        @if (
+          exportState.exportJobId() &&
+          (exportState.exportStatus() === "FAILED" ||
+            exportState.exportStatus() === "TIMEOUT")
+        ) {
+          <button
+            class="btn btn-sm btn-outline-primary ms-auto"
+            (click)="downloadExport(exportState.exportJobId()!)"
+          >
+            <i class="fas fa-download"></i> Try Download
+          </button>
+        }
+      </div>
     </div>
   }
 
@@ -48,154 +111,56 @@
   @if (!loading() || allStocks().length > 0) {
     <!-- Navigation Tabs -->
     <ul class="nav nav-pills mb-4" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          [class.active]="selectedView() === 'dashboard'"
-          (click)="setView('dashboard')"
-        >
-          <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link position-relative"
-          [class.active]="selectedView() === 'all'"
-          (click)="setView('all')"
-        >
-          <i class="fas fa-list me-1"></i>All Stocks
-          <span class="badge bg-secondary ms-1">{{
-            metrics().totalStocks
-          }}</span>
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link position-relative"
-          [class.active]="selectedView() === 'low'"
-          (click)="setView('low')"
-        >
-          <i class="fas fa-exclamation-circle me-1 text-warning"></i>Low Stock
-          @if (metrics().lowStockCount > 0) {
-            <span class="badge bg-warning ms-1">{{
-              metrics().lowStockCount
-            }}</span>
-          }
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link position-relative"
-          [class.active]="selectedView() === 'zero'"
-          (click)="setView('zero')"
-        >
-          <i class="fas fa-exclamation-triangle me-1 text-danger"></i>Out of
-          Stock
-          @if (metrics().zeroStockCount > 0) {
-            <span class="badge bg-danger ms-1">{{
-              metrics().zeroStockCount
-            }}</span>
-          }
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link position-relative"
-          [class.active]="selectedView() === 'over'"
-          (click)="setView('over')"
-        >
-          <i class="fas fa-info-circle me-1 text-info"></i>Overstock
-          @if (metrics().overStockCount > 0) {
-            <span class="badge bg-info ms-1">{{
-              metrics().overStockCount
-            }}</span>
-          }
-        </button>
-      </li>
+      @for (tab of tabs; track tab.key) {
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            [class.active]="selectedView() === tab.key"
+            [class.position-relative]="tab.badgeKey"
+            (click)="setView(tab.key)"
+          >
+            <i [class]="tab.icon + ' me-1'"></i>{{ tab.label }}
+            @if (tab.badgeKey && metrics()[tab.badgeKey] > 0) {
+              <span [class]="'badge ms-1 ' + tab.badgeClass">{{
+                metrics()[tab.badgeKey]
+              }}</span>
+            }
+          </button>
+        </li>
+      }
     </ul>
 
     <!-- Dashboard View -->
     @if (selectedView() === "dashboard") {
       <!-- Key Metrics Cards -->
       <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-              <div
-                class="d-flex align-items-center justify-content-center mb-2"
-              >
-                <i class="fas fa-boxes fa-2x text-primary me-2"></i>
-                <h2 class="mb-0 text-primary">{{ metrics().totalStocks }}</h2>
+        @for (card of metricCards(); track card.title) {
+          <div class="col-md-3 mb-3">
+            <div class="card border-0 h-100">
+              <div class="card-body text-center">
+                <div
+                  class="d-flex align-items-center justify-content-center mb-2"
+                >
+                  @if (card.icon) {
+                    <i [class]="card.icon + ' ' + card.iconClass + ' me-2'"></i>
+                  }
+                  <h5 [class]="'mb-0 ' + card.iconClass">{{ card.value }}</h5>
+                </div>
+                <h6 class="card-title text-muted">{{ card.title }}</h6>
+                <small [class]="card.subtitleClass">
+                  <i [class]="card.subtitleIcon + ' me-1'"></i
+                  >{{ card.subtitle }}
+                </small>
               </div>
-              <h6 class="card-title text-muted">Total Stock Items</h6>
-              <small class="text-success">
-                <i class="fas fa-chart-line me-1"></i>Active inventory
-              </small>
             </div>
           </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-              <div
-                class="d-flex align-items-center justify-content-center mb-2"
-              >
-                <h2 class="mb-0 text-success">
-                  {{ formatCurrency(metrics().totalValue) }}
-                </h2>
-              </div>
-              <h6 class="card-title text-muted">Total Inventory Value</h6>
-              <small class="text-info">
-                <i class="fas fa-calculator me-1"></i>Estimated value
-              </small>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-              <div
-                class="d-flex align-items-center justify-content-center mb-2"
-              >
-                <i
-                  class="fas fa-exclamation-triangle fa-2x text-warning me-2"
-                ></i>
-                <h2 class="mb-0 text-warning">
-                  {{ metrics().criticalAlerts }}
-                </h2>
-              </div>
-              <h6 class="card-title text-muted">Critical Alerts</h6>
-              <small class="text-warning">
-                <i class="fas fa-bell me-1"></i>Requires attention
-              </small>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-              <div
-                class="d-flex align-items-center justify-content-center mb-2"
-              >
-                <i class="fas fa-warehouse fa-2x text-info me-2"></i>
-                <h2 class="mb-0 text-info">{{ warehouses().length }}</h2>
-              </div>
-              <h6 class="card-title text-muted">Active Warehouses</h6>
-              <small class="text-info">
-                <i class="fas fa-map-marker-alt me-1"></i>Locations
-              </small>
-            </div>
-          </div>
-        </div>
+        }
       </div>
 
       <!-- Business Alerts -->
       @if (alerts().length > 0) {
-        <div class="card mb-4 border-0 shadow-sm">
-          <div class="card-header bg-light">
+        <div class="card mb-4 border-0">
+          <div class="card-header">
             <h5 class="mb-0">
               <i class="fas fa-bell me-2 text-warning"></i>Business Alerts &
               Recommendations
@@ -203,22 +168,13 @@
           </div>
           <div class="card-body">
             @for (alert of alerts(); track alert.type) {
-              <div
-                class="alert mb-3"
-                [class.alert-danger]="alert.type === 'critical'"
-                [class.alert-warning]="alert.type === 'warning'"
-                [class.alert-info]="alert.type === 'info'"
-              >
+              <div [class]="'alert mb-3 alert-' + alert.type">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <strong>
-                      @if (alert.type === "critical") {
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                      } @else if (alert.type === "warning") {
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                      } @else {
-                        <i class="fas fa-info-circle me-2"></i>
-                      }
+                      <i
+                        [class]="getAlertConfig(alert.type).icon + ' me-2'"
+                      ></i>
                       {{ alert.count }} {{ alert.message }}
                     </strong>
                     <div class="mt-1">
@@ -229,28 +185,14 @@
                     </div>
                   </div>
                   <div>
-                    @if (alert.type === "critical") {
-                      <button
-                        class="btn btn-danger btn-sm"
-                        (click)="setView('zero')"
-                      >
-                        View Details
-                      </button>
-                    } @else if (alert.type === "warning") {
-                      <button
-                        class="btn btn-warning btn-sm"
-                        (click)="setView('low')"
-                      >
-                        View Details
-                      </button>
-                    } @else {
-                      <button
-                        class="btn btn-info btn-sm"
-                        (click)="setView('over')"
-                      >
-                        View Details
-                      </button>
-                    }
+                    <button
+                      [class]="
+                        'btn btn-sm ' + getAlertConfig(alert.type).buttonClass
+                      "
+                      (click)="setView(getAlertConfig(alert.type).targetView)"
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               </div>
@@ -261,89 +203,60 @@
 
       <!-- Quick Stats -->
       <div class="row">
-        <div class="col-md-4 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body">
-              <h6 class="card-title text-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>Out of Stock
-                Items
-              </h6>
-              <h3 class="text-danger">{{ metrics().zeroStockCount }}</h3>
-              <p class="text-muted mb-0">Items requiring immediate reorder</p>
-              @if (metrics().zeroStockCount > 0) {
-                <button
-                  class="btn btn-outline-danger btn-sm mt-2"
-                  (click)="setView('zero')"
-                >
-                  View Critical Items
-                </button>
-              }
+        @for (stat of quickStats(); track stat.title) {
+          <div class="col-md-4">
+            <div class="card border-0 text-center">
+              <div class="card-body">
+                <h6 [class]="'card-title text-' + stat.colorClass">
+                  <i [class]="stat.icon + ' me-2'"></i>{{ stat.title }}
+                </h6>
+                <h3 [class]="'text-' + stat.colorClass">{{ stat.count }}</h3>
+                <p class="text-muted mb-0">{{ stat.description }}</p>
+                @if (stat.count > 0) {
+                  <button
+                    [class]="
+                      'btn btn-outline-' + stat.colorClass + ' btn-sm mt-2'
+                    "
+                    (click)="setView(stat.view)"
+                  >
+                    {{ stat.buttonText }}
+                  </button>
+                }
+              </div>
             </div>
           </div>
-        </div>
-
-        <div class="col-md-4 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body">
-              <h6 class="card-title text-warning">
-                <i class="fas fa-exclamation-circle me-2"></i>Low Stock Items
-              </h6>
-              <h3 class="text-warning">{{ metrics().lowStockCount }}</h3>
-              <p class="text-muted mb-0">Items below minimum threshold</p>
-              @if (metrics().lowStockCount > 0) {
-                <button
-                  class="btn btn-outline-warning btn-sm mt-2"
-                  (click)="setView('low')"
-                >
-                  Plan Reorders
-                </button>
-              }
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body">
-              <h6 class="card-title text-info">
-                <i class="fas fa-info-circle me-2"></i>Overstock Items
-              </h6>
-              <h3 class="text-info">{{ metrics().overStockCount }}</h3>
-              <p class="text-muted mb-0">Items above maximum threshold</p>
-              @if (metrics().overStockCount > 0) {
-                <button
-                  class="btn btn-outline-info btn-sm mt-2"
-                  (click)="setView('over')"
-                >
-                  Consider Promotions
-                </button>
-              }
-            </div>
-          </div>
-        </div>
+        }
       </div>
     }
 
     <!-- Stock List Views -->
     @if (selectedView() !== "dashboard") {
       <!-- Filters and Search -->
-      <div class="card mb-4 border-0 shadow-sm">
-        <div class="card-body">
-          <div class="row">
+      <div class="card mb-4">
+        <div class="card-body p-0">
+          <div class="row g-3">
             <div class="col-md-6">
               <label for="search" class="form-label">Search Products</label>
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="fas fa-search"></i>
-                </span>
+              <div class="position-relative">
                 <input
                   type="text"
-                  class="form-control"
+                  class="form-control pe-4"
                   id="search"
                   placeholder="Search by product name, code, or warehouse..."
                   [value]="searchTerm()"
                   (input)="searchTerm.set($any($event.target).value)"
                 />
+                <!-- clear button, shown only when there's a value -->
+                <button
+                  id="searchClearButton"
+                  *ngIf="searchTerm()"
+                  type="button"
+                  class="btn btn-sm btn-link p-0 position-absolute top-50 end-0 translate-middle-y me-2"
+                  (click)="searchTerm.set('')"
+                  aria-label="Clear search"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
               </div>
             </div>
             <div class="col-md-6">
@@ -369,19 +282,13 @@
       </div>
 
       <!-- Stock Table -->
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-light">
+      <div class="card border-0">
+        <div class="card-header">
           <h5 class="mb-0">
-            @if (selectedView() === "all") {
-              <i class="fas fa-list me-2"></i>All Stock Items
-            } @else if (selectedView() === "low") {
-              <i class="fas fa-exclamation-circle me-2 text-warning"></i>Low
-              Stock Items
-            } @else if (selectedView() === "zero") {
-              <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Out of
-              Stock Items
-            } @else if (selectedView() === "over") {
-              <i class="fas fa-info-circle me-2 text-info"></i>Overstock Items
+            @for (tab of tabs; track tab.key) {
+              @if (tab.key === selectedView()) {
+                <i [class]="tab.icon + ' me-2'"></i>{{ tab.label }}
+              }
             }
             <span class="badge bg-secondary ms-2">{{
               filteredStocks().length
@@ -455,26 +362,7 @@
 
                       <!-- Current Stock -->
                       <td>
-                        <span
-                          class="badge fs-6"
-                          [class.bg-danger]="stock.quantity === 0"
-                          [class.bg-warning]="
-                            stock.minStockLevel &&
-                            stock.quantity <= stock.minStockLevel &&
-                            stock.quantity > 0
-                          "
-                          [class.bg-info]="
-                            stock.maxStockLevel &&
-                            stock.quantity >= stock.maxStockLevel
-                          "
-                          [class.bg-success]="
-                            stock.quantity > 0 &&
-                            (!stock.minStockLevel ||
-                              stock.quantity > stock.minStockLevel) &&
-                            (!stock.maxStockLevel ||
-                              stock.quantity < stock.maxStockLevel)
-                          "
-                        >
+                        <span [class]="'badge ' + getStockBadgeClass(stock)">
                           {{ stock.quantity }}
                         </span>
                       </td>
@@ -482,16 +370,17 @@
                       <!-- Stock Levels -->
                       <td>
                         <small class="text-muted">
-                          @if (stock.minStockLevel) {
-                            Min: {{ stock.minStockLevel }}
-                          }
-                          @if (stock.minStockLevel && stock.maxStockLevel) {
-                            <br />
-                          }
-                          @if (stock.maxStockLevel) {
-                            Max: {{ stock.maxStockLevel }}
-                          }
-                          @if (!stock.minStockLevel && !stock.maxStockLevel) {
+                          @if (stock.minStockLevel || stock.maxStockLevel) {
+                            @if (stock.minStockLevel) {
+                              Min: {{ stock.minStockLevel }}
+                            }
+                            @if (stock.minStockLevel && stock.maxStockLevel) {
+                              <br />
+                            }
+                            @if (stock.maxStockLevel) {
+                              Max: {{ stock.maxStockLevel }}
+                            }
+                          } @else {
                             Not set
                           }
                         </small>
@@ -509,18 +398,18 @@
                         <div class="btn-group btn-group-sm" role="group">
                           <button
                             type="button"
-                            class="btn btn-outline-success"
-                            (click)="addStock(stock.uuid, 10)"
-                            title="Add 10 units"
+                            class="btn"
+                            (click)="addStock(stock.uuid, 1)"
+                            title="Add 1 unit"
                           >
                             <i class="fas fa-plus"></i>
                           </button>
                           <button
                             type="button"
-                            class="btn btn-outline-danger"
-                            (click)="removeStock(stock.uuid, 5)"
-                            [disabled]="stock.quantity < 5"
-                            title="Remove 5 units"
+                            class="btn"
+                            (click)="removeStock(stock.uuid, 1)"
+                            [disabled]="stock.quantity == 0"
+                            title="Remove 1 unit"
                           >
                             <i class="fas fa-minus"></i>
                           </button>

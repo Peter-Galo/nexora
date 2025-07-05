@@ -10,9 +10,9 @@
       <button
         class="btn btn-info"
         (click)="exportWarehouses()"
-        [disabled]="exportLoading()"
+        [disabled]="exportState.exportLoading()"
       >
-        @if (exportLoading()) {
+        @if (exportState.exportLoading()) {
           <span class="spinner-border spinner-border-sm me-2" role="status">
             <span class="visually-hidden">Exporting...</span>
           </span>
@@ -41,46 +41,46 @@
   }
 
   <!-- Export Status Alert -->
-  @if (exportStatus() && exportStatus() !== "COMPLETED") {
+  @if (exportState.exportStatus() && exportState.exportStatus() !== "COMPLETED") {
     <div
       class="alert"
       [class]="
-        exportStatus() === 'FAILED' || exportStatus() === 'TIMEOUT'
+        exportState.exportStatus() === 'FAILED' || exportState.exportStatus() === 'TIMEOUT'
           ? 'alert-danger'
           : 'alert-info'
       "
       role="alert"
     >
       <div class="d-flex align-items-center">
-        @if (exportStatus() === "PENDING" || exportStatus() === "PROCESSING") {
+        @if (exportState.exportStatus() === "PENDING" || exportState.exportStatus() === "PROCESSING") {
           <div class="spinner-border spinner-border-sm me-2" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         }
-        @if (exportStatus() === "PENDING") {
+        @if (exportState.exportStatus() === "PENDING") {
           <span>Export request submitted. Preparing warehouse data...</span>
-        } @else if (exportStatus() === "PROCESSING") {
+        } @else if (exportState.exportStatus() === "PROCESSING") {
           <span
             >Processing warehouse export. This may take a few moments...</span
           >
-        } @else if (exportStatus() === "FAILED") {
+        } @else if (exportState.exportStatus() === "FAILED") {
           <span
             ><i class="fas fa-exclamation-triangle me-2"></i>Export failed.
             Please try again.</span
           >
-        } @else if (exportStatus() === "TIMEOUT") {
+        } @else if (exportState.exportStatus() === "TIMEOUT") {
           <span
             ><i class="fas fa-clock me-2"></i>Export is taking longer than
             expected. Please check back later.</span
           >
         }
         @if (
-          exportJobId() &&
-          (exportStatus() === "FAILED" || exportStatus() === "TIMEOUT")
+          exportState.exportJobId() &&
+          (exportState.exportStatus() === "FAILED" || exportState.exportStatus() === "TIMEOUT")
         ) {
           <button
             class="btn btn-sm btn-outline-primary ms-auto"
-            (click)="downloadExport(exportJobId()!)"
+            (click)="downloadExport(exportState.exportJobId()!)"
           >
             <i class="fas fa-download"></i> Try Download
           </button>

@@ -1,6 +1,6 @@
 package com.nexora.controller.inventory;
 
-import com.nexora.service.inventory.impl.InventoryAggregateReportService;
+import com.nexora.service.inventory.impl.InventoryAggregateReportServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,9 +22,9 @@ import java.util.Map;
 )
 public class InventoryAggregateReportController {
 
-    private final InventoryAggregateReportService reportService;
+    private final InventoryAggregateReportServiceImpl reportService;
 
-    public InventoryAggregateReportController(InventoryAggregateReportService reportService) {
+    public InventoryAggregateReportController(InventoryAggregateReportServiceImpl reportService) {
         this.reportService = reportService;
     }
 
@@ -41,30 +41,30 @@ public class InventoryAggregateReportController {
                             mediaType = "application/json",
                             schema = @Schema(
                                     example = """
-                    {
-                      "lowStockByWarehouse": {
-                        "Warehouse A": [
-                          {
-                            "productCode": "P001",
-                            "productName": "Product 1",
-                            "quantity": 3,
-                            "minStockLevel": 5
-                          }
-                        ]
-                      },
-                      "inventoryValueByWarehouse": {
-                        "Warehouse A": 1500.00
-                      },
-                      "totalInventoryValue": 3500.00,
-                      "productStockSummary": [
-                        {
-                          "productCode": "P001",
-                          "productName": "Product 1",
-                          "totalQuantity": 10
-                        }
-                      ]
-                    }
-                    """
+                                            {
+                                              "lowStockByWarehouse": {
+                                                "Warehouse A": [
+                                                  {
+                                                    "productCode": "P001",
+                                                    "productName": "Product 1",
+                                                    "quantity": 3,
+                                                    "minStockLevel": 5
+                                                  }
+                                                ]
+                                              },
+                                              "inventoryValueByWarehouse": {
+                                                "Warehouse A": 1500.00
+                                              },
+                                              "totalInventoryValue": 3500.00,
+                                              "productStockSummary": [
+                                                {
+                                                  "productCode": "P001",
+                                                  "productName": "Product 1",
+                                                  "totalQuantity": 10
+                                                }
+                                              ]
+                                            }
+                                            """
                             )
                     )
             ),

@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AggregateReportData } from '../models/inventory.models';
+import { AggregateReportData } from '../../components/inventory/models/inventory.models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class InventoryService {
   private static readonly API_URL = 'http://localhost:8080/api/v1/inventory';
@@ -17,12 +17,13 @@ export class InventoryService {
    * @returns Observable with the aggregate report data
    */
   getAggregateReport(): Observable<AggregateReportData> {
-    return this.http.get<AggregateReportData>(`${InventoryService.API_URL}/report/aggregate`)
+    return this.http
+      .get<AggregateReportData>(`${InventoryService.API_URL}/report/aggregate`)
       .pipe(
-        catchError(error => {
+        catchError((error) => {
           console.error('Error fetching aggregate report:', error);
           throw error;
-        })
+        }),
       );
   }
 }

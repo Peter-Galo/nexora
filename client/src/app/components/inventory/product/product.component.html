@@ -1,1 +1,465 @@
-<h3 class="mb-0 text-dark">Products</h3>
+<div class="container-fluid p-0">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 text-dark">Product Report & Analytics</h3>
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="toggleAnalytics()"
+        [class.active]="showAnalytics"
+      >
+        <i class="fas fa-chart-bar me-1"></i>Analytics
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="toggleViewMode()"
+      >
+        <i
+          class="fas"
+          [class.fa-table]="viewMode === 'cards'"
+          [class.fa-th-large]="viewMode === 'table'"
+        ></i>
+        {{ viewMode === "table" ? "Cards" : "Table" }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-success"
+        (click)="exportProducts()"
+        [disabled]="exportState.exportLoading()"
+      >
+        @if (exportState.exportLoading()) {
+          <span class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Exporting...</span>
+          </span>
+          Exporting...
+        } @else {
+          <i class="fas fa-download me-1"></i>Export to Excel
+        }
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-info"
+        (click)="refreshData()"
+        [disabled]="loading()"
+      >
+        <i class="fas fa-sync-alt me-1" [class.fa-spin]="loading()"></i>Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading product data...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="alert alert-danger" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {{ error() }}
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-danger ms-2"
+        (click)="refreshData()"
+      >
+        Try Again
+      </button>
+    </div>
+  }
+
+  <!-- Export Status Alert -->
+  <app-export-status-alert
+    [exportStatus]="exportState.exportStatus()"
+    [exportJobId]="exportState.exportJobId()"
+    [entityType]="'product'"
+    [onDownloadExport]="downloadExport.bind(this)"
+  ></app-export-status-alert>
+
+  <!-- Main Content -->
+  @if (!loading() && !error()) {
+    <!-- Analytics Section -->
+    @if (showAnalytics && analytics) {
+      <div class="row mb-4">
+        <!-- Key Metrics -->
+        <div class="col-12 mb-4">
+          <div class="card">
+            <div class="card-header px-0">
+              <h5 class="mb-0">
+                <i class="fas fa-chart-line me-2"></i>Key Metrics
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="row g-3">
+                <div class="col-md-2">
+                  <div class="card bg-danger text-white h-100">
+                    <div class="card-body text-center">
+                      <h6>Total Products</h6>
+                      <h5>
+                        {{ analytics.totalProducts }}
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="card bg-success text-white h-100">
+                    <div class="card-body text-center">
+                      <h6>Active Products</h6>
+                      <h5>{{ analytics.activeProducts }}</h5>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="card bg-secondary text-white h-100">
+                    <div class="card-body text-center">
+                      <h6>Inactive Products</h6>
+                      <h5>{{ analytics.inactiveProducts }}</h5>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="card bg-info text-white h-100">
+                    <div class="card-body text-center">
+                      <h6>Total Value</h6>
+                      <h5>{{ analytics.totalValue | currency }}</h5>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="card bg-warning text-dark h-100">
+                    <div class="card-body text-center">
+                      <h6>Avg. Price</h6>
+                      <h5>{{ analytics.averagePrice | currency }}</h5>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="card bg-dark text-white h-100">
+                    <div class="card-body text-center">
+                      <h6>Categories</h6>
+                      <h5>{{ analytics.categoriesCount }}</h5>
+                      <!--                      <small>{{ analytics.brandsCount }} Brands</small>-->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Range Analysis -->
+        <div class="col-md-6 m-0">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-dollar-sign me-2"></i>Price Range Distribution
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-2">
+                <div class="col-6">
+                  <div class="card text-center">
+                    <small class="text-muted">Under $100</small>
+                    <div class="h5 text-success">
+                      {{ analytics.priceRanges.under100 }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card text-center">
+                    <small class="text-muted">$100 - $500</small>
+                    <div class="h5 text-info">
+                      {{ analytics.priceRanges.between100And500 }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card text-center">
+                    <small class="text-muted">$500 - $1000</small>
+                    <div class="h5 text-warning">
+                      {{ analytics.priceRanges.between500And1000 }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card text-center">
+                    <small class="text-muted">Over $1000</small>
+                    <div class="h5 text-danger">
+                      {{ analytics.priceRanges.over1000 }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="col-md-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-tags me-2"></i>Top Categories
+              </h5>
+            </div>
+            <div class="card-body">
+              @for (
+                item of categoryBreakdownEntries.slice(0, 5);
+                track item.key
+              ) {
+                <div
+                  class="d-flex justify-content-between align-items-center mb-2"
+                >
+                  <span class="fw-medium">{{ item.key }}</span>
+                  <span class="badge bg-primary">{{ item.value }}</span>
+                </div>
+              }
+              @if (categoryBreakdownEntries.length === 0) {
+                <p class="text-muted text-center">No category data available</p>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Filters Section -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filters & Search</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <!-- Search -->
+          <div class="col-md-4">
+            <label for="searchTerm" class="form-label">Search Products</label>
+            <div class="position-relative">
+              <input
+                type="text"
+                id="searchTerm"
+                class="form-control pe-4"
+                placeholder="Search by name, code, description, or SKU..."
+                [(ngModel)]="searchTerm"
+                (input)="onSearchChange()"
+              />
+              <!-- clear button, shown only when there's a value -->
+              <button
+                id="searchClearButton"
+                *ngIf="searchTerm"
+                type="button"
+                class="btn btn-sm btn-link p-0 position-absolute top-50 end-0 translate-middle-y me-2"
+                (click)="clearSearch()"
+                aria-label="Clear search"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="col-md-2">
+            <label for="categoryFilter" class="form-label">Category</label>
+            <select
+              id="categoryFilter"
+              class="form-select"
+              [(ngModel)]="selectedCategory"
+              (change)="onFilterChange()"
+            >
+              <option value="">All Categories</option>
+              @for (category of categories; track category) {
+                <option [value]="category">{{ category }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Brand Filter -->
+          <div class="col-md-2">
+            <label for="brandFilter" class="form-label">Brand</label>
+            <select
+              id="brandFilter"
+              class="form-select"
+              [(ngModel)]="selectedBrand"
+              (change)="onFilterChange()"
+            >
+              <option value="">All Brands</option>
+              @for (brand of brands; track brand) {
+                <option [value]="brand">{{ brand }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="col-md-2">
+            <label for="statusFilter" class="form-label">Status</label>
+            <select
+              id="statusFilter"
+              class="form-select"
+              [(ngModel)]="selectedStatus"
+              (change)="onFilterChange()"
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          <!-- Price Range -->
+          <div class="col-md-2">
+            <label class="form-label">Price Range</label>
+            <div class="input-group input-group-sm">
+              <input
+                type="number"
+                class="form-control"
+                placeholder="Min"
+                [(ngModel)]="priceRangeMin"
+                (input)="onFilterChange()"
+              />
+              <input
+                type="number"
+                class="form-control"
+                placeholder="Max"
+                [(ngModel)]="priceRangeMax"
+                (input)="onFilterChange()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Actions -->
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="showActiveOnly"
+                  [(ngModel)]="showActiveOnly"
+                  (change)="onFilterChange()"
+                />
+                <label class="form-check-label" for="showActiveOnly">
+                  Show active products only
+                </label>
+              </div>
+              <div>
+                <span class="text-muted me-3">
+                  Showing {{ filteredProducts.length }} of
+                  {{ allProducts.length }} products
+                </span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  (click)="clearFilters()"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Data Section -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-box me-2"></i>Products
+          <span class="badge bg-primary ms-2">{{
+            filteredProducts.length
+          }}</span>
+        </h5>
+      </div>
+      <div class="card-body">
+        @if (filteredProducts.length === 0) {
+          <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No products found</h5>
+            <p class="text-muted">
+              Try adjusting your filters or search criteria
+            </p>
+          </div>
+        } @else {
+          <!-- Table View -->
+          @if (viewMode === "table") {
+            <app-data-table
+              [data]="filteredProducts"
+              [columns]="productColumns"
+              [trackBy]="'uuid'"
+              title="Products"
+              emptyMessage="No products available"
+            >
+              <ng-template #customCell let-product let-field="field">
+                @if (field === "active") {
+                  <span [class]="getStatusClass(product.active)">
+                    {{ getStatusText(product.active) }}
+                  </span>
+                } @else if (field === "createdAt") {
+                  <span class="text-muted">{{
+                    formatDate(product.createdAt)
+                  }}</span>
+                }
+              </ng-template>
+            </app-data-table>
+          }
+
+          <!-- Cards View -->
+          @if (viewMode === "cards") {
+            <div class="row g-3">
+              @for (product of filteredProducts; track product.uuid) {
+                <div class="col-md-6 col-lg-4">
+                  <div class="card h-100 border-0">
+                    <div class="card-body">
+                      <div
+                        class="d-flex justify-content-between align-items-start mb-2"
+                      >
+                        <h6 class="card-title mb-0">{{ product.name }}</h6>
+                        <span [class]="getStatusClass(product.active)">
+                          {{ getStatusText(product.active) }}
+                        </span>
+                      </div>
+                      <p class="text-muted small mb-2">
+                        {{ product.code }} • {{ product.sku }}
+                      </p>
+                      <p class="card-text small text-muted">
+                        {{ product.description }}
+                      </p>
+                      <div class="row g-2 small">
+                        <div class="col-6">
+                          <strong>Category:</strong><br />
+                          <span class="text-muted">{{ product.category }}</span>
+                        </div>
+                        <div class="col-6">
+                          <strong>Brand:</strong><br />
+                          <span class="text-muted">{{ product.brand }}</span>
+                        </div>
+                        <div class="col-6">
+                          <strong>Price:</strong><br />
+                          <span class="text-success fw-bold">{{
+                            product.price | currency
+                          }}</span>
+                        </div>
+                        <div class="col-6">
+                          <strong>Created:</strong><br />
+                          <span class="text-muted">{{
+                            formatDate(product.createdAt)
+                          }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
