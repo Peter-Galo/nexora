@@ -1,5 +1,39 @@
 // Interfaces for inventory data structures
 
+// Product interface
+export interface Product {
+  uuid: string;
+  code: string;
+  name: string;
+  description: string;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+  active: boolean;
+  category: string;
+  brand: string;
+  sku: string;
+}
+
+// Product analytics interface
+export interface ProductAnalytics {
+  totalProducts: number;
+  activeProducts: number;
+  inactiveProducts: number;
+  totalValue: number;
+  averagePrice: number;
+  categoriesCount: number;
+  brandsCount: number;
+  categoryBreakdown: Record<string, number>;
+  brandBreakdown: Record<string, number>;
+  priceRanges: {
+    under100: number;
+    between100And500: number;
+    between500And1000: number;
+    over1000: number;
+  };
+}
+
 // Warehouse overview item
 export interface WarehouseOverview {
   uuid: string;

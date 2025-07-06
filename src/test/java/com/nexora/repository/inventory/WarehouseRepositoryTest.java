@@ -8,10 +8,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -107,7 +105,7 @@ class WarehouseRepositoryTest {
     @Test
     void findByActiveTrue_shouldReturnOnlyActiveWarehouses() {
         // Act
-        List<Warehouse> activeWarehouses = warehouseRepository.findByActiveTrue();
+        List<Warehouse> activeWarehouses = warehouseRepository.findByActiveTrueOrderByName();
 
         // Assert
         assertEquals(2, activeWarehouses.size());
@@ -172,12 +170,12 @@ class WarehouseRepositoryTest {
     }
 
     @Test
-    void findByNameContainingIgnoreCase_shouldReturnWarehousesWithNameContainingText() {
+    void findByNameContainingIgnoreCase_shouldReturnWarehousesWithNameContainingTextOrderByName() {
         // Act
-        List<Warehouse> mainWarehouses = warehouseRepository.findByNameContainingIgnoreCase("main");
-        List<Warehouse> warehouseWarehouses = warehouseRepository.findByNameContainingIgnoreCase("warehouse");
-        List<Warehouse> westWarehouses = warehouseRepository.findByNameContainingIgnoreCase("west");
-        List<Warehouse> nonExistentNameWarehouses = warehouseRepository.findByNameContainingIgnoreCase("nonexistent");
+        List<Warehouse> mainWarehouses = warehouseRepository.findByNameContainingIgnoreCaseOrderByName("main");
+        List<Warehouse> warehouseWarehouses = warehouseRepository.findByNameContainingIgnoreCaseOrderByName("warehouse");
+        List<Warehouse> westWarehouses = warehouseRepository.findByNameContainingIgnoreCaseOrderByName("west");
+        List<Warehouse> nonExistentNameWarehouses = warehouseRepository.findByNameContainingIgnoreCaseOrderByName("nonexistent");
 
         // Assert
         assertEquals(1, mainWarehouses.size());

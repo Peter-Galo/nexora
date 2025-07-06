@@ -8,6 +8,16 @@ export const WAREHOUSE_COLUMNS: TableColumn[] = [
   { header: 'Total Stock Value', field: 'totalStockValue', isCurrency: true },
 ];
 
+export const WAREHOUSE_MANAGEMENT_COLUMNS: TableColumn[] = [
+  { header: 'Code', field: 'code' },
+  { header: 'Name', field: 'name' },
+  { header: 'City', field: 'city' },
+  { header: 'State/Province', field: 'stateProvince' },
+  { header: 'Country', field: 'country' },
+  { header: 'Status', field: 'active', customTemplate: true },
+  { header: 'Actions', field: 'actions', customTemplate: true },
+];
+
 export const INVENTORY_VALUE_COLUMNS: TableColumn[] = [
   { header: 'Warehouse', field: '0' },
   { header: 'Value', field: '1', isCurrency: true },
@@ -35,3 +45,23 @@ export const STOCK_COLUMNS = {
     { header: 'Max Stock', field: 'maxStockLevel' },
   ],
 };
+
+export const PRODUCT_COLUMNS: TableColumn[] = [
+  { header: 'Code', field: 'code' },
+  { header: 'Name', field: 'name' },
+  { header: 'Category', field: 'category' },
+  { header: 'Brand', field: 'brand' },
+  { header: 'Price', field: 'price', isCurrency: true },
+  { header: 'SKU', field: 'sku' },
+  { header: 'Status', field: 'active', customTemplate: true },
+  { header: 'Created', field: 'createdAt', customTemplate: true },
+];
+
+export const PRODUCT_SUMMARY_SIMPLE_COLUMNS: TableColumn[] = [
+  { header: 'Code', field: 'code' },
+  { header: 'Name', field: 'name' },
+  { header: 'Category', field: 'category' },
+  { header: 'Brand', field: 'brand' },
+  { header: 'Price', field: 'price', isCurrency: true },
+  { header: 'Status', field: 'active', customTemplate: true },
+];

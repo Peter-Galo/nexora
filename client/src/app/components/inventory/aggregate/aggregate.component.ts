@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { InventoryService } from '../services/inventory.service';
+import { InventoryService } from '../../../services/inventory/inventory.service';
 import { catchError, of } from 'rxjs';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
-import { AggregateDataService } from '../services/aggregate-data.service';
+import { AggregateDataService } from '../../../services/inventory/aggregate-data.service';
 import {
   INVENTORY_VALUE_COLUMNS,
   PRODUCT_SUMMARY_COLUMNS,
@@ -23,7 +23,6 @@ import { DataAccordionComponent } from '../../shared/data-accordion/data-accordi
   ],
   providers: [AggregateDataService],
   templateUrl: './aggregate.component.html',
-  styleUrl: './aggregate.component.css',
 })
 export class AggregateComponent implements OnInit {
   // Expose column definitions

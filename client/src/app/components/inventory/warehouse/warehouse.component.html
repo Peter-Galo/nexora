@@ -1,1 +1,527 @@
-<h3 class="mb-0 text-dark">Warehouse</h3>
+<div class="container-fluid px-0">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 text-dark">Warehouse Management</h3>
+    <div class="d-flex gap-2">
+      @if (canCreateWarehouses()) {
+        <button class="btn btn-success" (click)="showCreateWarehouseForm()">
+          <i class="fas fa-plus"></i> Create New Warehouse
+        </button>
+      }
+      <button
+        class="btn btn-info"
+        (click)="exportWarehouses()"
+        [disabled]="exportState.exportLoading()"
+      >
+        @if (exportState.exportLoading()) {
+          <span class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Exporting...</span>
+          </span>
+          Exporting...
+        } @else {
+          <i class="fas fa-download"></i> Export to Excel
+        }
+      </button>
+
+      <button class="btn btn-primary" (click)="refresh()">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error() }}
+      <button
+        type="button"
+        class="btn-close"
+        (click)="error.set(null)"
+      ></button>
+    </div>
+  }
+
+  <!-- Export Status Alert -->
+  @if (exportState.exportStatus() && exportState.exportStatus() !== "COMPLETED") {
+    <div
+      class="alert"
+      [class]="
+        exportState.exportStatus() === 'FAILED' || exportState.exportStatus() === 'TIMEOUT'
+          ? 'alert-danger'
+          : 'alert-info'
+      "
+      role="alert"
+    >
+      <div class="d-flex align-items-center">
+        @if (exportState.exportStatus() === "PENDING" || exportState.exportStatus() === "PROCESSING") {
+          <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        }
+        @if (exportState.exportStatus() === "PENDING") {
+          <span>Export request submitted. Preparing warehouse data...</span>
+        } @else if (exportState.exportStatus() === "PROCESSING") {
+          <span
+            >Processing warehouse export. This may take a few moments...</span
+          >
+        } @else if (exportState.exportStatus() === "FAILED") {
+          <span
+            ><i class="fas fa-exclamation-triangle me-2"></i>Export failed.
+            Please try again.</span
+          >
+        } @else if (exportState.exportStatus() === "TIMEOUT") {
+          <span
+            ><i class="fas fa-clock me-2"></i>Export is taking longer than
+            expected. Please check back later.</span
+          >
+        }
+        @if (
+          exportState.exportJobId() &&
+          (exportState.exportStatus() === "FAILED" || exportState.exportStatus() === "TIMEOUT")
+        ) {
+          <button
+            class="btn btn-sm btn-outline-primary ms-auto"
+            (click)="downloadExport(exportState.exportJobId()!)"
+          >
+            <i class="fas fa-download"></i> Try Download
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Create Warehouse Form -->
+  @if (showCreateForm()) {
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">New Warehouse</h5>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="createWarehouse()" #createForm="ngForm">
+          <div class="row g-3">
+            <!-- Warehouse Code -->
+            <div class="col-md-6">
+              <label for="warehouseCode" class="form-label"
+                >Warehouse Code *</label
+              >
+              <input
+                id="warehouseCode"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('code')"
+                [class.is-valid]="
+                  fieldTouched()['code'] &&
+                  !hasFieldError('code') &&
+                  createFormData().code?.trim()
+                "
+                placeholder="Enter warehouse code"
+                [value]="createFormData().code"
+                (input)="updateFormField('code', $any($event.target).value)"
+                (blur)="updateFormField('code', createFormData().code)"
+                required
+                maxlength="50"
+              />
+              @if (hasFieldError("code")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("code") }}
+                </div>
+              }
+            </div>
+
+            <!-- Warehouse Name -->
+            <div class="col-md-6">
+              <label for="warehouseName" class="form-label"
+                >Warehouse Name *</label
+              >
+              <input
+                id="warehouseName"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('name')"
+                [class.is-valid]="
+                  fieldTouched()['name'] &&
+                  !hasFieldError('name') &&
+                  createFormData().name?.trim()
+                "
+                placeholder="Enter warehouse name"
+                [value]="createFormData().name"
+                (input)="updateFormField('name', $any($event.target).value)"
+                (blur)="updateFormField('name', createFormData().name)"
+                required
+                maxlength="100"
+              />
+              @if (hasFieldError("name")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("name") }}
+                </div>
+              }
+            </div>
+
+            <!-- Description -->
+            <div class="col-12">
+              <label for="warehouseDescription" class="form-label"
+                >Description</label
+              >
+              <textarea
+                id="warehouseDescription"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('description')"
+                [class.is-valid]="
+                  fieldTouched()['description'] && !hasFieldError('description')
+                "
+                rows="3"
+                placeholder="Enter warehouse description"
+                [value]="createFormData().description"
+                (input)="
+                  updateFormField('description', $any($event.target).value)
+                "
+                (blur)="
+                  updateFormField('description', createFormData().description)
+                "
+                maxlength="500"
+              ></textarea>
+              @if (hasFieldError("description")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("description") }}
+                </div>
+              }
+            </div>
+
+            <!-- Address -->
+            <div class="col-12">
+              <label for="warehouseAddress" class="form-label">Address *</label>
+              <input
+                id="warehouseAddress"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('address')"
+                [class.is-valid]="
+                  fieldTouched()['address'] &&
+                  !hasFieldError('address') &&
+                  createFormData().address?.trim()
+                "
+                placeholder="Enter warehouse address"
+                [value]="createFormData().address"
+                (input)="updateFormField('address', $any($event.target).value)"
+                (blur)="updateFormField('address', createFormData().address)"
+                required
+                maxlength="200"
+              />
+              @if (hasFieldError("address")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("address") }}
+                </div>
+              }
+            </div>
+
+            <!-- City -->
+            <div class="col-md-4">
+              <label for="warehouseCity" class="form-label">City *</label>
+              <input
+                id="warehouseCity"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('city')"
+                [class.is-valid]="
+                  fieldTouched()['city'] &&
+                  !hasFieldError('city') &&
+                  createFormData().city?.trim()
+                "
+                placeholder="Enter city"
+                [value]="createFormData().city"
+                (input)="updateFormField('city', $any($event.target).value)"
+                (blur)="updateFormField('city', createFormData().city)"
+                required
+                maxlength="100"
+              />
+              @if (hasFieldError("city")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("city") }}
+                </div>
+              }
+            </div>
+
+            <!-- State/Province -->
+            <div class="col-md-4">
+              <label for="warehouseState" class="form-label"
+                >State/Province</label
+              >
+              <input
+                id="warehouseState"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('stateProvince')"
+                [class.is-valid]="
+                  fieldTouched()['stateProvince'] &&
+                  !hasFieldError('stateProvince')
+                "
+                placeholder="Enter state or province"
+                [value]="createFormData().stateProvince"
+                (input)="
+                  updateFormField('stateProvince', $any($event.target).value)
+                "
+                (blur)="
+                  updateFormField(
+                    'stateProvince',
+                    createFormData().stateProvince
+                  )
+                "
+                maxlength="100"
+              />
+              @if (hasFieldError("stateProvince")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("stateProvince") }}
+                </div>
+              }
+            </div>
+
+            <!-- Postal Code -->
+            <div class="col-md-4">
+              <label for="warehousePostal" class="form-label"
+                >Postal Code</label
+              >
+              <input
+                id="warehousePostal"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('postalCode')"
+                [class.is-valid]="
+                  fieldTouched()['postalCode'] && !hasFieldError('postalCode')
+                "
+                placeholder="Enter postal code"
+                [value]="createFormData().postalCode"
+                (input)="
+                  updateFormField('postalCode', $any($event.target).value)
+                "
+                (blur)="
+                  updateFormField('postalCode', createFormData().postalCode)
+                "
+                maxlength="20"
+              />
+              @if (hasFieldError("postalCode")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("postalCode") }}
+                </div>
+              }
+            </div>
+
+            <!-- Country -->
+            <div class="col-md-6">
+              <label for="warehouseCountry" class="form-label">Country *</label>
+              <input
+                id="warehouseCountry"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="hasFieldError('country')"
+                [class.is-valid]="
+                  fieldTouched()['country'] &&
+                  !hasFieldError('country') &&
+                  createFormData().country?.trim()
+                "
+                placeholder="Enter country"
+                [value]="createFormData().country"
+                (input)="updateFormField('country', $any($event.target).value)"
+                (blur)="updateFormField('country', createFormData().country)"
+                required
+                maxlength="100"
+              />
+              @if (hasFieldError("country")) {
+                <div class="invalid-feedback">
+                  {{ getFieldError("country") }}
+                </div>
+              }
+            </div>
+
+            <!-- Active Status -->
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="warehouseActive"
+                  [checked]="createFormData().active"
+                  (change)="
+                    updateFormField('active', $any($event.target).checked)
+                  "
+                />
+                <label class="form-check-label" for="warehouseActive">
+                  Active warehouse
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="hideCreateWarehouseForm()"
+              [disabled]="creating()"
+            >
+              <i class="fas fa-times"></i> Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn btn-success"
+              [disabled]="
+                creating() ||
+                Object.keys(formErrors()).length > 0 ||
+                !createFormData().code?.trim() ||
+                !createFormData().name?.trim() ||
+                !createFormData().address?.trim() ||
+                !createFormData().city?.trim() ||
+                !createFormData().country?.trim()
+              "
+            >
+              @if (creating()) {
+                <span
+                  class="spinner-border spinner-border-sm me-2"
+                  role="status"
+                >
+                  <span class="visually-hidden">Creating...</span>
+                </span>
+                Creating...
+              } @else {
+                <i class="fas fa-save"></i> Create Warehouse
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Filters and Search -->
+  <div class="card mb-4">
+    <div class="card-body p-0">
+      <div class="row g-3">
+        <!-- Search -->
+
+        <div class="col-md-6">
+          <label for="searchInput" class="form-label">Search Warehouses</label>
+          <div class="position-relative">
+            <input
+              id="searchInput"
+              type="text"
+              class="form-control pe-4"
+              placeholder="Search by warehouse name"
+              [value]="searchTerm()"
+              (input)="onSearchInput($any($event.target).value)"
+            />
+            <!-- clear button, shown only when there's a value -->
+            <button
+              id="searchClearButton"
+              *ngIf="searchTerm()"
+              type="button"
+              class="btn btn-sm btn-link p-0 position-absolute top-50 end-0 translate-middle-y me-2"
+              (click)="clearSearch()"
+              aria-label="Clear search"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Filter -->
+        <div class="col-md-6">
+          <label class="form-label">Filter Options</label>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="activeOnlyCheck"
+              [checked]="showActiveOnly()"
+              (change)="toggleActiveFilter()"
+            />
+            <label class="form-check-label" for="activeOnlyCheck">
+              Show active warehouses only
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouses Table -->
+  <div class="card">
+    <div class="card-header px-0">
+      <h5 class="mb-0">
+        Warehouses
+        @if (loading()) {
+          <span class="spinner-border spinner-border-sm ms-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </span>
+        }
+      </h5>
+    </div>
+    <div class="card-body px-0">
+      @if (loading() && warehouses().length === 0) {
+        <div class="text-center py-4">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading warehouses...</span>
+          </div>
+          <p class="mt-2 text-muted">Loading warehouses...</p>
+        </div>
+      } @else {
+        <app-data-table
+          [data]="warehouses()"
+          [columns]="warehouseColumns()"
+          [trackBy]="'uuid'"
+          title="Warehouse List"
+          emptyMessage="No warehouses found"
+        >
+          <!-- Custom templates for status and actions -->
+          <ng-template #customCell let-warehouse let-field="field">
+            @if (field === "active") {
+              <span
+                class="badge"
+                [class]="warehouse.active ? 'bg-success' : 'bg-secondary'"
+              >
+                {{ warehouse.active ? "Active" : "Inactive" }}
+              </span>
+            }
+            @if (field === "actions") {
+              <div class="btn-group btn-group-sm" role="group">
+                @if (canModifyWarehouses()) {
+                  @if (warehouse.active) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-warning"
+                      (click)="deactivateWarehouse(warehouse)"
+                      title="Deactivate warehouse"
+                    >
+                      <i class="fas fa-pause"></i> Deactivate
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn btn-outline-success"
+                      (click)="activateWarehouse(warehouse)"
+                      title="Activate warehouse"
+                    >
+                      <i class="fas fa-play"></i> Activate
+                    </button>
+                  }
+                }
+                @if (canDeleteWarehouses()) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    (click)="deleteWarehouse(warehouse)"
+                    title="Delete warehouse"
+                  >
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                }
+                @if (!canModifyWarehouses() && !canDeleteWarehouses()) {
+                  <span class="text-muted small">No actions available</span>
+                }
+              </div>
+            }
+          </ng-template>
+        </app-data-table>
+      }
+    </div>
+  </div>
+</div>

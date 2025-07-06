@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid p-0">
   <h3 class="mb-4 text-dark">Inventory Aggregate Report</h3>
 
   <!-- Main Content -->
@@ -29,10 +29,10 @@
           <h5 class="mb-0">Inventory Value</h5>
         </div>
         <div class="card-body">
-          <h4 class="text-center mb-4">
+          <h6 class="mb-4">
             Total Value:
             {{ dataService.inventoryValue()?.totalInventoryValue | currency }}
-          </h4>
+          </h6>
           <div class="table-responsive">
             <app-data-table
               [data]="dataService.sortedInventoryValueByWarehouse()"
@@ -114,36 +114,36 @@
             accordionId="highStockAccordion"
             accordionPrefix="highStock"
           ></app-data-accordion>
+        </div>
+      </div>
+    </div>
 
-          <!-- Product Summary Section -->
-          <div class="col-12 my-4">
-            <div class="card shadow-md">
-              <div class="card-header">
-                <h5 class="mb-0">Product Summary</h5>
-              </div>
-              <div class="card-body">
-                <app-data-table
-                  [data]="dataService.productSummary()"
-                  [columns]="productSummaryColumns"
-                  [trackBy]="'uuid'"
-                  title="Product Summary"
-                  emptyMessage="No product summary data available"
-                >
-                  <ng-template #customCell let-product let-field="field">
-                    @if (field === "warehousesPresentIn") {
-                      @for (
-                        wh of product.warehousesPresentIn;
-                        track wh.uuid;
-                        let last = $last
-                      ) {
-                        {{ wh.name }}{{ !last ? ", " : "" }}
-                      }
-                    }
-                  </ng-template>
-                </app-data-table>
-              </div>
-            </div>
-          </div>
+    <!-- Product Summary Section -->
+    <div class="col-12">
+      <div class="card shadow-md">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Product Summary</h5>
+        </div>
+        <div class="card-body">
+          <app-data-table
+            [data]="dataService.productSummary()"
+            [columns]="productSummaryColumns"
+            [trackBy]="'uuid'"
+            title="Product Summary"
+            emptyMessage="No product summary data available"
+          >
+            <ng-template #customCell let-product let-field="field">
+              @if (field === "warehousesPresentIn") {
+                @for (
+                  wh of product.warehousesPresentIn;
+                  track wh.uuid;
+                  let last = $last
+                ) {
+                  {{ wh.name }}{{ !last ? ", " : "" }}
+                }
+              }
+            </ng-template>
+          </app-data-table>
         </div>
       </div>
     </div>

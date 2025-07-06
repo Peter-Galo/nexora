@@ -37,11 +37,11 @@ class WarehouseServiceTest {
     @BeforeEach
     void setUp() {
         warehouseService = new WarehouseServiceImpl(warehouseRepository);
-        
+
         // Create test data
         testUuid = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
-        
+
         // Create test warehouse entity
         testWarehouse = new Warehouse("WH001", "Test Warehouse");
         testWarehouse.setUuid(testUuid);
@@ -54,7 +54,7 @@ class WarehouseServiceTest {
         testWarehouse.setCreatedAt(now);
         testWarehouse.setUpdatedAt(now);
         testWarehouse.setActive(true);
-        
+
         // Create test warehouse DTO
         testWarehouseDTO = new WarehouseDTO(
                 testUuid,
@@ -91,7 +91,7 @@ class WarehouseServiceTest {
     @Test
     void getActiveWarehouses_shouldReturnOnlyActiveWarehouses() {
         // Arrange
-        when(warehouseRepository.findByActiveTrue()).thenReturn(Arrays.asList(testWarehouse));
+        when(warehouseRepository.findByActiveTrueOrderByName()).thenReturn(Arrays.asList(testWarehouse));
 
         // Act
         List<WarehouseDTO> result = warehouseService.getActiveWarehouses();
@@ -100,7 +100,7 @@ class WarehouseServiceTest {
         assertEquals(1, result.size());
         assertTrue(result.get(0).isActive());
         assertEquals(testWarehouse.getUuid(), result.get(0).getUuid());
-        verify(warehouseRepository).findByActiveTrue();
+        verify(warehouseRepository).findByActiveTrueOrderByName();
     }
 
     @Test
@@ -178,7 +178,7 @@ class WarehouseServiceTest {
         newWarehouseDTO.setStateProvince("New State");
         newWarehouseDTO.setPostalCode("67890");
         newWarehouseDTO.setCountry("New Country");
-        
+
         Warehouse savedWarehouse = new Warehouse("WH002", "New Warehouse");
         savedWarehouse.setUuid(UUID.randomUUID());
         savedWarehouse.setDescription("New description");
@@ -189,7 +189,7 @@ class WarehouseServiceTest {
         savedWarehouse.setCountry("New Country");
         savedWarehouse.setCreatedAt(LocalDateTime.now());
         savedWarehouse.setUpdatedAt(LocalDateTime.now());
-        
+
         when(warehouseRepository.existsByCode(newWarehouseDTO.getCode())).thenReturn(false);
         when(warehouseRepository.save(any(Warehouse.class))).thenReturn(savedWarehouse);
 
@@ -201,12 +201,12 @@ class WarehouseServiceTest {
         assertEquals(savedWarehouse.getUuid(), result.getUuid());
         assertEquals(newWarehouseDTO.getCode(), result.getCode());
         assertEquals(newWarehouseDTO.getName(), result.getName());
-        
+
         // Verify warehouse was saved with correct data
         ArgumentCaptor<Warehouse> warehouseCaptor = ArgumentCaptor.forClass(Warehouse.class);
         verify(warehouseRepository).save(warehouseCaptor.capture());
         Warehouse capturedWarehouse = warehouseCaptor.getValue();
-        
+
         assertEquals(newWarehouseDTO.getCode(), capturedWarehouse.getCode());
         assertEquals(newWarehouseDTO.getName(), capturedWarehouse.getName());
         assertEquals(newWarehouseDTO.getDescription(), capturedWarehouse.getDescription());
@@ -253,7 +253,7 @@ class WarehouseServiceTest {
                 null,
                 true
         );
-        
+
         Warehouse updatedWarehouse = new Warehouse("WH001", "Updated Warehouse");
         updatedWarehouse.setUuid(testUuid);
         updatedWarehouse.setDescription("Updated description");
@@ -264,7 +264,7 @@ class WarehouseServiceTest {
         updatedWarehouse.setCountry("Updated Country");
         updatedWarehouse.setCreatedAt(testWarehouse.getCreatedAt());
         updatedWarehouse.setUpdatedAt(LocalDateTime.now());
-        
+
         when(warehouseRepository.findById(testUuid)).thenReturn(Optional.of(testWarehouse));
         when(warehouseRepository.save(any(Warehouse.class))).thenReturn(updatedWarehouse);
 
@@ -281,12 +281,12 @@ class WarehouseServiceTest {
         assertEquals(updateDTO.getStateProvince(), result.getStateProvince());
         assertEquals(updateDTO.getPostalCode(), result.getPostalCode());
         assertEquals(updateDTO.getCountry(), result.getCountry());
-        
+
         // Verify warehouse was saved with correct data
         ArgumentCaptor<Warehouse> warehouseCaptor = ArgumentCaptor.forClass(Warehouse.class);
         verify(warehouseRepository).save(warehouseCaptor.capture());
         Warehouse capturedWarehouse = warehouseCaptor.getValue();
-        
+
         assertEquals(updateDTO.getName(), capturedWarehouse.getName());
         assertEquals(updateDTO.getDescription(), capturedWarehouse.getDescription());
         assertEquals(updateDTO.getAddress(), capturedWarehouse.getAddress());
@@ -332,7 +332,7 @@ class WarehouseServiceTest {
                 null,
                 true
         );
-        
+
         when(warehouseRepository.findById(testUuid)).thenReturn(Optional.of(testWarehouse));
         when(warehouseRepository.existsByCode(existingCode)).thenReturn(true);
 
@@ -380,7 +380,7 @@ class WarehouseServiceTest {
     void deactivateWarehouse_withExistingId_shouldDeactivateAndReturnWarehouse() {
         // Arrange
         when(warehouseRepository.findById(testUuid)).thenReturn(Optional.of(testWarehouse));
-        
+
         Warehouse deactivatedWarehouse = new Warehouse(testWarehouse.getCode(), testWarehouse.getName());
         deactivatedWarehouse.setUuid(testUuid);
         deactivatedWarehouse.setDescription(testWarehouse.getDescription());
@@ -392,7 +392,7 @@ class WarehouseServiceTest {
         deactivatedWarehouse.setCreatedAt(testWarehouse.getCreatedAt());
         deactivatedWarehouse.setUpdatedAt(LocalDateTime.now());
         deactivatedWarehouse.setActive(false);
-        
+
         when(warehouseRepository.save(any(Warehouse.class))).thenReturn(deactivatedWarehouse);
 
         // Act
@@ -401,12 +401,12 @@ class WarehouseServiceTest {
         // Assert
         assertNotNull(result);
         assertFalse(result.isActive());
-        
+
         // Verify warehouse was saved with active=false
         ArgumentCaptor<Warehouse> warehouseCaptor = ArgumentCaptor.forClass(Warehouse.class);
         verify(warehouseRepository).save(warehouseCaptor.capture());
         Warehouse capturedWarehouse = warehouseCaptor.getValue();
-        
+
         assertFalse(capturedWarehouse.isActive());
     }
 
@@ -415,7 +415,7 @@ class WarehouseServiceTest {
         // Arrange
         testWarehouse.setActive(false); // Start with inactive warehouse
         when(warehouseRepository.findById(testUuid)).thenReturn(Optional.of(testWarehouse));
-        
+
         Warehouse activatedWarehouse = new Warehouse(testWarehouse.getCode(), testWarehouse.getName());
         activatedWarehouse.setUuid(testUuid);
         activatedWarehouse.setDescription(testWarehouse.getDescription());
@@ -427,7 +427,7 @@ class WarehouseServiceTest {
         activatedWarehouse.setCreatedAt(testWarehouse.getCreatedAt());
         activatedWarehouse.setUpdatedAt(LocalDateTime.now());
         activatedWarehouse.setActive(true);
-        
+
         when(warehouseRepository.save(any(Warehouse.class))).thenReturn(activatedWarehouse);
 
         // Act
@@ -436,12 +436,12 @@ class WarehouseServiceTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.isActive());
-        
+
         // Verify warehouse was saved with active=true
         ArgumentCaptor<Warehouse> warehouseCaptor = ArgumentCaptor.forClass(Warehouse.class);
         verify(warehouseRepository).save(warehouseCaptor.capture());
         Warehouse capturedWarehouse = warehouseCaptor.getValue();
-        
+
         assertTrue(capturedWarehouse.isActive());
     }
 
@@ -497,7 +497,7 @@ class WarehouseServiceTest {
     void searchWarehousesByName_shouldReturnWarehousesWithNameContainingText() {
         // Arrange
         String searchText = "Test";
-        when(warehouseRepository.findByNameContainingIgnoreCase(searchText)).thenReturn(Arrays.asList(testWarehouse));
+        when(warehouseRepository.findByNameContainingIgnoreCaseOrderByName(searchText)).thenReturn(Arrays.asList(testWarehouse));
 
         // Act
         List<WarehouseDTO> result = warehouseService.searchWarehousesByName(searchText);
@@ -506,6 +506,6 @@ class WarehouseServiceTest {
         assertEquals(1, result.size());
         assertEquals(testWarehouse.getUuid(), result.get(0).getUuid());
         assertTrue(result.get(0).getName().contains(searchText));
-        verify(warehouseRepository).findByNameContainingIgnoreCase(searchText);
+        verify(warehouseRepository).findByNameContainingIgnoreCaseOrderByName(searchText);
     }
 }
