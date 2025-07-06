@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface ProductDTO {
   uuid: string;
@@ -54,7 +55,7 @@ export interface StockDTO {
   providedIn: 'root'
 })
 export class StockService {
-  private static readonly API_URL = 'http://localhost:8080/api/v1/inventory/stocks';
+  private static readonly API_URL = `${environment.apiUrl}/inventory/stocks`;
 
   constructor(private readonly http: HttpClient) {}
 
