@@ -19,12 +19,6 @@ ENV_FILE=".do/.env.prod"
 echo -e "${GREEN}🚀 Nexora Deployment Script${NC}"
 echo "=================================="
 
-# Check if running as root or with sudo
-if [[ $EUID -eq 0 ]]; then
-   echo -e "${RED}❌ This script should not be run as root${NC}"
-   exit 1
-fi
-
 # Check if Docker or Podman is installed
 CONTAINER_ENGINE=""
 if command -v podman &> /dev/null; then
