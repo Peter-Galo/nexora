@@ -144,16 +144,16 @@ podman-compose up --build
    # Docker (Option 1)
    # On macOS with Homebrew
    brew install docker docker-compose
-   
+
    # On Ubuntu/Debian
    curl -fsSL https://get.docker.com -o get-docker.sh
    sudo sh get-docker.sh
    sudo usermod -aG docker $USER
-   
+
    # Podman (Option 2)
    # On macOS with Homebrew
    brew install podman podman-compose
-   
+
    # On Ubuntu/Debian
    sudo apt update
    sudo apt install -y podman podman-compose
@@ -161,8 +161,8 @@ podman-compose up --build
 
 2. **Create Environment File**
    ```bash
-   # Copy the existing .env file or create one with required variables
-   cp .env.template .env  # If template exists
+   # Copy the template and fill in your values
+   cp .env.template .env
    ```
 
 ### Development Workflow
@@ -207,6 +207,24 @@ docker-compose up --build nexora-app
    cd client
    npm install
    npm start  # Runs on port 4200
+   ```
+
+   **Angular CLI Commands:**
+   ```bash
+   # Generate new component
+   ng generate component component-name
+
+   # Build for production
+   ng build
+
+   # Run unit tests
+   ng test
+
+   # Run end-to-end tests
+   ng e2e
+
+   # Get help with available schematics
+   ng generate --help
    ```
 
 ### Local Architecture
