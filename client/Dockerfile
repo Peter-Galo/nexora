@@ -1,30 +1,25 @@
-# Multi-stage build for Angular
-FROM node:20-alpine AS build
-
+FROM docker.io/node:18-alpine as build
 WORKDIR /app
+
+# Set npm configuration for better stability
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retries 3
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with optimizations
+RUN npm ci --only=production=false --no-audit --no-fund --prefer-offline --progress=false
 
 # Copy source code
 COPY . .
 
-# Build the Angular app for production
-RUN npm run build
+# Build the application
+RUN npm run build --prod
 
-# Production stage with Nginx
-FROM nginx:alpine
-
-# Copy built Angular app to Nginx
+FROM docker.io/nginx:alpine
 COPY --from=build /app/dist/client/browser /usr/share/nginx/html
-
-# Copy custom Nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]

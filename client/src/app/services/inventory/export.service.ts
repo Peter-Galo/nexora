@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface ExportJob {
   uuid: string;
@@ -24,8 +25,7 @@ export interface ExportResponse {
   providedIn: 'root',
 })
 export class ExportService {
-  private static readonly API_URL =
-    'http://localhost:8080/api/v1/inventory/export';
+  private static readonly API_URL = `${environment.apiUrl}/inventory/export`;
 
   constructor(private readonly http: HttpClient) {}
 

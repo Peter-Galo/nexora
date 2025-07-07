@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface User {
   email: string;
@@ -21,7 +22,7 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private static readonly API_URL = 'http://localhost:8080/api/v1/auth';
+  private static readonly API_URL = `${environment.apiUrl}/auth`;
   private static readonly TOKEN_KEY = 'auth_token';
   private static readonly USER_KEY = 'auth_user';
 

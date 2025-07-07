@@ -20,43 +20,47 @@
 
 ## Overview
 
-Nexora is a comprehensive enterprise-grade inventory management system built with Spring Boot and Angular. It provides a robust platform for managing products, stock levels, and warehouses across multiple locations. The system offers both REST and GraphQL APIs for flexible integration options, with secure JWT-based authentication and role-based access control.
+Nexora is a comprehensive enterprise-grade inventory management system built with Spring Boot and Angular. It provides a
+robust platform for managing products, stock levels, and warehouses across multiple locations. The system offers both
+REST and GraphQL APIs for flexible integration options, with secure JWT-based authentication and role-based access
+control.
 
-Designed for scalability and performance, Nexora helps businesses efficiently track inventory, manage stock levels, prevent stockouts, and optimize warehouse operations.
+Designed for scalability and performance, Nexora helps businesses efficiently track inventory, manage stock levels,
+prevent stockouts, and optimize warehouse operations.
 
 ## Key Features
 
 - **Product Management**
-  - Create, update, delete, and search products
-  - Categorize products by brand, category, and custom attributes
-  - Track product lifecycle with activation/deactivation
+    - Create, update, delete, and search products
+    - Categorize products by brand, category, and custom attributes
+    - Track product lifecycle with activation/deactivation
 
 - **Warehouse Management**
-  - Manage multiple warehouses and their details
-  - Track warehouse locations, capacity, and status
-  - Organize warehouses by region, country, or custom criteria
+    - Manage multiple warehouses and their details
+    - Track warehouse locations, capacity, and status
+    - Organize warehouses by region, country, or custom criteria
 
 - **Stock Management**
-  - Track stock levels across warehouses
-  - Set min/max stock levels with alerts for low/over stock
-  - Monitor stock movements and history
-  - Generate stock reports and analytics
+    - Track stock levels across warehouses
+    - Set min/max stock levels with alerts for low/over stock
+    - Monitor stock movements and history
+    - Generate stock reports and analytics
 
 - **Dual API Support**
-  - RESTful API with comprehensive endpoints
-  - GraphQL API for flexible, client-specific queries
-  - Swagger/OpenAPI documentation
+    - RESTful API with comprehensive endpoints
+    - GraphQL API for flexible, client-specific queries
+    - Swagger/OpenAPI documentation
 
 - **Security**
-  - JWT-based authentication
-  - Role-based access control (USER, ADMIN)
-  - Stateless architecture for scalability
+    - JWT-based authentication
+    - Role-based access control (USER, ADMIN)
+    - Stateless architecture for scalability
 
 - **Integration Capabilities**
-  - Message queue integration with RabbitMQ
-  - File storage with Digital Ocean Spaces (S3-compatible)
-  - WebSocket support for real-time updates
-  - Excel export functionality
+    - Message queue integration with RabbitMQ
+    - File storage with Digital Ocean Spaces (S3-compatible)
+    - WebSocket support for real-time updates
+    - Excel export functionality
 
 ## Architecture
 
@@ -90,7 +94,8 @@ Nexora follows a modern microservices-inspired architecture with clear separatio
 ## Technologies
 
 ### Backend
-- **Java 17** - Core programming language
+
+- **Java 21** - Core programming language
 - **Spring Boot 3.5.3** - Application framework
 - **Spring Data JPA** - Data persistence
 - **Spring Security** - Authentication and authorization
@@ -100,36 +105,39 @@ Nexora follows a modern microservices-inspired architecture with clear separatio
 - **JWT** - Token-based authentication
 
 ### Frontend
+
 - **Angular 19** - Frontend framework
 - **TypeScript** - Programming language
 - **Nginx** - Web server and reverse proxy
 
 ### DevOps & Deployment
-- **Docker/Podman** - Containerization
-- **Docker Compose** - Multi-container orchestration
-- **Digital Ocean Spaces** - File storage
+
+- **Podman** - Containerization
+- **Podman Compose** - Multi-container orchestration
+- **Digital Ocean Spaces** - File storage (optional)
 - **Maven** - Build automation
 
 ## Quick Start
 
 ### Prerequisites
-- **Docker** or **Podman** installed
-- **Docker Compose** or **Podman Compose** installed
+
+- **Podman** installed
+- **Podman Compose** installed
 - **Git** for cloning the repository
 
 ### 1. Clone and Start
+
 ```bash
 # Clone the repository
 git clone <your-repo-url>
 cd nexora
 
 # Start all services
-docker-compose up --build
-# OR with Podman
 podman-compose up --build
 ```
 
 ### 2. Access the Application
+
 - **Frontend**: http://localhost
 - **Backend API**: http://localhost:8080
 - **Database**: localhost:5432
@@ -141,16 +149,6 @@ podman-compose up --build
 
 1. **Install Dependencies**
    ```bash
-   # Docker (Option 1)
-   # On macOS with Homebrew
-   brew install docker docker-compose
-
-   # On Ubuntu/Debian
-   curl -fsSL https://get.docker.com -o get-docker.sh
-   sudo sh get-docker.sh
-   sudo usermod -aG docker $USER
-
-   # Podman (Option 2)
    # On macOS with Homebrew
    brew install podman podman-compose
 
@@ -169,23 +167,23 @@ podman-compose up --build
 
 ```bash
 # Start all services
-docker-compose up -d
+podman-compose up -d
 
 # Start specific service
-docker-compose up -d postgres
+podman-compose up -d db
 
 # Stop all services
-docker-compose down
+podman-compose down
 
 # Stop and remove volumes (clean slate)
-docker-compose down -v
+podman-compose down -v
 
 # View logs
-docker-compose logs -f
-docker-compose logs -f nexora-app
+podman-compose logs -f
+podman-compose logs -f backend
 
 # Rebuild after changes
-docker-compose up --build nexora-app
+podman-compose up --build backend
 ```
 
 ### Development Tips
@@ -193,16 +191,16 @@ docker-compose up --build nexora-app
 1. **Database Access**
    ```bash
    # Connect to PostgreSQL
-   docker-compose exec postgres psql -U nexora -d nexora
+   podman-compose exec db psql -U nexora -d nexora
    ```
 
 2. **Backend Development**
-   - Backend runs on port 8080
-   - For active development, consider running Spring Boot locally and only database/RabbitMQ in Docker
+    - Backend runs on port 8080
+    - For active development, consider running Spring Boot locally and only database/RabbitMQ in Podman
 
 3. **Frontend Development**
-   - Frontend is served by Nginx on port 80
-   - For active development, run Angular dev server locally:
+    - Frontend is served by Nginx on port 80
+    - For active development, run Angular dev server locally:
    ```bash
    cd client
    npm install
@@ -228,6 +226,7 @@ docker-compose up --build nexora-app
    ```
 
 ### Local Architecture
+
 ```
 ┌─────────────────┐    ┌──────────────────┐
 │   Browser       │    │   Nexora App     │
@@ -248,136 +247,139 @@ docker-compose up --build nexora-app
 
 ## Production Deployment
 
-### Digital Ocean Deployment
+### Prerequisites
 
-#### Prerequisites
-- **Digital Ocean Droplet** with Ubuntu 22.04 LTS
-- **Docker** or **Podman** installed on the droplet
+- **Server** with Ubuntu 22.04 LTS (or similar Linux distribution)
+- **Podman** and **Podman Compose** installed on the server
 - **Domain name** (optional but recommended)
 
-#### 1. Prepare Your Droplet
+### 1. Prepare Your Server
+
 ```bash
-# Connect to your droplet
-ssh root@your-droplet-ip
+# Connect to your server
+ssh user@your-server-ip
 
 # Update system
-apt update && apt upgrade -y
+sudo apt update && sudo apt upgrade -y
 
-# Install Podman (Recommended)
+# Install Podman and Podman Compose
 sudo apt update
 sudo apt install -y podman podman-compose
 
-# OR Install Docker (Alternative)
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER
-
-# Install docker-compose (if using Podman)
-sudo apt install -y docker-compose
-
-# Enable Podman socket (if using Podman)
+# Enable Podman socket for rootless operation
 systemctl --user enable --now podman.socket
 ```
 
-#### 2. Deploy the Application
+### 2. Deploy the Application
+
 ```bash
 # Clone your repository
 git clone <your-repo-url>
 cd nexora
 
 # Create production environment file
-cp .do/.env.prod.template .do/.env.prod
-nano .do/.env.prod  # Edit with your production values
+cp .env.template .env
+nano .env  # Edit with your production values
 
-# Make deploy script executable
-chmod +x .do/deploy.sh
-
-# Deploy (builds images and starts services)
-./.do/deploy.sh deploy
+# Build and start all services
+podman-compose build
+podman-compose up -d
 ```
 
-#### 3. Environment Configuration
+### 3. Environment Configuration
 
-Edit `.do/.env.prod` with your production values:
+Edit `.env` with your production values (based on `.env.template`):
 
 ```bash
+DATASOURCE_URL=
+DATASOURCE_USERNAME=
+DATASOURCE_PASSWORD=
+
 # Database Configuration
-POSTGRES_DB=nexora
-POSTGRES_USER=nexora
-POSTGRES_PASSWORD=your_secure_database_password_here
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
 
-# RabbitMQ Configuration
-RABBITMQ_USER=nexora
-RABBITMQ_PASSWORD=your_secure_rabbitmq_password_here
+RABBITMQ_HOST=
+RABBITMQ_PORT=
+RABBITMQ_USERNAME=
+RABBITMQ_PASSWORD=
+RABBITMQ_QUEUE=
+RABBITMQ_EXCHANGE=
+RABBITMQ_ROUTING_KEY=
 
-# JWT Configuration
-JWT_SECRET_KEY=your_jwt_secret_key_here_minimum_256_bits
-JWT_EXPIRATION=86400000
+# JWT Configuration (generate a secure key)
+JWT_SECRET_KEY=
+JWT_EXPIRATION=
 
-# Digital Ocean Spaces Configuration
-DO_SPACES_KEY=your_do_spaces_access_key
-DO_SPACES_SECRET=your_do_spaces_secret_key
-DO_SPACES_REGION=fra1
-DO_SPACES_ENDPOINT=https://fra1.digitaloceanspaces.com
-DO_SPACES_BUCKET=your_bucket_name
-DO_SPACES_PUBLIC_URL=https://your_bucket_name.fra1.digitaloceanspaces.com
-
-# Docker Configuration
-DOCKER_REGISTRY=your_docker_registry_url_optional
-APP_VERSION=latest
+# Digital Ocean Spaces
+DO_SPACES_KEY=
+DO_SPACES_SECRET=
+DO_SPACES_REGION=
+DO_SPACES_ENDPOINT=
+DO_SPACES_BUCKET=
+DO_SPACES_PUBLIC_URL=
 ```
 
-#### 4. Deployment Commands
+### 4. Deployment Commands
 
 ```bash
-# Build images only
-./.do/deploy.sh build
+# Build images
+podman-compose build
 
-# Deploy application (default)
-./.do/deploy.sh deploy
+# Start all services
+podman-compose up -d
 
-# Stop application
-./.do/deploy.sh stop
+# Stop all services
+podman-compose down
 
-# Show logs
-./.do/deploy.sh logs [service-name]
+# View logs
+podman-compose logs -f
 
-# Show status
-./.do/deploy.sh status
+# View specific service logs
+podman-compose logs -f backend
+podman-compose logs -f frontend
+podman-compose logs -f db
 
-# Update application
-./.do/deploy.sh update
+# Check service status
+podman-compose ps
 
-# Show help
-./.do/deploy.sh help
+# Update application (after code changes)
+git pull
+podman-compose build
+podman-compose up -d
 ```
 
-#### 5. Verify Deployment
+### 5. Verify Deployment
+
 ```bash
 # Check service status
-./.do/deploy.sh status
+podman-compose ps
 
 # Check logs
-./.do/deploy.sh logs
+podman-compose logs
 
-# Check specific service logs
-./.do/deploy.sh logs nexora-app
-./.do/deploy.sh logs nexora-frontend
-./.do/deploy.sh logs postgres
+# Test application endpoints
+curl http://localhost:8080/api/health  # Backend health check
+curl http://localhost  # Frontend
 ```
 
-#### 6. Access the Application
+### 6. Access the Application
 
 After successful deployment:
-- **Web Application**: `http://your-droplet-ip`
-- **API**: `http://your-droplet-ip/api`
-- **RabbitMQ Management** (internal only): `http://127.0.0.1:15672`
 
-#### 7. Firewall Configuration
+- **Web Application**: `http://your-server-ip`
+- **API**: `http://your-server-ip:8080/api`
+- **RabbitMQ Management**: `http://your-server-ip:15672` (username/password from .env)
+
+### 7. Firewall Configuration
 
 ```bash
 # Allow HTTP traffic
 sudo ufw allow 80/tcp
+
+# Allow API traffic (if needed externally)
+sudo ufw allow 8080/tcp
 
 # Allow SSH (if not already allowed)
 sudo ufw allow 22/tcp
@@ -387,20 +389,21 @@ sudo ufw enable
 ```
 
 ### Production Architecture
+
 ```
 ┌─────────────────┐
 │   Browser       │
-│   droplet-ip    │
+│   server-ip     │
 └─────────────────┘
          │
          ▼
 ┌─────────────────┐    ┌──────────────────┐
-│ Nexora Frontend │    │   Nexora App     │
-│ Nginx (port 80) │────│   (internal)     │
+│ Nexora Frontend │    │   Nexora Backend │
+│ Nginx (port 80) │────│   (port 8080)    │
 └─────────────────┘    └──────────────────┘
          │                       │
     API Proxy                    │
-    /api/* → nexora-app:8080     │
+    /api/* → backend:8080        │
                                  ▼
                         ┌──────────────────┐
                         │   PostgreSQL     │
@@ -417,15 +420,18 @@ sudo ufw enable
 ## API Documentation
 
 ### REST API
+
 - **Base URL**: `http://localhost:8080/api`
 - **Swagger UI**: `http://localhost:8080/swagger-ui.html`
 - **OpenAPI Spec**: `http://localhost:8080/v3/api-docs`
 
 ### GraphQL API
+
 - **Endpoint**: `http://localhost:8080/graphql`
 - **GraphiQL**: `http://localhost:8080/graphiql`
 
 ### Authentication
+
 All API endpoints (except public ones) require JWT authentication:
 
 ```bash
@@ -443,7 +449,10 @@ curl -X GET http://localhost:8080/api/products \
 
 ### Environment Variables
 
+### Environment Variables
+
 #### Required for Production:
+
 - `POSTGRES_PASSWORD` - Database password
 - `RABBITMQ_PASSWORD` - RabbitMQ password
 - `JWT_SECRET_KEY` - JWT signing key (minimum 256 bits)
@@ -452,6 +461,7 @@ curl -X GET http://localhost:8080/api/products \
 - `DO_SPACES_BUCKET` - Digital Ocean Spaces bucket name
 
 #### Optional:
+
 - `POSTGRES_DB` - Database name (default: nexora)
 - `POSTGRES_USER` - Database user (default: nexora)
 - `RABBITMQ_USER` - RabbitMQ user (default: nexora)
@@ -459,15 +469,17 @@ curl -X GET http://localhost:8080/api/products \
 - `DO_SPACES_REGION` - Digital Ocean Spaces region (default: fra1)
 
 ### Application Profiles
-- `default` - Local development
-- `docker` - Docker environment
-- `prod` - Production environment
+
+- `dev` - Local development (default profile)
+- `prod` - Production and Docker environment
+- `test` - Testing environment (uses H2 in-memory database)
 
 ## Troubleshooting
 
 ### Local Development Issues
 
 #### Port Conflicts
+
 ```bash
 # Check what's using the ports
 lsof -i :80
@@ -478,72 +490,112 @@ lsof -i :5432
 ```
 
 #### Database Issues
+
 ```bash
 # Reset database
-docker-compose down -v
-docker-compose up -d postgres
+podman-compose down -v
+podman-compose up -d db
 ```
 
 #### Permission Issues (Linux/macOS)
-```bash
-# Fix Docker permissions
-sudo usermod -aG docker $USER
-# Log out and back in
 
+```bash
 # For Podman
 systemctl --user enable --now podman.socket
 ```
 
 #### Build Issues
+
 ```bash
 # Clean build
-docker-compose down
-docker system prune -f
-docker-compose up --build
+podman-compose down
+podman system prune -f
+podman-compose up --build
 ```
 
 ### Production Deployment Issues
 
 #### Check Services Status
+
 ```bash
-./.do/deploy.sh status
+podman-compose ps
 ```
 
 #### Check Logs
+
 ```bash
-./.do/deploy.sh logs
+podman-compose logs -f
 ```
 
 #### Restart Services
+
 ```bash
-./.do/deploy.sh stop
-./.do/deploy.sh deploy
+podman-compose down
+podman-compose up -d
 ```
 
 #### Container Engine Issues
+
 ```bash
-# For Podman
+# Check running containers
 podman ps -a
 
-# For Docker
-docker ps -a
+# Check Podman system info
+podman system info
 ```
 
 #### Common Issues
 
-**Issue**: "Permission denied" when running deploy script
-```bash
-chmod +x .do/deploy.sh
-```
-
 **Issue**: Podman socket not available
+
 ```bash
 systemctl --user enable --now podman.socket
 ```
 
 **Issue**: Images not building
+
 - Check disk space: `df -h`
 - Check memory: `free -h`
+- Clean up old images: `podman system prune -f`
+
+**Issue**: Port conflicts
+
+```bash
+# Check what's using the ports
+sudo lsof -i :80
+sudo lsof -i :8080
+sudo lsof -i :5432
+```
+
+**Issue**: Frontend build fails with "io: read/write on closed pipe" during npm install
+
+This error typically occurs during container builds when npm install runs out of resources or encounters network issues.
+
+```bash
+# Solutions to try:
+
+# 1. Increase available memory for containers
+podman-compose down
+podman system prune -f
+
+# 2. Build with more resources (if using systemd)
+systemctl --user set-property podman.service MemoryMax=4G
+
+# 3. Try building the frontend separately first
+cd client
+podman build -t nexora-frontend .
+
+# 4. If the issue persists, try building with Docker instead
+docker build -t nexora-frontend .
+
+# 5. Clear npm cache and retry
+podman run --rm -v $(pwd)/client:/app -w /app node:18-alpine sh -c "npm cache clean --force && npm ci"
+```
+
+The updated Dockerfile includes optimizations to prevent this issue:
+- Uses `npm ci` instead of `npm install` for more reliable builds
+- Adds retry configuration for network timeouts
+- Disables unnecessary output to reduce memory usage
 
 ## Contributing
 
@@ -554,6 +606,7 @@ systemctl --user enable --now podman.socket
 5. Open a Pull Request
 
 ### Development Guidelines
+
 - Follow Spring Boot best practices
 - Write unit tests for new features
 - Update documentation for API changes
@@ -566,10 +619,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 For support and questions:
+
 - Create an issue in the GitHub repository
 - Check the troubleshooting section above
 - Review the API documentation
 
 ---
 
-**Note**: This consolidated README combines information from multiple documentation files. For specific deployment scenarios, refer to the individual files in the `.do/` directory for production deployment details.
+**Note**: This README provides comprehensive documentation for the Nexora inventory management system. For the latest
+updates and additional information, please refer to the project repository.

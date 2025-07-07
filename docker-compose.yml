@@ -1,126 +1,82 @@
 version: '3.8'
-
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:16-alpine
-    container_name: nexora-postgres
-    environment:
-      POSTGRES_DB: nexora
-      POSTGRES_USER: nexora
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexora123}
-
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U nexora -d nexora" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - nexora-network
-    restart: unless-stopped
-
-  # RabbitMQ Message Broker
-  rabbitmq:
-    image: rabbitmq:3.13-management-alpine
-    container_name: nexora-rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: nexora
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-nexora123}
-    ports:
-      - "5672:5672"
-      - "15672:15672"  # Management UI
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - nexora-network
-
-    restart: unless-stopped
-
-  # Nexora Backend Application
-  nexora-app:
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: nexora-app
+      dockerfile: src/Dockerfile
     environment:
-      # Database configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexora
-      SPRING_DATASOURCE_USERNAME: nexora
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-nexora123}
-
-      # RabbitMQ configuration
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: nexora
-
-      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-nexora123}
-
-      # Server configuration
-      SERVER_PORT: 8080
-
-      # Profile
-      SPRING_PROFILES_ACTIVE: docker
-
-      # JWT Configuration
-      APPLICATION_SECURITY_JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      APPLICATION_SECURITY_JWT_EXPIRATION: 86400000
-
-      # Digital Ocean Spaces
-      DO_SPACES_KEY: ${DO_SPACES_KEY}
-      DO_SPACES_SECRET: ${DO_SPACES_SECRET}
-      DO_SPACES_REGION: fra1
-      DO_SPACES_ENDPOINT: https://fra1.digitaloceanspaces.com
-      DO_SPACES_BUCKET: nexora
-      DO_SPACES_PUBLIC_URL: https://nexora.fra1.digitaloceanspaces.com
+      - DATASOURCE_URL=${DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
+      - SPRING_PROFILES_ACTIVE=prod
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
+      - RABBITMQ_EXCHANGE=${RABBITMQ_EXCHANGE}
+      - RABBITMQ_ROUTING_KEY=${RABBITMQ_ROUTING_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - DO_SPACES_KEY=${DO_SPACES_KEY}
+      - DO_SPACES_SECRET=${DO_SPACES_SECRET}
+      - DO_SPACES_REGION=${DO_SPACES_REGION}
+      - DO_SPACES_ENDPOINT=${DO_SPACES_ENDPOINT}
+      - DO_SPACES_BUCKET=${DO_SPACES_BUCKET}
+      - DO_SPACES_PUBLIC_URL=${DO_SPACES_PUBLIC_URL}
     ports:
-      - "8080:8080"  # Expose for local development
-
+      - "8080:8080"
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
       rabbitmq:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    networks:
-      - nexora-network
+        condition: service_healthy  # Changed from service_started
     restart: unless-stopped
 
-
-  # Nexora Frontend Application
-  nexora-frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: nexora-frontend
+  frontend:
+    build: ./client
     ports:
-      - "80:80"  # Serve on port 80 for production
+      - "80:80"
     depends_on:
-      - nexora-app
-    networks:
-      - nexora-network
+      - backend
+    restart: unless-stopped
+
+  db:
+    image: docker.io/postgres:15
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./src/main/resources/db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  rabbitmq:
+    image: docker.io/rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     restart: unless-stopped
 
 volumes:
-  postgres_data:
-    driver: local
-  rabbitmq_data:
-    driver: local
-
-networks:
-  nexora-network:
-    driver: bridge
+  db_data:
