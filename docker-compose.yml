@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexora-postgres
+    environment:
+      POSTGRES_DB: nexora
+      POSTGRES_USER: nexora
+      POSTGRES_PASSWORD: nexora123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexora -d nexora"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexora-network
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: nexora-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: nexora
+      RABBITMQ_DEFAULT_PASS: nexora123
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexora-network
+
+  # Nexora Application
+  nexora-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexora-app
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexora
+      SPRING_DATASOURCE_USERNAME: nexora
+      SPRING_DATASOURCE_PASSWORD: nexora123
+      
+      # RabbitMQ configuration
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: nexora
+      SPRING_RABBITMQ_PASSWORD: nexora123
+      
+      # Server configuration
+      SERVER_PORT: 8080
+      
+      # Profile
+      SPRING_PROFILES_ACTIVE: docker
+      
+      # JWT Configuration (using the same secret from dev config)
+      APPLICATION_SECURITY_JWT_SECRET_KEY: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      APPLICATION_SECURITY_JWT_EXPIRATION: 86400000
+      
+      # Digital Ocean Spaces (using dev config values)
+      DO_SPACES_KEY: DO00ERAK97UGV4YAG9PW
+      DO_SPACES_SECRET: lfuC9dusLijDr9wDKoL8UbdN8RjJ4H075AQLJyghn4k
+      DO_SPACES_REGION: fra1
+      DO_SPACES_ENDPOINT: https://fra1.digitaloceanspaces.com
+      DO_SPACES_BUCKET: nexora
+      DO_SPACES_PUBLIC_URL: https://nexora.fra1.digitaloceanspaces.com
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - nexora-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+networks:
+  nexora-network:
+    driver: bridge
