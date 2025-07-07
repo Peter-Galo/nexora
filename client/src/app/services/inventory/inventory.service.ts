@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AggregateReportData } from '../../components/inventory/models/inventory.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class InventoryService {
-  private static readonly API_URL = 'http://localhost:8080/api/v1/inventory';
+  private static readonly API_URL = `${environment.apiUrl}/inventory`;
 
   constructor(private readonly http: HttpClient) {}
 

@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Production
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexora-postgres-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nexora}
+      POSTGRES_USER: ${POSTGRES_USER:-nexora}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nexora} -d ${POSTGRES_DB:-nexora}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexora-prod-network
+    restart: unless-stopped
+    # Don't expose ports in production - only internal access
+
+  # RabbitMQ Message Broker for Production
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: nexora-rabbitmq-prod
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-nexora}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_prod_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexora-prod-network
+    restart: unless-stopped
+    # Management UI only accessible internally
+    ports:
+      - "127.0.0.1:15672:15672"
+
+  # Nexora Application for Production
+  nexora-app:
+    image: ${DOCKER_REGISTRY:-nexora}/nexora:${APP_VERSION:-latest}
+    container_name: nexora-app-prod
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-nexora}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-nexora}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # RabbitMQ configuration
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-nexora}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+
+      # Server configuration
+      SERVER_PORT: 8080
+
+      # Profile
+      SPRING_PROFILES_ACTIVE: docker,prod
+
+      # JWT Configuration
+      APPLICATION_SECURITY_JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      APPLICATION_SECURITY_JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+
+      # Digital Ocean Spaces
+      DO_SPACES_KEY: ${DO_SPACES_KEY}
+      DO_SPACES_SECRET: ${DO_SPACES_SECRET}
+      DO_SPACES_REGION: ${DO_SPACES_REGION:-fra1}
+      DO_SPACES_ENDPOINT: ${DO_SPACES_ENDPOINT:-https://fra1.digitaloceanspaces.com}
+      DO_SPACES_BUCKET: ${DO_SPACES_BUCKET}
+      DO_SPACES_PUBLIC_URL: ${DO_SPACES_PUBLIC_URL}
+
+      # JVM Options for production
+      JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport"
+
+    expose:
+      - "8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    networks:
+      - nexora-prod-network
+    restart: unless-stopped
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+          cpus: 1.0
+        reservations:
+          memory: 512m
+          cpus: 0.5
+
+
+  # Nexora Frontend Application
+  nexora-frontend:
+    image: ${DOCKER_REGISTRY:-nexora}/nexora-frontend:${APP_VERSION:-latest}
+    container_name: nexora-frontend-prod
+    ports:
+      - "80:80"  # Main web server port
+    depends_on:
+      - nexora-app
+    networks:
+      - nexora-prod-network
+    restart: unless-stopped
+    # Resource limits for frontend
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: 0.5
+        reservations:
+          memory: 128m
+          cpus: 0.25
+
+volumes:
+  postgres_prod_data:
+    driver: local
+  rabbitmq_prod_data:
+    driver: local
+
+networks:
+  nexora-prod-network:
+    driver: bridge

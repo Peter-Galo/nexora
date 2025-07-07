@@ -34,3 +34,5 @@ build/
 application-dev.yml
 .DS_Store
 node_modules/
+
+.env

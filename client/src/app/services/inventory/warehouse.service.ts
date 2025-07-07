@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface WarehouseDTO {
   uuid?: string;
@@ -22,8 +23,7 @@ export interface WarehouseDTO {
   providedIn: 'root',
 })
 export class WarehouseService {
-  private static readonly API_URL =
-    'http://localhost:8080/api/v1/inventory/warehouses';
+  private static readonly API_URL = `${environment.apiUrl}/inventory/warehouses`;
 
   constructor(private readonly http: HttpClient) {}
 

@@ -9,19 +9,18 @@
   <a href="#key-features">Key Features</a> •
   <a href="#architecture">Architecture</a> •
   <a href="#technologies">Technologies</a> •
-  <a href="#getting-started">Getting Started</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#local-development">Local Development</a> •
+  <a href="#production-deployment">Production Deployment</a> •
   <a href="#api-documentation">API Documentation</a> •
-  <a href="#usage-examples">Usage Examples</a> •
   <a href="#configuration">Configuration</a> •
-  <a href="#project-structure">Project Structure</a> •
   <a href="#troubleshooting">Troubleshooting</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#license">License</a>
+  <a href="#contributing">Contributing</a>
 </p>
 
 ## Overview
 
-Nexora is a comprehensive enterprise-grade inventory management system built with Spring Boot. It provides a robust platform for managing products, stock levels, and warehouses across multiple locations. The system offers both REST and GraphQL APIs for flexible integration options, with secure JWT-based authentication and role-based access control.
+Nexora is a comprehensive enterprise-grade inventory management system built with Spring Boot and Angular. It provides a robust platform for managing products, stock levels, and warehouses across multiple locations. The system offers both REST and GraphQL APIs for flexible integration options, with secure JWT-based authentication and role-based access control.
 
 Designed for scalability and performance, Nexora helps businesses efficiently track inventory, manage stock levels, prevent stockouts, and optimize warehouse operations.
 
@@ -90,461 +89,487 @@ Nexora follows a modern microservices-inspired architecture with clear separatio
 
 ## Technologies
 
-### Core Framework
-- Java 17
-- Spring Boot 3.5.3
-- Spring Data JPA
-- Spring Security
-- Spring WebSocket
+### Backend
+- **Java 17** - Core programming language
+- **Spring Boot 3.5.3** - Application framework
+- **Spring Data JPA** - Data persistence
+- **Spring Security** - Authentication and authorization
+- **Spring GraphQL** - GraphQL API support
+- **PostgreSQL** - Primary database
+- **RabbitMQ** - Message broker
+- **JWT** - Token-based authentication
 
-### API & Documentation
-- Spring Web (REST)
-- Spring GraphQL
-- OpenAPI/Swagger
+### Frontend
+- **Angular 19** - Frontend framework
+- **TypeScript** - Programming language
+- **Nginx** - Web server and reverse proxy
 
-### Database
-- PostgreSQL (Production)
-- H2 Database (Testing)
-- Hibernate ORM
+### DevOps & Deployment
+- **Docker/Podman** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **Digital Ocean Spaces** - File storage
+- **Maven** - Build automation
 
-### Security
-- JWT (JSON Web Tokens)
-- BCrypt Password Encoding
-
-### Integration
-- RabbitMQ for messaging
-- Digital Ocean Spaces (S3-compatible storage)
-- Apache POI for Excel export
-
-### Build & Deployment
-- Maven
-- Docker support
-
-## Getting Started
+## Quick Start
 
 ### Prerequisites
-- Java 17 or higher
-- Maven 3.6 or higher
-- PostgreSQL (for production)
-- RabbitMQ (optional, for messaging features)
+- **Docker** or **Podman** installed
+- **Docker Compose** or **Podman Compose** installed
+- **Git** for cloning the repository
 
-### Installation
+### 1. Clone and Start
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd nexora
 
-1. **Clone the repository**
+# Start all services
+docker-compose up --build
+# OR with Podman
+podman-compose up --build
+```
+
+### 2. Access the Application
+- **Frontend**: http://localhost
+- **Backend API**: http://localhost:8080
+- **Database**: localhost:5432
+- **RabbitMQ Management**: http://localhost:15672
+
+## Local Development
+
+### Environment Setup
+
+1. **Install Dependencies**
    ```bash
-   git clone https://github.com/yourusername/nexora.git
-   cd nexora
+   # Docker (Option 1)
+   # On macOS with Homebrew
+   brew install docker docker-compose
+
+   # On Ubuntu/Debian
+   curl -fsSL https://get.docker.com -o get-docker.sh
+   sudo sh get-docker.sh
+   sudo usermod -aG docker $USER
+
+   # Podman (Option 2)
+   # On macOS with Homebrew
+   brew install podman podman-compose
+
+   # On Ubuntu/Debian
+   sudo apt update
+   sudo apt install -y podman podman-compose
    ```
 
-2. **Configure the application**
-
-   Edit the configuration files in `src/main/resources/`:
-   - `application.yml` - Main configuration
-   - `application-dev.yml` - Development environment configuration
-
-   Key configurations:
-   - Database connection
-   - JWT secret and expiration
-   - RabbitMQ settings
-   - Digital Ocean Spaces credentials
-
-3. **Build the project**
+2. **Create Environment File**
    ```bash
-   mvn clean install
+   # Copy the template and fill in your values
+   cp .env.template .env
    ```
 
-4. **Run the application**
+### Development Workflow
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Start specific service
+docker-compose up -d postgres
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (clean slate)
+docker-compose down -v
+
+# View logs
+docker-compose logs -f
+docker-compose logs -f nexora-app
+
+# Rebuild after changes
+docker-compose up --build nexora-app
+```
+
+### Development Tips
+
+1. **Database Access**
    ```bash
-   mvn spring-boot:run
+   # Connect to PostgreSQL
+   docker-compose exec postgres psql -U nexora -d nexora
    ```
 
-   Or with a specific profile:
+2. **Backend Development**
+   - Backend runs on port 8080
+   - For active development, consider running Spring Boot locally and only database/RabbitMQ in Docker
+
+3. **Frontend Development**
+   - Frontend is served by Nginx on port 80
+   - For active development, run Angular dev server locally:
    ```bash
-   mvn spring-boot:run -Dspring.profiles.active=dev
+   cd client
+   npm install
+   npm start  # Runs on port 4200
    ```
 
-5. **Verify the application is running**
+   **Angular CLI Commands:**
+   ```bash
+   # Generate new component
+   ng generate component component-name
 
-   Access the Swagger UI at:
-   ```
-   http://localhost:8080/swagger-ui.html
+   # Build for production
+   ng build
+
+   # Run unit tests
+   ng test
+
+   # Run end-to-end tests
+   ng e2e
+
+   # Get help with available schematics
+   ng generate --help
    ```
 
-   Access the GraphiQL interface at:
-   ```
-   http://localhost:8080/graphiql
-   ```
+### Local Architecture
+```
+┌─────────────────┐    ┌──────────────────┐
+│   Browser       │    │   Nexora App     │
+│   localhost     │────│   localhost:8080 │
+└─────────────────┘    └──────────────────┘
+         │
+         ▼
+┌─────────────────┐    ┌──────────────────┐
+│ Nexora Frontend │    │   PostgreSQL     │
+│ Nginx (port 80) │────│   localhost:5432 │
+└─────────────────┘    └──────────────────┘
+         │
+         ▼              ┌──────────────────┐
+    API Proxy           │   RabbitMQ       │
+    /api/* → :8080      │   localhost:5672 │
+                        └──────────────────┘
+```
+
+## Production Deployment
+
+### Digital Ocean Deployment
+
+#### Prerequisites
+- **Digital Ocean Droplet** with Ubuntu 22.04 LTS
+- **Docker** or **Podman** installed on the droplet
+- **Domain name** (optional but recommended)
+
+#### 1. Prepare Your Droplet
+```bash
+# Connect to your droplet
+ssh root@your-droplet-ip
+
+# Update system
+apt update && apt upgrade -y
+
+# Install Podman (Recommended)
+sudo apt update
+sudo apt install -y podman podman-compose
+
+# OR Install Docker (Alternative)
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Install docker-compose (if using Podman)
+sudo apt install -y docker-compose
+
+# Enable Podman socket (if using Podman)
+systemctl --user enable --now podman.socket
+```
+
+#### 2. Deploy the Application
+```bash
+# Clone your repository
+git clone <your-repo-url>
+cd nexora
+
+# Create production environment file
+cp .do/.env.prod.template .do/.env.prod
+nano .do/.env.prod  # Edit with your production values
+
+# Make deploy script executable
+chmod +x .do/deploy.sh
+
+# Deploy (builds images and starts services)
+./.do/deploy.sh deploy
+```
+
+#### 3. Environment Configuration
+
+Edit `.do/.env.prod` with your production values:
+
+```bash
+# Database Configuration
+POSTGRES_DB=nexora
+POSTGRES_USER=nexora
+POSTGRES_PASSWORD=your_secure_database_password_here
+
+# RabbitMQ Configuration
+RABBITMQ_USER=nexora
+RABBITMQ_PASSWORD=your_secure_rabbitmq_password_here
+
+# JWT Configuration
+JWT_SECRET_KEY=your_jwt_secret_key_here_minimum_256_bits
+JWT_EXPIRATION=86400000
+
+# Digital Ocean Spaces Configuration
+DO_SPACES_KEY=your_do_spaces_access_key
+DO_SPACES_SECRET=your_do_spaces_secret_key
+DO_SPACES_REGION=fra1
+DO_SPACES_ENDPOINT=https://fra1.digitaloceanspaces.com
+DO_SPACES_BUCKET=your_bucket_name
+DO_SPACES_PUBLIC_URL=https://your_bucket_name.fra1.digitaloceanspaces.com
+
+# Docker Configuration
+DOCKER_REGISTRY=your_docker_registry_url_optional
+APP_VERSION=latest
+```
+
+#### 4. Deployment Commands
+
+```bash
+# Build images only
+./.do/deploy.sh build
+
+# Deploy application (default)
+./.do/deploy.sh deploy
+
+# Stop application
+./.do/deploy.sh stop
+
+# Show logs
+./.do/deploy.sh logs [service-name]
+
+# Show status
+./.do/deploy.sh status
+
+# Update application
+./.do/deploy.sh update
+
+# Show help
+./.do/deploy.sh help
+```
+
+#### 5. Verify Deployment
+```bash
+# Check service status
+./.do/deploy.sh status
+
+# Check logs
+./.do/deploy.sh logs
+
+# Check specific service logs
+./.do/deploy.sh logs nexora-app
+./.do/deploy.sh logs nexora-frontend
+./.do/deploy.sh logs postgres
+```
+
+#### 6. Access the Application
+
+After successful deployment:
+- **Web Application**: `http://your-droplet-ip`
+- **API**: `http://your-droplet-ip/api`
+- **RabbitMQ Management** (internal only): `http://127.0.0.1:15672`
+
+#### 7. Firewall Configuration
+
+```bash
+# Allow HTTP traffic
+sudo ufw allow 80/tcp
+
+# Allow SSH (if not already allowed)
+sudo ufw allow 22/tcp
+
+# Enable firewall
+sudo ufw enable
+```
+
+### Production Architecture
+```
+┌─────────────────┐
+│   Browser       │
+│   droplet-ip    │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐    ┌──────────────────┐
+│ Nexora Frontend │    │   Nexora App     │
+│ Nginx (port 80) │────│   (internal)     │
+└─────────────────┘    └──────────────────┘
+         │                       │
+    API Proxy                    │
+    /api/* → nexora-app:8080     │
+                                 ▼
+                        ┌──────────────────┐
+                        │   PostgreSQL     │
+                        │   (internal)     │
+                        └──────────────────┘
+                                 │
+                                 ▼
+                        ┌──────────────────┐
+                        │   RabbitMQ       │
+                        │   (internal)     │
+                        └──────────────────┘
+```
 
 ## API Documentation
 
 ### REST API
-
-Once the application is running, you can access the comprehensive API documentation at:
-```
-http://localhost:8080/swagger-ui.html
-```
-
-#### Authentication Endpoints
-- `POST /api/v1/auth/login` - Authenticate a user
-- `POST /api/v1/auth/register` - Register a new user
-
-#### Product Endpoints
-- `GET /api/v1/inventory/products` - Get all products
-- `GET /api/v1/inventory/products/active` - Get active products
-- `GET /api/v1/inventory/products/{id}` - Get product by ID
-- `GET /api/v1/inventory/products/code/{code}` - Get product by code
-- `POST /api/v1/inventory/products` - Create a new product
-- `PUT /api/v1/inventory/products/{id}` - Update a product
-- `DELETE /api/v1/inventory/products/{id}` - Delete a product
-- `PUT /api/v1/inventory/products/{id}/activate` - Activate a product
-- `PUT /api/v1/inventory/products/{id}/deactivate` - Deactivate a product
-- `GET /api/v1/inventory/products/category/{category}` - Get products by category
-- `GET /api/v1/inventory/products/brand/{brand}` - Get products by brand
-- `GET /api/v1/inventory/products/search?name={name}` - Search products by name
-
-#### Warehouse Endpoints
-- `GET /api/v1/inventory/warehouses` - Get all warehouses
-- `GET /api/v1/inventory/warehouses/active` - Get active warehouses
-- `GET /api/v1/inventory/warehouses/{id}` - Get warehouse by ID
-- `GET /api/v1/inventory/warehouses/code/{code}` - Get warehouse by code
-- `POST /api/v1/inventory/warehouses` - Create a new warehouse
-- `PUT /api/v1/inventory/warehouses/{id}` - Update a warehouse
-- `DELETE /api/v1/inventory/warehouses/{id}` - Delete a warehouse
-- `PUT /api/v1/inventory/warehouses/{id}/activate` - Activate a warehouse
-- `PUT /api/v1/inventory/warehouses/{id}/deactivate` - Deactivate a warehouse
-
-#### Stock Endpoints
-- `GET /api/v1/inventory/stocks` - Get all stock records
-- `GET /api/v1/inventory/stocks/{id}` - Get stock by ID
-- `GET /api/v1/inventory/stocks/product/{productId}` - Get stocks by product ID
-- `GET /api/v1/inventory/stocks/product/code/{productCode}` - Get stocks by product code
-- `GET /api/v1/inventory/stocks/warehouse/{warehouseId}` - Get stocks by warehouse ID
-- `GET /api/v1/inventory/stocks/warehouse/code/{warehouseCode}` - Get stocks by warehouse code
-- `GET /api/v1/inventory/stocks/product/{productId}/warehouse/{warehouseId}` - Get stock for a product in a warehouse
-- `POST /api/v1/inventory/stocks` - Create a new stock record
-- `PUT /api/v1/inventory/stocks/{id}` - Update a stock record
-- `DELETE /api/v1/inventory/stocks/{id}` - Delete a stock record
-- `PUT /api/v1/inventory/stocks/{id}/add` - Add stock quantity
-- `PUT /api/v1/inventory/stocks/{id}/remove` - Remove stock quantity
-- `GET /api/v1/inventory/stocks/low` - Get low stock records
-- `GET /api/v1/inventory/stocks/over` - Get over stock records
-- `GET /api/v1/inventory/stocks/zero` - Get zero stock records
+- **Base URL**: `http://localhost:8080/api`
+- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+- **OpenAPI Spec**: `http://localhost:8080/v3/api-docs`
 
 ### GraphQL API
+- **Endpoint**: `http://localhost:8080/graphql`
+- **GraphiQL**: `http://localhost:8080/graphiql`
 
-Nexora also provides a GraphQL API for more flexible querying. Access the GraphiQL interface at:
+### Authentication
+All API endpoints (except public ones) require JWT authentication:
+
+```bash
+# Login to get JWT token
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+
+# Use token in subsequent requests
+curl -X GET http://localhost:8080/api/products \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
-http://localhost:8080/graphiql
-```
-
-#### Example Queries
-
-**Get all products:**
-```graphql
-query {
-  allProducts {
-    uuid
-    code
-    name
-    price
-    category
-    brand
-  }
-}
-```
-
-**Get product by ID:**
-```graphql
-query {
-  productById(id: "product-uuid") {
-    uuid
-    code
-    name
-    description
-    price
-  }
-}
-```
-
-**Get stocks for a product:**
-```graphql
-query {
-  stocksByProductId(productId: "product-uuid") {
-    uuid
-    quantity
-    warehouse {
-      name
-      code
-    }
-  }
-}
-```
-
-#### Example Mutations
-
-**Create a product:**
-```graphql
-mutation {
-  createProduct(product: {
-    code: "PROD-001",
-    name: "New Product",
-    description: "Product description",
-    price: 29.99,
-    category: "Electronics",
-    brand: "BrandName"
-  }) {
-    uuid
-    code
-    name
-  }
-}
-```
-
-**Update stock quantity:**
-```graphql
-mutation {
-  addStock(id: "stock-uuid", quantity: 10) {
-    uuid
-    quantity
-    product {
-      name
-    }
-    warehouse {
-      name
-    }
-  }
-}
-```
-
-## Usage Examples
-
-### Authentication Flow
-
-1. **Register a new user:**
-   ```bash
-   curl -X POST http://localhost:8080/api/v1/auth/register \
-     -H "Content-Type: application/json" \
-     -d '{"firstName":"John","lastName":"Doe","email":"john.doe@example.com","password":"securePassword123"}'
-   ```
-
-2. **Login to get JWT token:**
-   ```bash
-   curl -X POST http://localhost:8080/api/v1/auth/login \
-     -H "Content-Type: application/json" \
-     -d '{"email":"john.doe@example.com","password":"securePassword123"}'
-   ```
-
-3. **Use the JWT token for authenticated requests:**
-   ```bash
-   curl -X GET http://localhost:8080/api/v1/inventory/products \
-     -H "Authorization: Bearer YOUR_JWT_TOKEN"
-   ```
-
-### Inventory Management Workflow
-
-1. **Create a warehouse:**
-   ```bash
-   curl -X POST http://localhost:8080/api/v1/inventory/warehouses \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     -d '{"code":"WH-001","name":"Main Warehouse","address":"123 Storage St","city":"Warehouse City","country":"US"}'
-   ```
-
-2. **Create a product:**
-   ```bash
-   curl -X POST http://localhost:8080/api/v1/inventory/products \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     -d '{"code":"PROD-001","name":"Smartphone X","description":"Latest smartphone model","price":999.99,"category":"Electronics","brand":"TechBrand"}'
-   ```
-
-3. **Add stock for the product in the warehouse:**
-   ```bash
-   curl -X POST http://localhost:8080/api/v1/inventory/stocks \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     -d '{"productId":"PRODUCT_UUID","warehouseId":"WAREHOUSE_UUID","quantity":100,"minStockLevel":20,"maxStockLevel":200}'
-   ```
-
-4. **Check stock levels:**
-   ```bash
-   curl -X GET http://localhost:8080/api/v1/inventory/stocks/product/PRODUCT_UUID \
-     -H "Authorization: Bearer YOUR_JWT_TOKEN"
-   ```
-
-5. **Remove stock (e.g., for a sale):**
-   ```bash
-   curl -X PUT http://localhost:8080/api/v1/inventory/stocks/STOCK_UUID/remove?quantity=5 \
-     -H "Authorization: Bearer YOUR_JWT_TOKEN"
-   ```
 
 ## Configuration
 
-### Application Properties
+### Environment Variables
 
-Key configuration properties in `application.yml`:
+#### Required for Production:
+- `POSTGRES_PASSWORD` - Database password
+- `RABBITMQ_PASSWORD` - RabbitMQ password
+- `JWT_SECRET_KEY` - JWT signing key (minimum 256 bits)
+- `DO_SPACES_KEY` - Digital Ocean Spaces access key
+- `DO_SPACES_SECRET` - Digital Ocean Spaces secret key
+- `DO_SPACES_BUCKET` - Digital Ocean Spaces bucket name
 
-```yaml
-spring:
-  application:
-    name: nexora
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
-  graphql:
-    graphiql:
-      enabled: true
-    path: /graphql
+#### Optional:
+- `POSTGRES_DB` - Database name (default: nexora)
+- `POSTGRES_USER` - Database user (default: nexora)
+- `RABBITMQ_USER` - RabbitMQ user (default: nexora)
+- `JWT_EXPIRATION` - JWT expiration time (default: 86400000ms)
+- `DO_SPACES_REGION` - Digital Ocean Spaces region (default: fra1)
 
-# JWT Configuration
-application:
-  security:
-    jwt:
-      secret-key: YOUR_SECRET_KEY
-      expiration: 86400000 # 24 hours
-
-# OpenAPI Documentation Configuration
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-    tagsSorter: alpha
-    tryItOutEnabled: true
-  packages-to-scan: com.nexora.controller
-  paths-to-match: /api/**
-```
-
-### Environment-Specific Configuration
-
-Development environment configuration in `application-dev.yml`:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://your-db-host:5432/your-db-name
-    username: your-username
-    password: your-password
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        default_schema: nexora
-        format_sql: false
-    show-sql: false
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-
-# Digital Ocean Spaces Configuration
-do:
-  spaces:
-    key: YOUR_DO_SPACES_KEY
-    secret: YOUR_DO_SPACES_SECRET
-    region: fra1
-    endpoint: https://fra1.digitaloceanspaces.com
-    bucket: nexora
-    public-url: https://nexora.fra1.digitaloceanspaces.com
-```
-
-## Project Structure
-
-```
-nexora/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── nexora/
-│   │   │           ├── config/           # Configuration classes
-│   │   │           ├── controller/       # REST controllers
-│   │   │           │   ├── auth/         # Authentication controllers
-│   │   │           │   └── inventory/    # Inventory controllers
-│   │   │           ├── dto/              # Data Transfer Objects
-│   │   │           ├── entity/           # JPA entities
-│   │   │           ├── exception/        # Custom exceptions
-│   │   │           ├── repository/       # Data repositories
-│   │   │           ├── resolver/         # GraphQL resolvers
-│   │   │           ├── security/         # Security configuration
-│   │   │           ├── service/          # Business logic
-│   │   │           └── util/             # Utility classes
-│   │   └── resources/
-│   │       ├── graphql/                  # GraphQL schema
-│   │       └── application.yml           # Application configuration
-│   └── test/                             # Test classes
-└── pom.xml                               # Maven configuration
-```
+### Application Profiles
+- `default` - Local development
+- `docker` - Docker environment
+- `prod` - Production environment
 
 ## Troubleshooting
 
-### Common Issues
+### Local Development Issues
 
-**Authentication Issues**
-- Ensure you're using the correct JWT token format: `Bearer YOUR_TOKEN`
-- Check that your token hasn't expired (default expiration is 24 hours)
-- Verify user credentials and permissions
+#### Port Conflicts
+```bash
+# Check what's using the ports
+lsof -i :80
+lsof -i :8080
+lsof -i :5432
 
-**Database Connection Issues**
-- Verify database credentials in application-dev.yml
-- Ensure PostgreSQL is running and accessible
-- Check database schema exists (default: nexora)
-
-**API Request Problems**
-- Validate request format against API documentation
-- Check required fields in request bodies
-- Verify correct content types (application/json)
-
-### Logging
-
-To enable more detailed logging, add the following to your application.yml:
-
-```yaml
-logging:
-  level:
-    com.nexora: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: INFO
+# Stop conflicting services or change ports in docker-compose.yml
 ```
+
+#### Database Issues
+```bash
+# Reset database
+docker-compose down -v
+docker-compose up -d postgres
+```
+
+#### Permission Issues (Linux/macOS)
+```bash
+# Fix Docker permissions
+sudo usermod -aG docker $USER
+# Log out and back in
+
+# For Podman
+systemctl --user enable --now podman.socket
+```
+
+#### Build Issues
+```bash
+# Clean build
+docker-compose down
+docker system prune -f
+docker-compose up --build
+```
+
+### Production Deployment Issues
+
+#### Check Services Status
+```bash
+./.do/deploy.sh status
+```
+
+#### Check Logs
+```bash
+./.do/deploy.sh logs
+```
+
+#### Restart Services
+```bash
+./.do/deploy.sh stop
+./.do/deploy.sh deploy
+```
+
+#### Container Engine Issues
+```bash
+# For Podman
+podman ps -a
+
+# For Docker
+docker ps -a
+```
+
+#### Common Issues
+
+**Issue**: "Permission denied" when running deploy script
+```bash
+chmod +x .do/deploy.sh
+```
+
+**Issue**: Podman socket not available
+```bash
+systemctl --user enable --now podman.socket
+```
+
+**Issue**: Images not building
+- Check disk space: `df -h`
+- Check memory: `free -h`
 
 ## Contributing
 
-We welcome contributions to Nexora! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. **Commit your changes**
-   ```bash
-   git commit -m "Add some feature"
-   ```
-4. **Push to the branch**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-5. **Open a Pull Request**
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ### Development Guidelines
-
-- Follow Java code conventions
+- Follow Spring Boot best practices
 - Write unit tests for new features
 - Update documentation for API changes
-- Add appropriate logging
-- Ensure all tests pass before submitting PR
+- Use conventional commit messages
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support and questions:
+- Create an issue in the GitHub repository
+- Check the troubleshooting section above
+- Review the API documentation
 
 ---
 
-<p align="center">
-  Made with ❤️ by the Nexora Team
-</p>
+**Note**: This consolidated README combines information from multiple documentation files. For specific deployment scenarios, refer to the individual files in the `.do/` directory for production deployment details.

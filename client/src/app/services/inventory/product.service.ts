@@ -5,12 +5,13 @@ import {
   ProductAnalytics,
 } from '../../components/inventory/models/inventory.models';
 import { BaseInventoryService } from './base-inventory.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService extends BaseInventoryService<Product> {
-  protected readonly apiUrl = 'http://localhost:8080/api/v1/inventory/products';
+  protected readonly apiUrl = `${environment.apiUrl}/inventory/products`;
   protected readonly entityName = 'product';
 
   // Alias methods for backward compatibility
