@@ -9,6 +9,7 @@ services:
       POSTGRES_DB: nexora
       POSTGRES_USER: nexora
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexora123}
+
     ports:
       - "5432:5432"
     volumes:
@@ -42,6 +43,7 @@ services:
       retries: 5
     networks:
       - nexora-network
+
     restart: unless-stopped
 
   # Nexora Backend Application
@@ -60,6 +62,7 @@ services:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: nexora
+
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-nexora123}
 
       # Server configuration
@@ -81,6 +84,7 @@ services:
       DO_SPACES_PUBLIC_URL: https://nexora.fra1.digitaloceanspaces.com
     ports:
       - "8080:8080"  # Expose for local development
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,6 +99,7 @@ services:
     networks:
       - nexora-network
     restart: unless-stopped
+
 
   # Nexora Frontend Application
   nexora-frontend:

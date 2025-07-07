@@ -79,8 +79,10 @@ services:
 
       # JVM Options for production
       JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport"
+
     expose:
       - "8080"
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -104,6 +106,7 @@ services:
         reservations:
           memory: 512m
           cpus: 0.5
+
 
   # Nexora Frontend Application
   nexora-frontend:

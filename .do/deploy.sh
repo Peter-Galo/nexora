@@ -67,6 +67,7 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
+
 # Function to build and push Docker images
 build_and_push() {
     echo -e "${YELLOW}🔨 Building Docker images...${NC}"
@@ -87,6 +88,7 @@ build_and_push() {
         echo -e "${YELLOW}📤 Pushing images to registry...${NC}"
         $CONTAINER_ENGINE push "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION:-latest}"
         $CONTAINER_ENGINE push "${DOCKER_REGISTRY}/${APP_NAME}-frontend:${APP_VERSION:-latest}"
+
     fi
 }
 
@@ -119,16 +121,19 @@ deploy() {
 # Function to stop application
 stop() {
     echo -e "${YELLOW}🛑 Stopping application...${NC}"
+
     if [ "$CONTAINER_ENGINE" = "podman" ] && [ "$COMPOSE_CMD" = "docker-compose" ]; then
         DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock $COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" --env-file "$ENV_FILE" down
     else
         $COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" --env-file "$ENV_FILE" down
     fi
+
     echo -e "${GREEN}✅ Application stopped!${NC}"
 }
 
 # Function to show logs
 logs() {
+
     if [ "$CONTAINER_ENGINE" = "podman" ] && [ "$COMPOSE_CMD" = "docker-compose" ]; then
         DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock $COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" logs -f "${1:-nexora-app}"
     else
@@ -138,6 +143,7 @@ logs() {
 
 # Function to show status
 status() {
+
     if [ "$CONTAINER_ENGINE" = "podman" ] && [ "$COMPOSE_CMD" = "docker-compose" ]; then
         DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock $COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps
     else
@@ -149,11 +155,13 @@ status() {
 update() {
     echo -e "${YELLOW}🔄 Updating application...${NC}"
     build_and_push
+
     if [ "$CONTAINER_ENGINE" = "podman" ] && [ "$COMPOSE_CMD" = "docker-compose" ]; then
         DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock $COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" --env-file "$ENV_FILE" up -d --force-recreate nexora-app nexora-frontend
     else
         $COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" --env-file "$ENV_FILE" up -d --force-recreate nexora-app nexora-frontend
     fi
+
     echo -e "${GREEN}✅ Application updated!${NC}"
 }
 
@@ -195,4 +203,5 @@ case "${1:-deploy}" in
         echo "Use '$0 help' to see available commands."
         exit 1
         ;;
+
 esac
