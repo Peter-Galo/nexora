@@ -5,22 +5,21 @@
       <h3 class="mb-0 text-dark">Stock Management</h3>
     </div>
     <div class="d-flex gap-2">
-      @if (canExportData()) {
-        <button
-          class="btn btn-info"
-          (click)="exportStocks()"
-          [disabled]="exportState.exportLoading()"
-        >
-          @if (exportState.exportLoading()) {
-            <span class="spinner-border spinner-border-sm me-2" role="status">
-              <span class="visually-hidden">Exporting...</span>
-            </span>
-            Exporting...
-          } @else {
-            <i class="fas fa-download"></i> Export to Excel
-          }
-        </button>
-      }
+      <button
+        class="btn btn-info"
+        (click)="exportStocks()"
+        [disabled]="exportState.exportLoading()"
+      >
+        @if (exportState.exportLoading()) {
+          <span class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Exporting...</span>
+          </span>
+          Exporting...
+        } @else {
+          <i class="fas fa-download"></i> Export to Excel
+        }
+      </button>
+
       <button class="btn" (click)="toggleAutoRefresh()">
         <i class="fas fa-sync-alt me-1" [class.fa-spin]="autoRefresh()"></i>
         Auto-refresh {{ autoRefresh() ? "ON" : "OFF" }}

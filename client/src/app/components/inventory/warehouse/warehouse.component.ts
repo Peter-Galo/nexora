@@ -1,4 +1,4 @@
-import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -18,6 +18,7 @@ import {
 } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ExportUtilityService } from '../../../services/inventory/export-utility.service';
+import { BaseInventoryComponent } from '../base-inventory.component';
 
 @Component({
   selector: 'app-warehouse',
@@ -25,11 +26,12 @@ import { ExportUtilityService } from '../../../services/inventory/export-utility
   imports: [CommonModule, FormsModule, DataTableComponent],
   templateUrl: './warehouse.component.html',
 })
-export class WarehouseComponent implements OnInit, OnDestroy {
+export class WarehouseComponent extends BaseInventoryComponent {
+  // Export category for base class
+  protected exportCategory = 'WAREHOUSE' as const;
+
   // Data signals
   warehouses = signal<WarehouseDTO[]>([]);
-  loading = signal<boolean>(false);
-  error = signal<string | null>(null);
 
   // UI state
   showActiveOnly = signal<boolean>(false);
@@ -56,9 +58,6 @@ export class WarehouseComponent implements OnInit, OnDestroy {
   // Field validation states
   fieldTouched = signal<{ [key: string]: boolean }>({});
 
-  // Export state
-  exportState: ReturnType<typeof this.exportUtilityService.createExportState>;
-
   // Column definitions - dynamically filtered based on user permissions
   protected readonly warehouseColumns = computed(() => {
     const hasAnyPermissions =
@@ -77,14 +76,13 @@ export class WarehouseComponent implements OnInit, OnDestroy {
 
   // Search debouncing
   private searchSubject = new Subject<string>();
-  private destroy$ = new Subject<void>();
 
   constructor(
     private warehouseService: WarehouseService,
     private authService: AuthService,
-    private exportUtilityService: ExportUtilityService,
+    exportUtilityService: ExportUtilityService,
   ) {
-    this.exportState = this.exportUtilityService.createExportState();
+    super(exportUtilityService);
 
     // Set up debounced search with 0.2 second delay
     this.searchSubject
@@ -115,14 +113,11 @@ export class WarehouseComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnInit(): void {
+  /**
+   * Implementation of abstract loadData method from BaseInventoryComponent
+   */
+  protected loadData(): void {
     this.loadWarehouses();
-    this.loadExistingExportJobs();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   /**
@@ -644,51 +639,14 @@ export class WarehouseComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Export warehouse data to Excel
+   * Override canExportData to use warehouse-specific permissions
    */
-  exportWarehouses(): void {
-    this.exportUtilityService.initiateExport(
-      'WAREHOUSE',
-      this.exportState,
-      this.destroy$,
-    );
-  }
-
-  /**
-   * Download the exported file
-   */
-  downloadExport(jobId: string): void {
-    this.exportUtilityService.downloadExport(jobId);
-  }
-
-  /**
-   * Download file by URL
-   */
-  downloadFileByUrl(fileUrl: string): void {
-    this.exportUtilityService.downloadFileByUrl(fileUrl);
-  }
-
-  /**
-   * Check if the current user can export data
-   */
-  canExportData(): boolean {
+  override canExportData(): boolean {
     return this.canModifyWarehouses();
   }
 
-  /**
-   * Load existing export jobs for the current user
-   */
-  loadExistingExportJobs(): void {
-    if (!this.canExportData()) {
-      return; // User doesn't have permission to export, so don't load export jobs
-    }
-
-    this.exportUtilityService.loadExistingExportJobs(
-      'WAREHOUSE',
-      this.exportState,
-      this.destroy$,
-    );
-  }
+  // Alias for backward compatibility with template
+  exportWarehouses = () => this.exportData();
 
   protected readonly Object = Object;
 }
