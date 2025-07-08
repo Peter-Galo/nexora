@@ -593,6 +593,7 @@ podman run --rm -v $(pwd)/client:/app -w /app node:18-alpine sh -c "npm cache cl
 ```
 
 The updated Dockerfile includes optimizations to prevent this issue:
+
 - Uses `npm ci` instead of `npm install` for more reliable builds
 - Adds retry configuration for network timeouts
 - Disables unnecessary output to reduce memory usage
@@ -611,10 +612,6 @@ The updated Dockerfile includes optimizations to prevent this issue:
 - Write unit tests for new features
 - Update documentation for API changes
 - Use conventional commit messages
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
