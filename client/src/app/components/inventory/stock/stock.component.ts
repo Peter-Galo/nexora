@@ -1,20 +1,14 @@
-import {
-  Component,
-  computed,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   StockDTO,
   StockService,
 } from '../../../services/inventory/stock.service';
-import { interval, Subject, Subscription } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 import { ExportUtilityService } from '../../../services/inventory/export-utility.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { BaseInventoryComponent } from '../base-inventory.component';
 
 type ViewType = 'dashboard' | 'all' | 'low' | 'over' | 'zero';
 type AlertType = 'danger' | 'warning' | 'info';
@@ -68,24 +62,24 @@ interface QuickStat {
   imports: [CommonModule, FormsModule],
   templateUrl: './stock.component.html',
 })
-export class StockComponent implements OnInit, OnDestroy {
+export class StockComponent extends BaseInventoryComponent {
+  // Export category for base class
+  protected exportCategory = 'STOCK' as const;
+
   private stockService = inject(StockService);
-  private exportUtilityService = inject(ExportUtilityService);
   private authService = inject(AuthService);
   private autoRefreshSubscription?: Subscription;
-  private destroy$ = new Subject<void>();
 
   // Signals
-  loading = signal(false);
-  error = signal<string | null>(null);
   allStocks = signal<StockDTO[]>([]);
   selectedView = signal<ViewType>('dashboard');
   searchTerm = signal('');
   selectedWarehouse = signal<string>('all');
   autoRefresh = signal(true);
 
-  // Export state
-  exportState = this.exportUtilityService.createExportState();
+  constructor() {
+    super(inject(ExportUtilityService));
+  }
 
   // Configuration data
   tabs: TabConfig[] = [
@@ -315,18 +309,23 @@ export class StockComponent implements OnInit, OnDestroy {
     return Array.from(unique.values());
   });
 
-  ngOnInit() {
-    this.loadStockData();
-    this.loadExistingExportJobs();
+  override ngOnInit() {
+    super.ngOnInit();
     this.autoRefreshSubscription = interval(30000).subscribe(() => {
       if (this.autoRefresh()) this.loadStockData();
     });
   }
 
-  ngOnDestroy() {
+  override ngOnDestroy() {
     this.autoRefreshSubscription?.unsubscribe();
-    this.destroy$.next();
-    this.destroy$.complete();
+    super.ngOnDestroy();
+  }
+
+  /**
+   * Implementation of abstract loadData method from BaseInventoryComponent
+   */
+  protected loadData(): void {
+    this.loadStockData();
   }
 
   private loadStockData() {
@@ -501,7 +500,7 @@ export class StockComponent implements OnInit, OnDestroy {
     }).format(value);
   }
 
-  formatDate(dateString: string): string {
+  override formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -515,46 +514,7 @@ export class StockComponent implements OnInit, OnDestroy {
       return 'Invalid Date';
     }
   }
-
-  // TrackBy functions
-  trackByStockId = (index: number, stock: StockDTO): string => stock.uuid;
-  trackByAlertType = (index: number, alert: StockAlert): string => alert.type;
-  trackByWarehouseId = (index: number, warehouse: any): string =>
-    warehouse.uuid;
-
-  // Export functionality
-  /**
-   * Export stock data to Excel
-   */
-  exportStocks(): void {
-    this.exportUtilityService.initiateExport(
-      'STOCK',
-      this.exportState,
-      this.destroy$,
-    );
-  }
-
-  /**
-   * Download the exported file
-   */
-  downloadExport(jobId: string): void {
-    this.exportUtilityService.downloadExport(jobId);
-  }
-
-  /**
-   * Download file by URL
-   */
-  downloadFileByUrl(fileUrl: string): void {
-    this.exportUtilityService.downloadFileByUrl(fileUrl);
-  }
-
-  /**
-   * Check if the current user can export data
-   */
-  canExportData(): boolean {
-    return this.canModifyStocks();
-  }
-
+  
   /**
    * Check if the current user has permission to modify stocks
    */
@@ -563,18 +523,6 @@ export class StockComponent implements OnInit, OnDestroy {
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
-  /**
-   * Load existing export jobs for the current user
-   */
-  loadExistingExportJobs(): void {
-    if (!this.canExportData()) {
-      return; // User doesn't have permission to export, so don't load export jobs
-    }
-
-    this.exportUtilityService.loadExistingExportJobs(
-      'STOCK',
-      this.exportState,
-      this.destroy$,
-    );
-  }
+  // Alias for backward compatibility with template
+  exportStocks = () => this.exportData();
 }
