@@ -28,6 +28,10 @@ control.
 Designed for scalability and performance, Nexora helps businesses efficiently track inventory, manage stock levels,
 prevent stockouts, and optimize warehouse operations.
 
+<p align="center">
+  <img src="/assets/images/landing.png?text=Nexora" alt="Nexora Logo" width="3456"/>
+</p>
+
 ## Key Features
 
 - **Product Management**
@@ -35,10 +39,18 @@ prevent stockouts, and optimize warehouse operations.
     - Categorize products by brand, category, and custom attributes
     - Track product lifecycle with activation/deactivation
 
+<p align="center">
+  <img src="/assets/images/dashboard.png?text=Nexora" alt="Nexora Logo" width="3456"/>
+</p>
+
 - **Warehouse Management**
     - Manage multiple warehouses and their details
     - Track warehouse locations, capacity, and status
     - Organize warehouses by region, country, or custom criteria
+
+<p align="center">
+  <img src="/assets/images/warehouse.png?text=Nexora" alt="Nexora Logo" width="3456"/>
+</p>
 
 - **Stock Management**
     - Track stock levels across warehouses
@@ -46,10 +58,18 @@ prevent stockouts, and optimize warehouse operations.
     - Monitor stock movements and history
     - Generate stock reports and analytics
 
+<p align="center">
+  <img src="/assets/images/stock.png?text=Nexora" alt="Nexora Logo" width="3456"/>
+</p>
+
 - **Dual API Support**
     - RESTful API with comprehensive endpoints
     - GraphQL API for flexible, client-specific queries
     - Swagger/OpenAPI documentation
+
+<p align="center">
+  <img src="/assets/images/swagger.png?text=Nexora" alt="Nexora Logo" width="3456"/>
+</p>
 
 - **Security**
     - JWT-based authentication
@@ -61,6 +81,10 @@ prevent stockouts, and optimize warehouse operations.
     - File storage with Digital Ocean Spaces (S3-compatible)
     - WebSocket support for real-time updates
     - Excel export functionality
+
+<p align="center">
+  <img src="/assets/images/export.png?text=Nexora" alt="Nexora Logo" width="3456"/>
+</p>
 
 ## Architecture
 
