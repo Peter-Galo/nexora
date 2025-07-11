@@ -5,14 +5,20 @@ import {
   ProductAnalytics,
 } from '../../components/inventory/models/inventory.models';
 import { BaseInventoryService } from './base-inventory.service';
-import { environment } from '../../../environments/environment';
+import { RepositoryConfig } from '../../core/repositories/base.repository';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService extends BaseInventoryService<Product> {
-  protected readonly apiUrl = `${environment.apiUrl}/inventory/products`;
-  protected readonly entityName = 'product';
+  // Repository configuration
+  protected readonly config: RepositoryConfig = {
+    baseUrl: 'inventory/products',
+    entityName: 'Product',
+    cacheTimeout: 5 * 60 * 1000, // 5 minutes
+    retryAttempts: 3,
+    enableCache: true
+  };
 
   // Alias methods for backward compatibility
   getAllProducts = () => this.getAll();
@@ -25,14 +31,14 @@ export class ProductService extends BaseInventoryService<Product> {
    * Fetches products by category
    */
   getProductsByCategory(category: string): Observable<Product[]> {
-    return this.getArray(`category/${category}`);
+    return this.get<Product[]>(`category/${category}`);
   }
 
   /**
    * Fetches products by brand
    */
   getProductsByBrand(brand: string): Observable<Product[]> {
-    return this.getArray(`brand/${brand}`);
+    return this.get<Product[]>(`brand/${brand}`);
   }
 
   /**

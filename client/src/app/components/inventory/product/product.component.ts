@@ -76,9 +76,8 @@ export class ProductComponent extends BaseInventoryComponent {
 
   constructor(
     private productService: ProductService,
-    exportUtilityService: ExportUtilityService,
   ) {
-    super(exportUtilityService);
+    super();
   }
 
   protected loadData(): void {
