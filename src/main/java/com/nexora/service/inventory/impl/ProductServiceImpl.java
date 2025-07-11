@@ -5,6 +5,7 @@ import com.nexora.exception.ApplicationException;
 import com.nexora.model.inventory.Product;
 import com.nexora.repository.inventory.ProductRepository;
 import com.nexora.service.inventory.ProductService;
+import com.nexora.util.EntityMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,16 +22,18 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final EntityMapper entityMapper;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, EntityMapper entityMapper) {
         this.productRepository = productRepository;
+        this.entityMapper = entityMapper;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -38,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<ProductDTO> getActiveProducts() {
         return productRepository.findByActiveTrue().stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -46,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductDTO getProductById(UUID id) {
         return productRepository.findById(id)
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + id, "PRODUCT_NOT_FOUND"));
     }
 
@@ -54,15 +57,15 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductDTO getProductByCode(String code) {
         return productRepository.findByCode(code)
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .orElseThrow(() -> new ApplicationException("Product not found with code: " + code, "PRODUCT_NOT_FOUND"));
     }
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
         // Check if product with the same code already exists
-        if (productRepository.existsByCode(productDTO.getCode())) {
-            throw new ApplicationException("Product with code " + productDTO.getCode() + " already exists", "PRODUCT_CODE_EXISTS");
+        if (productRepository.existsByCode(productDTO.code())) {
+            throw new ApplicationException("Product with code " + productDTO.code() + " already exists", "PRODUCT_CODE_EXISTS");
         }
 
         Product product = mapToEntity(productDTO);
@@ -70,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdatedAt(LocalDateTime.now());
 
         Product savedProduct = productRepository.save(product);
-        return mapToDTO(savedProduct);
+        return entityMapper.mapToDTO(savedProduct);
     }
 
     @Override
@@ -79,24 +82,24 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + id, "PRODUCT_NOT_FOUND"));
 
         // Check if the code is being changed and if the new code already exists
-        if (!existingProduct.getCode().equals(productDTO.getCode()) && 
-                productRepository.existsByCode(productDTO.getCode())) {
-            throw new ApplicationException("Product with code " + productDTO.getCode() + " already exists", "PRODUCT_CODE_EXISTS");
+        if (!existingProduct.getCode().equals(productDTO.code()) &&
+                productRepository.existsByCode(productDTO.code())) {
+            throw new ApplicationException("Product with code " + productDTO.code() + " already exists", "PRODUCT_CODE_EXISTS");
         }
 
         // Update the product fields
-        existingProduct.setCode(productDTO.getCode());
-        existingProduct.setName(productDTO.getName());
-        existingProduct.setDescription(productDTO.getDescription());
-        existingProduct.setPrice(productDTO.getPrice());
-        existingProduct.setActive(productDTO.isActive());
-        existingProduct.setCategory(productDTO.getCategory());
-        existingProduct.setBrand(productDTO.getBrand());
-        existingProduct.setSku(productDTO.getSku());
+        existingProduct.setCode(productDTO.code());
+        existingProduct.setName(productDTO.name());
+        existingProduct.setDescription(productDTO.description());
+        existingProduct.setPrice(productDTO.price());
+        existingProduct.setActive(productDTO.active());
+        existingProduct.setCategory(productDTO.category());
+        existingProduct.setBrand(productDTO.brand());
+        existingProduct.setSku(productDTO.sku());
         existingProduct.setUpdatedAt(LocalDateTime.now());
 
         Product updatedProduct = productRepository.save(existingProduct);
-        return mapToDTO(updatedProduct);
+        return entityMapper.mapToDTO(updatedProduct);
     }
 
     @Override
@@ -117,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdatedAt(LocalDateTime.now());
 
         Product updatedProduct = productRepository.save(product);
-        return mapToDTO(updatedProduct);
+        return entityMapper.mapToDTO(updatedProduct);
     }
 
     @Override
@@ -129,14 +132,14 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdatedAt(LocalDateTime.now());
 
         Product updatedProduct = productRepository.save(product);
-        return mapToDTO(updatedProduct);
+        return entityMapper.mapToDTO(updatedProduct);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ProductDTO> getProductsByCategory(String category) {
         return productRepository.findByCategory(category).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -144,7 +147,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<ProductDTO> getProductsByBrand(String brand) {
         return productRepository.findByBrand(brand).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -152,31 +155,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<ProductDTO> searchProductsByName(String name) {
         return productRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Maps a Product entity to a ProductDTO.
-     *
-     * @param product the Product entity
-     * @return the ProductDTO
-     */
-    private ProductDTO mapToDTO(Product product) {
-        return new ProductDTO(
-                product.getUuid(),
-                product.getCode(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getCreatedAt(),
-                product.getUpdatedAt(),
-                product.isActive(),
-                product.getCategory(),
-                product.getBrand(),
-                product.getSku()
-        );
-    }
 
     /**
      * Maps a ProductDTO to a Product entity.
@@ -188,19 +170,17 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         // Don't set ID for new products, let the database generate it
         // Only set ID for existing products (in update operations)
-        if (productDTO.getUuid() != null && productRepository.existsById(productDTO.getUuid())) {
-            product.setUuid(productDTO.getUuid());
+        if (productDTO.uuid() != null && productRepository.existsById(productDTO.uuid())) {
+            product.setUuid(productDTO.uuid());
         }
-        product.setCode(productDTO.getCode());
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        product.setPrice(productDTO.getPrice());
-        product.setActive(productDTO.isActive());
-        product.setCategory(productDTO.getCategory());
-        product.setBrand(productDTO.getBrand());
-        product.setSku(productDTO.getSku());
-
-        // Don't set createdAt and updatedAt here, they are set in the service methods
+        product.setCode(productDTO.code());
+        product.setName(productDTO.name());
+        product.setDescription(productDTO.description());
+        product.setPrice(productDTO.price());
+        product.setActive(productDTO.active());
+        product.setCategory(productDTO.category());
+        product.setBrand(productDTO.brand());
+        product.setSku(productDTO.sku());
 
         return product;
     }

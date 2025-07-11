@@ -1,35 +1,52 @@
-import { HomeComponent } from './components/home/home.component';
 import { Routes } from '@angular/router';
-import { LoginComponent } from './auth/components/login/login.component';
-import { RegisterComponent } from './auth/components/register/register.component';
-import { InventoryComponent } from './components/inventory/inventory.component';
 import { authGuard } from './auth/guards/auth.guard';
-import { WarehouseComponent } from './components/inventory/warehouse/warehouse.component';
-import { StockComponent } from './components/inventory/stock/stock.component';
-import { ProductComponent } from './components/inventory/product/product.component';
-import { AggregateComponent } from './components/inventory/aggregate/aggregate.component';
-import { ExportJobsComponent } from './components/inventory/export-jobs/export-jobs.component';
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: () => import('./auth/components/login/login.component').then(m => m.LoginComponent),
   },
   {
     path: 'register',
-    component: RegisterComponent,
+    loadComponent: () => import('./auth/components/register/register.component').then(m => m.RegisterComponent),
   },
   {
     path: 'inventory',
-    component: InventoryComponent,
+    loadComponent: () => import('./components/inventory/inventory.component').then(m => m.InventoryComponent),
     canActivate: [authGuard],
     children: [
-      { path: '', component: AggregateComponent },
-      { path: 'product', component: ProductComponent },
-      { path: 'stock', component: StockComponent },
-      { path: 'warehouse', component: WarehouseComponent },
-      { path: 'export-jobs', component: ExportJobsComponent },
+      {
+        path: '',
+        loadComponent: () => import('./components/inventory/aggregate/aggregate.component').then(m => m.AggregateComponent)
+      },
+      {
+        path: 'product',
+        loadComponent: () => import('./components/inventory/product/product.component').then(m => m.ProductComponent)
+      },
+      {
+        path: 'stock',
+        loadComponent: () => import('./components/inventory/stock/stock.component').then(m => m.StockComponent)
+      },
+      {
+        path: 'warehouse',
+        loadComponent: () => import('./components/inventory/warehouse/warehouse.component').then(m => m.WarehouseComponent)
+      },
+      {
+        path: 'export-jobs',
+        loadComponent: () => import('./components/inventory/export-jobs/export-jobs.component').then(m => m.ExportJobsComponent)
+      },
     ],
   },
-  { path: '', component: HomeComponent },
+  {
+    path: '',
+    loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent)
+  },
+  {
+    path: '404',
+    loadComponent: () => import('./components/shared/not-found/not-found.component').then(m => m.NotFoundComponent)
+  },
+  {
+    path: '**',
+    redirectTo: '/404'
+  },
 ];

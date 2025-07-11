@@ -78,7 +78,7 @@ export class StockComponent extends BaseInventoryComponent {
   autoRefresh = signal(true);
 
   constructor() {
-    super(inject(ExportUtilityService));
+    super();
   }
 
   // Configuration data
@@ -514,7 +514,7 @@ export class StockComponent extends BaseInventoryComponent {
       return 'Invalid Date';
     }
   }
-  
+
   /**
    * Check if the current user has permission to modify stocks
    */

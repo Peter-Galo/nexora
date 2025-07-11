@@ -61,8 +61,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseDTO createWarehouse(WarehouseDTO warehouseDTO) {
         // Check if warehouse with the same code already exists
-        if (warehouseRepository.existsByCode(warehouseDTO.getCode())) {
-            throw new ApplicationException("Warehouse with code " + warehouseDTO.getCode() + " already exists", "WAREHOUSE_CODE_EXISTS");
+        if (warehouseRepository.existsByCode(warehouseDTO.code())) {
+            throw new ApplicationException("Warehouse with code " + warehouseDTO.code() + " already exists", "WAREHOUSE_CODE_EXISTS");
         }
 
         Warehouse warehouse = mapToEntity(warehouseDTO);
@@ -79,21 +79,21 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + id, "WAREHOUSE_NOT_FOUND"));
 
         // Check if the code is being changed and if the new code already exists
-        if (!existingWarehouse.getCode().equals(warehouseDTO.getCode()) &&
-                warehouseRepository.existsByCode(warehouseDTO.getCode())) {
-            throw new ApplicationException("Warehouse with code " + warehouseDTO.getCode() + " already exists", "WAREHOUSE_CODE_EXISTS");
+        if (!existingWarehouse.getCode().equals(warehouseDTO.code()) &&
+                warehouseRepository.existsByCode(warehouseDTO.code())) {
+            throw new ApplicationException("Warehouse with code " + warehouseDTO.code() + " already exists", "WAREHOUSE_CODE_EXISTS");
         }
 
         // Update the warehouse fields
-        existingWarehouse.setCode(warehouseDTO.getCode());
-        existingWarehouse.setName(warehouseDTO.getName());
-        existingWarehouse.setDescription(warehouseDTO.getDescription());
-        existingWarehouse.setAddress(warehouseDTO.getAddress());
-        existingWarehouse.setCity(warehouseDTO.getCity());
-        existingWarehouse.setStateProvince(warehouseDTO.getStateProvince());
-        existingWarehouse.setPostalCode(warehouseDTO.getPostalCode());
-        existingWarehouse.setCountry(warehouseDTO.getCountry());
-        existingWarehouse.setActive(warehouseDTO.isActive());
+        existingWarehouse.setCode(warehouseDTO.code());
+        existingWarehouse.setName(warehouseDTO.name());
+        existingWarehouse.setDescription(warehouseDTO.description());
+        existingWarehouse.setAddress(warehouseDTO.address());
+        existingWarehouse.setCity(warehouseDTO.city());
+        existingWarehouse.setStateProvince(warehouseDTO.stateProvince());
+        existingWarehouse.setPostalCode(warehouseDTO.postalCode());
+        existingWarehouse.setCountry(warehouseDTO.country());
+        existingWarehouse.setActive(warehouseDTO.active());
         existingWarehouse.setUpdatedAt(LocalDateTime.now());
 
         Warehouse updatedWarehouse = warehouseRepository.save(existingWarehouse);
@@ -196,16 +196,16 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     private Warehouse mapToEntity(WarehouseDTO warehouseDTO) {
         Warehouse warehouse = new Warehouse();
-        warehouse.setUuid(warehouseDTO.getUuid());
-        warehouse.setCode(warehouseDTO.getCode());
-        warehouse.setName(warehouseDTO.getName());
-        warehouse.setDescription(warehouseDTO.getDescription());
-        warehouse.setAddress(warehouseDTO.getAddress());
-        warehouse.setCity(warehouseDTO.getCity());
-        warehouse.setStateProvince(warehouseDTO.getStateProvince());
-        warehouse.setPostalCode(warehouseDTO.getPostalCode());
-        warehouse.setCountry(warehouseDTO.getCountry());
-        warehouse.setActive(warehouseDTO.isActive());
+        warehouse.setUuid(warehouseDTO.uuid());
+        warehouse.setCode(warehouseDTO.code());
+        warehouse.setName(warehouseDTO.name());
+        warehouse.setDescription(warehouseDTO.description());
+        warehouse.setAddress(warehouseDTO.address());
+        warehouse.setCity(warehouseDTO.city());
+        warehouse.setStateProvince(warehouseDTO.stateProvince());
+        warehouse.setPostalCode(warehouseDTO.postalCode());
+        warehouse.setCountry(warehouseDTO.country());
+        warehouse.setActive(warehouseDTO.active());
 
         // Don't set createdAt and updatedAt here, they are set in the service methods
 

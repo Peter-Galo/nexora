@@ -109,14 +109,14 @@
                 class="form-control"
                 [class.is-invalid]="hasFieldError('code')"
                 [class.is-valid]="
-                  fieldTouched()['code'] &&
+                  formState.isFieldTouched('code') &&
                   !hasFieldError('code') &&
-                  createFormData().code?.trim()
+                  formState.data().code?.trim()
                 "
                 placeholder="Enter warehouse code"
-                [value]="createFormData().code"
+                [value]="formState.data().code"
                 (input)="updateFormField('code', $any($event.target).value)"
-                (blur)="updateFormField('code', createFormData().code)"
+                (blur)="formState.touchField('code')"
                 required
                 maxlength="50"
               />
@@ -366,12 +366,12 @@
               class="btn btn-success"
               [disabled]="
                 creating() ||
-                Object.keys(formErrors()).length > 0 ||
-                !createFormData().code?.trim() ||
-                !createFormData().name?.trim() ||
-                !createFormData().address?.trim() ||
-                !createFormData().city?.trim() ||
-                !createFormData().country?.trim()
+                !formState.isValid() ||
+                !formState.data().code?.trim() ||
+                !formState.data().name?.trim() ||
+                !formState.data().address?.trim() ||
+                !formState.data().city?.trim() ||
+                !formState.data().country?.trim()
               "
             >
               @if (creating()) {
@@ -406,13 +406,13 @@
               type="text"
               class="form-control pe-4"
               placeholder="Search by warehouse name"
-              [value]="searchTerm()"
+              [value]="filterState.searchTerm()"
               (input)="onSearchInput($any($event.target).value)"
             />
             <!-- clear button, shown only when there's a value -->
             <button
               id="searchClearButton"
-              *ngIf="searchTerm()"
+              *ngIf="filterState.searchTerm()"
               type="button"
               class="btn btn-sm btn-link p-0 position-absolute top-50 end-0 translate-middle-y me-2"
               (click)="clearSearch()"
@@ -431,7 +431,7 @@
               class="form-check-input"
               type="checkbox"
               id="activeOnlyCheck"
-              [checked]="showActiveOnly()"
+              [checked]="filterState.showActiveOnly()"
               (change)="toggleActiveFilter()"
             />
             <label class="form-check-label" for="activeOnlyCheck">
@@ -456,7 +456,7 @@
       </h5>
     </div>
     <div class="card-body px-0">
-      @if (loading() && warehouses().length === 0) {
+      @if (loading() && filterState.filteredData().length === 0) {
         <div class="text-center py-4">
           <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading warehouses...</span>
@@ -465,7 +465,7 @@
         </div>
       } @else {
         <app-data-table
-          [data]="warehouses()"
+          [data]="filterState.filteredData()"
           [columns]="warehouseColumns()"
           [trackBy]="'uuid'"
           title="Warehouse List"
