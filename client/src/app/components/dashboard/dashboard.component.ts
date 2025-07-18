@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService, User } from '../../auth/services/auth.service';
 import { Router } from '@angular/router';
-import { NgIf, CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, NgIf } from '@angular/common';
 import { ProductService } from '../../services/inventory/product.service';
 import { InventoryService } from '../../services/inventory/inventory.service';
-import { ProductAnalytics, AggregateReportData, StockItem } from '../inventory/models/inventory.models';
-import { forkJoin, catchError, of } from 'rxjs';
+import {
+  AggregateReportData,
+  ProductAnalytics,
+  StockItem,
+} from '../inventory/models/inventory.models';
+import { catchError, forkJoin, of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -52,19 +56,22 @@ export class DashboardComponent implements OnInit {
 
     forkJoin({
       productAnalytics: this.productService.getProductAnalytics(),
-      aggregateData: this.inventoryService.getAggregateReport()
-    }).pipe(
-      catchError(error => {
-        console.error('Error loading dashboard data:', error);
-        this.hasError = true;
-        this.errorMessage = 'Failed to load dashboard data. Please try again.';
-        return of({ productAnalytics: null, aggregateData: null });
-      })
-    ).subscribe(data => {
-      this.productAnalytics = data.productAnalytics;
-      this.aggregateData = data.aggregateData;
-      this.isLoading = false;
-    });
+      aggregateData: this.inventoryService.getAggregateReport(),
+    })
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading dashboard data:', error);
+          this.hasError = true;
+          this.errorMessage =
+            'Failed to load dashboard data. Please try again.';
+          return of({ productAnalytics: null, aggregateData: null });
+        }),
+      )
+      .subscribe((data) => {
+        this.productAnalytics = data.productAnalytics;
+        this.aggregateData = data.aggregateData;
+        this.isLoading = false;
+      });
   }
 
   // Computed properties for dashboard insights
@@ -84,7 +91,7 @@ export class DashboardComponent implements OnInit {
     return this.aggregateData?.warehouseOverview?.length || 0;
   }
 
-  get topCategories(): Array<{key: string, value: number}> {
+  get topCategories(): Array<{ key: string; value: number }> {
     if (!this.productAnalytics?.categoryBreakdown) return [];
     return Object.entries(this.productAnalytics.categoryBreakdown)
       .map(([key, value]) => ({ key, value }))
@@ -95,9 +102,11 @@ export class DashboardComponent implements OnInit {
   get criticalStockItems(): StockItem[] {
     if (!this.aggregateData?.stockLevels) return [];
     const allLowStock: StockItem[] = [];
-    Object.values(this.aggregateData.stockLevels.lowStockByWarehouse).forEach(items => {
-      allLowStock.push(...items);
-    });
+    Object.values(this.aggregateData.stockLevels.lowStockByWarehouse).forEach(
+      (items) => {
+        allLowStock.push(...items);
+      },
+    );
     return allLowStock.slice(0, 5); // Show top 5 critical items
   }
 
@@ -106,12 +115,13 @@ export class DashboardComponent implements OnInit {
 
     const totalProducts = this.productAnalytics.totalProducts;
     const activeProducts = this.productAnalytics.activeProducts;
-    const lowStockProducts = this.aggregateData.stockLevels.totalLowStockProducts;
+    const lowStockProducts =
+      this.aggregateData.stockLevels.totalLowStockProducts;
 
     if (totalProducts === 0) return 100;
 
     const activeRatio = activeProducts / totalProducts;
-    const stockHealthRatio = Math.max(0, 1 - (lowStockProducts / totalProducts));
+    const stockHealthRatio = Math.max(0, 1 - lowStockProducts / totalProducts);
 
     return Math.round((activeRatio * 0.6 + stockHealthRatio * 0.4) * 100);
   }
@@ -135,10 +145,5 @@ export class DashboardComponent implements OnInit {
 
   navigateToReports(): void {
     this.router.navigate(['/inventory']);
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
   }
 }

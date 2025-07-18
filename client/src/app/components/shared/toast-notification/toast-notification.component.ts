@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Notification, NotificationService } from '../../../core/services/notification.service';
 
@@ -27,7 +27,9 @@ import { Notification, NotificationService } from '../../../core/services/notifi
           <i [class]="getIconClass()" [attr.aria-label]="getIconLabel()"></i>
         </div>
 
-        <strong class="me-auto">{{ notification.title || getDefaultTitle() }}</strong>
+        <strong class="me-auto">{{
+          notification.title || getDefaultTitle()
+        }}</strong>
 
         <small class="text-muted">{{ getTimeAgo() }}</small>
 
@@ -35,7 +37,9 @@ import { Notification, NotificationService } from '../../../core/services/notifi
           type="button"
           class="btn-close"
           (click)="onDismiss()"
-          [attr.aria-label]="'Close ' + (notification.title || getDefaultTitle())"
+          [attr.aria-label]="
+            'Close ' + (notification.title || getDefaultTitle())
+          "
         ></button>
       </div>
 
@@ -43,7 +47,10 @@ import { Notification, NotificationService } from '../../../core/services/notifi
         <div class="notification-message">{{ notification.message }}</div>
 
         <!-- Actions -->
-        <div *ngIf="notification.actions && notification.actions.length > 0" class="notification-actions mt-2">
+        <div
+          *ngIf="notification.actions && notification.actions.length > 0"
+          class="notification-actions mt-2"
+        >
           <div class="d-flex gap-2">
             <button
               *ngFor="let action of notification.actions"
@@ -60,7 +67,9 @@ import { Notification, NotificationService } from '../../../core/services/notifi
 
         <!-- Progress bar for timed notifications -->
         <div
-          *ngIf="!notification.persistent && notification.duration && showProgress"
+          *ngIf="
+            !notification.persistent && notification.duration && showProgress
+          "
           class="notification-progress mt-2"
         >
           <div
@@ -71,180 +80,143 @@ import { Notification, NotificationService } from '../../../core/services/notifi
       </div>
     </div>
   `,
-  styles: [`
-    .toast {
-      max-width: 350px;
-      margin-bottom: 0.5rem;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease-in-out;
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .toast-dismissed {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-
-    .toast-success {
-      border-left: 4px solid var(--bs-success);
-    }
-
-    .toast-success .toast-header {
-      background-color: rgba(25, 135, 84, 0.1);
-    }
-
-    .toast-error {
-      border-left: 4px solid var(--bs-danger);
-    }
-
-    .toast-error .toast-header {
-      background-color: rgba(220, 53, 69, 0.1);
-    }
-
-    .toast-warning {
-      border-left: 4px solid var(--bs-warning);
-    }
-
-    .toast-warning .toast-header {
-      background-color: rgba(255, 193, 7, 0.1);
-    }
-
-    .toast-info {
-      border-left: 4px solid var(--bs-info);
-    }
-
-    .toast-info .toast-header {
-      background-color: rgba(13, 202, 240, 0.1);
-    }
-
-    .toast-header {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      padding: 0.75rem;
-    }
-
-    .toast-body {
-      padding: 0.75rem;
-    }
-
-    .toast-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-    }
-
-    .notification-message {
-      word-wrap: break-word;
-      line-height: 1.4;
-    }
-
-    .notification-actions .btn {
-      font-size: 0.875rem;
-    }
-
-    .notification-progress {
-      height: 3px;
-      background-color: rgba(0, 0, 0, 0.1);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background-color: currentColor;
-      opacity: 0.3;
-      animation: progress-countdown linear;
-      transform-origin: left;
-    }
-
-    @keyframes progress-countdown {
-      from {
-        transform: scaleX(1);
-      }
-      to {
-        transform: scaleX(0);
-      }
-    }
-
-    /* Hover effects */
-    .toast:hover {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .toast:hover .progress-bar {
-      animation-play-state: paused;
-    }
-
-    /* Focus styles */
-    .btn-close:focus {
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    /* Responsive design */
-    @media (max-width: 576px) {
+  styles: [
+    `
       .toast {
-        max-width: calc(100vw - 2rem);
-        margin-left: 1rem;
-        margin-right: 1rem;
-      }
-
-      .notification-actions .d-flex {
-        flex-direction: column;
-      }
-
-      .notification-actions .btn {
-        width: 100%;
-        margin-bottom: 0.25rem;
-      }
-
-      .notification-actions .btn:last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    /* High contrast mode */
-    @media (prefers-contrast: high) {
-      .toast {
-        border: 2px solid;
-      }
-
-      .toast-success {
-        border-color: var(--bs-success);
-      }
-
-      .toast-error {
-        border-color: var(--bs-danger);
-      }
-
-      .toast-warning {
-        border-color: var(--bs-warning);
-      }
-
-      .toast-info {
-        border-color: var(--bs-info);
-      }
-    }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      .toast {
-        transition: none;
+        max-width: 350px;
+        margin-bottom: 0.5rem;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        transform: translateX(0);
+        opacity: 1;
       }
 
       .toast-dismissed {
-        display: none;
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      .toast-success {
+        border-left: 4px solid var(--bs-success);
+      }
+
+      .toast-success .toast-header {
+        background-color: rgba(25, 135, 84, 0.1);
+      }
+
+      .toast-error {
+        border-left: 4px solid var(--bs-danger);
+      }
+
+      .toast-error .toast-header {
+        background-color: rgba(220, 53, 69, 0.1);
+      }
+
+      .toast-warning {
+        border-left: 4px solid var(--bs-warning);
+      }
+
+      .toast-warning .toast-header {
+        background-color: rgba(255, 193, 7, 0.1);
+      }
+
+      .toast-info {
+        border-left: 4px solid var(--bs-info);
+      }
+
+      .toast-info .toast-header {
+        background-color: rgba(13, 202, 240, 0.1);
+      }
+
+      .toast-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 0.75rem;
+      }
+
+      .toast-body {
+        padding: 0.75rem;
+      }
+
+      .toast-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+      }
+
+      .notification-message {
+        word-wrap: break-word;
+        line-height: 1.4;
+      }
+
+      .notification-actions .btn {
+        font-size: 0.875rem;
+      }
+
+      .notification-progress {
+        height: 3px;
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
       }
 
       .progress-bar {
-        animation: none;
-        display: none;
+        height: 100%;
+        background-color: currentColor;
+        opacity: 0.3;
+        animation: progress-countdown linear;
+        transform-origin: left;
       }
-    }
-  `]
+
+      @keyframes progress-countdown {
+        from {
+          transform: scaleX(1);
+        }
+        to {
+          transform: scaleX(0);
+        }
+      }
+
+      /* Hover effects */
+      .toast:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .toast:hover .progress-bar {
+        animation-play-state: paused;
+      }
+
+      /* Focus styles */
+      .btn-close:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      /* Responsive design */
+      @media (max-width: 576px) {
+        .toast {
+          max-width: calc(100vw - 2rem);
+          margin-left: 1rem;
+          margin-right: 1rem;
+        }
+
+        .notification-actions .d-flex {
+          flex-direction: column;
+        }
+
+        .notification-actions .btn {
+          width: 100%;
+          margin-bottom: 0.25rem;
+        }
+
+        .notification-actions .btn:last-child {
+          margin-bottom: 0;
+        }
+      }
+    `,
+  ],
 })
 export class ToastNotificationComponent {
   @Input() notification!: Notification;

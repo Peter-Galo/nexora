@@ -37,7 +37,7 @@ export class ExportUtilityService {
   initiateExport(
     category: ExportCategory,
     exportState: ReturnType<typeof this.createExportState>,
-    destroy$: Observable<void>
+    destroy$: Observable<void>,
   ): void {
     exportState.exportLoading.set(true);
     exportState.error.set(null);
@@ -65,13 +65,16 @@ export class ExportUtilityService {
     exportRequest
       .pipe(
         catchError((err) => {
-          console.error(`Error requesting ${category.toLowerCase()} export:`, err);
+          console.error(
+            `Error requesting ${category.toLowerCase()} export:`,
+            err,
+          );
           exportState.error.set(
-            `Failed to request ${category.toLowerCase()} export. Please try again.`
+            `Failed to request ${category.toLowerCase()} export. Please try again.`,
           );
           return of(null);
         }),
-        takeUntil(destroy$)
+        takeUntil(destroy$),
       )
       .subscribe((response) => {
         exportState.exportLoading.set(false);
@@ -80,7 +83,12 @@ export class ExportUtilityService {
           exportState.exportStatus.set('PENDING');
 
           // Start polling for export status
-          this.pollExportStatus(response.jobId, category, exportState, destroy$);
+          this.pollExportStatus(
+            response.jobId,
+            category,
+            exportState,
+            destroy$,
+          );
 
           console.log(`${category} export initiated successfully:`, response);
         }
@@ -94,7 +102,7 @@ export class ExportUtilityService {
     jobId: string,
     category: ExportCategory,
     exportState: ReturnType<typeof this.createExportState>,
-    destroy$: Observable<void>
+    destroy$: Observable<void>,
   ): void {
     const pollInterval = setInterval(() => {
       this.exportService
@@ -107,7 +115,7 @@ export class ExportUtilityService {
             exportState.error.set('Failed to check export status.');
             return of(null);
           }),
-          takeUntil(destroy$)
+          takeUntil(destroy$),
         )
         .subscribe((job) => {
           if (job) {
@@ -119,7 +127,7 @@ export class ExportUtilityService {
             } else if (job.status === 'FAILED') {
               clearInterval(pollInterval);
               exportState.error.set(
-                job.errorMessage || 'Export failed. Please try again.'
+                job.errorMessage || 'Export failed. Please try again.',
               );
             }
           }
@@ -135,7 +143,7 @@ export class ExportUtilityService {
       ) {
         exportState.exportStatus.set('TIMEOUT');
         exportState.error.set(
-          'Export is taking longer than expected. Please check back later.'
+          'Export is taking longer than expected. Please check back later.',
         );
       }
     }, 300000); // 5 minutes
@@ -147,7 +155,7 @@ export class ExportUtilityService {
   private addExportedFile(
     job: ExportJob,
     category: ExportCategory,
-    exportState: ReturnType<typeof this.createExportState>
+    exportState: ReturnType<typeof this.createExportState>,
   ): void {
     if (job.fileUrl) {
       const fileName = `${category.toLowerCase()}_export_${new Date().toISOString().split('T')[0]}.xlsx`;
@@ -175,19 +183,12 @@ export class ExportUtilityService {
   }
 
   /**
-   * Download file by URL
-   */
-  downloadFileByUrl(fileUrl: string): void {
-    window.open(fileUrl, '_blank');
-  }
-
-  /**
    * Load existing export jobs for a specific category
    */
   loadExistingExportJobs(
     category: ExportCategory,
     exportState: ReturnType<typeof this.createExportState>,
-    destroy$: Observable<void>
+    destroy$: Observable<void>,
   ): void {
     this.exportService
       .getUserExportJobs()
@@ -196,7 +197,7 @@ export class ExportUtilityService {
           console.error('Error loading existing export jobs:', err);
           return of([]);
         }),
-        takeUntil(destroy$)
+        takeUntil(destroy$),
       )
       .subscribe((jobs) => {
         // Filter for the specific category export jobs and convert to the expected format
@@ -205,7 +206,7 @@ export class ExportUtilityService {
             (job) =>
               job.category === category &&
               job.status === 'COMPLETED' &&
-              job.fileUrl
+              job.fileUrl,
           )
           .map((job) => ({
             jobId: job.uuid,

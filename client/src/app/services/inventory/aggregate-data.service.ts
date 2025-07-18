@@ -1,11 +1,6 @@
 // src/app/components/inventory/aggregate/aggregate-data.service.ts
 import { computed, Injectable, signal } from '@angular/core';
-import {
-  AggregateReportData,
-  StockItem,
-} from '../../components/inventory/models/inventory.models';
-
-export type WarehouseStockEntry = [string, StockItem[]];
+import { AggregateReportData } from '../../components/inventory/models/inventory.models';
 
 @Injectable()
 export class AggregateDataService {

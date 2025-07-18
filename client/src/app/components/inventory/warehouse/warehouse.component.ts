@@ -1,8 +1,14 @@
-import { Component, computed, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  WarehouseDTO,
+  WarehouseEntity,
   WarehouseService,
 } from '../../../services/inventory/warehouse.service';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
@@ -41,14 +47,14 @@ export class WarehouseComponent extends BaseInventoryComponent {
       postalCode: '',
       country: '',
       active: true,
-    } as Partial<WarehouseDTO>,
-    FormValidationService.WAREHOUSE_VALIDATION
+    } as Partial<WarehouseEntity>,
+    FormValidationService.WAREHOUSE_VALIDATION,
   );
 
   // Filter state using filtering service
   filterState = this.filteringService.createFilterState(
-    [] as WarehouseDTO[],
-    FilteringService.COMMON_CONFIGS.warehouse
+    [] as WarehouseEntity[],
+    FilteringService.COMMON_CONFIGS.warehouse,
   );
 
   // UI state
@@ -56,7 +62,9 @@ export class WarehouseComponent extends BaseInventoryComponent {
   creating = signal<boolean>(false);
 
   // Computed properties using permission service
-  readonly permissions = computed(() => this.permissionService.getWarehousePermissions());
+  readonly permissions = computed(() =>
+    this.permissionService.getWarehousePermissions(),
+  );
 
   // Column definitions - dynamically filtered based on user permissions
   protected readonly warehouseColumns = computed(() => {
@@ -64,7 +72,9 @@ export class WarehouseComponent extends BaseInventoryComponent {
     if (perms.canModify || perms.canDelete) {
       return WAREHOUSE_MANAGEMENT_COLUMNS;
     } else {
-      return WAREHOUSE_MANAGEMENT_COLUMNS.filter(column => column.field !== 'actions');
+      return WAREHOUSE_MANAGEMENT_COLUMNS.filter(
+        (column) => column.field !== 'actions',
+      );
     }
   });
 
@@ -78,10 +88,10 @@ export class WarehouseComponent extends BaseInventoryComponent {
   protected loadData(): void {
     this.handleApiCall(
       () => this.warehouseService.getAllWarehouses(),
-      (warehouses: WarehouseDTO[]) => {
+      (warehouses: WarehouseEntity[]) => {
         this.filterState.updateData(warehouses);
       },
-      'load warehouses'
+      'load warehouses',
     );
   }
 
@@ -114,66 +124,84 @@ export class WarehouseComponent extends BaseInventoryComponent {
   /**
    * Activate a warehouse
    */
-  activateWarehouse(warehouse: WarehouseDTO): void {
+  activateWarehouse(warehouse: WarehouseEntity): void {
     if (!this.canModifyWarehouses()) {
       this.handleError(
-        { message: this.permissionService.getPermissionErrorMessage('warehouse.activate') },
-        'activate warehouse'
+        {
+          message:
+            this.permissionService.getPermissionErrorMessage(
+              'warehouse.activate',
+            ),
+        },
+        'activate warehouse',
       );
       return;
     }
 
     this.handleApiCall(
       () => this.warehouseService.activateWarehouse(warehouse.uuid!),
-      (updatedWarehouse: WarehouseDTO) => {
+      (updatedWarehouse: WarehouseEntity) => {
         const currentData = this.filterState.allData();
-        const updatedData = currentData.map(w =>
-          w.uuid === warehouse.uuid ? updatedWarehouse : w
+        const updatedData = currentData.map((w) =>
+          w.uuid === warehouse.uuid ? updatedWarehouse : w,
         );
         this.filterState.updateData(updatedData);
       },
-      'activate warehouse'
+      'activate warehouse',
     );
   }
 
   /**
    * Deactivate a warehouse
    */
-  deactivateWarehouse(warehouse: WarehouseDTO): void {
+  deactivateWarehouse(warehouse: WarehouseEntity): void {
     if (!this.canModifyWarehouses()) {
       this.handleError(
-        { message: this.permissionService.getPermissionErrorMessage('warehouse.deactivate') },
-        'deactivate warehouse'
+        {
+          message: this.permissionService.getPermissionErrorMessage(
+            'warehouse.deactivate',
+          ),
+        },
+        'deactivate warehouse',
       );
       return;
     }
 
     this.handleApiCall(
       () => this.warehouseService.deactivateWarehouse(warehouse.uuid!),
-      (updatedWarehouse: WarehouseDTO) => {
+      (updatedWarehouse: WarehouseEntity) => {
         const currentData = this.filterState.allData();
-        const updatedData = currentData.map(w =>
-          w.uuid === warehouse.uuid ? updatedWarehouse : w
+        const updatedData = currentData.map((w) =>
+          w.uuid === warehouse.uuid ? updatedWarehouse : w,
         );
         this.filterState.updateData(updatedData);
       },
-      'deactivate warehouse'
+      'deactivate warehouse',
     );
   }
 
   /**
    * Delete a warehouse
    */
-  deleteWarehouse(warehouse: WarehouseDTO): void {
+  deleteWarehouse(warehouse: WarehouseEntity): void {
     if (!this.canDeleteWarehouses()) {
       this.handleError(
-        { message: this.permissionService.getPermissionErrorMessage('warehouse.delete') },
-        'delete warehouse'
+        {
+          message:
+            this.permissionService.getPermissionErrorMessage(
+              'warehouse.delete',
+            ),
+        },
+        'delete warehouse',
       );
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete warehouse "${warehouse.name}"? This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete warehouse "${warehouse.name}"? This action cannot be undone.`,
+      )
+    ) {
       return;
     }
 
@@ -181,10 +209,12 @@ export class WarehouseComponent extends BaseInventoryComponent {
       () => this.warehouseService.deleteWarehouse(warehouse.uuid!),
       () => {
         const currentData = this.filterState.allData();
-        const updatedData = currentData.filter(w => w.uuid !== warehouse.uuid);
+        const updatedData = currentData.filter(
+          (w) => w.uuid !== warehouse.uuid,
+        );
         this.filterState.updateData(updatedData);
       },
-      'delete warehouse'
+      'delete warehouse',
     );
   }
 
@@ -201,8 +231,13 @@ export class WarehouseComponent extends BaseInventoryComponent {
   showCreateWarehouseForm(): void {
     if (!this.canCreateWarehouses()) {
       this.handleError(
-        { message: this.permissionService.getPermissionErrorMessage('warehouse.create') },
-        'show create form'
+        {
+          message:
+            this.permissionService.getPermissionErrorMessage(
+              'warehouse.create',
+            ),
+        },
+        'show create form',
       );
       return;
     }
@@ -222,21 +257,21 @@ export class WarehouseComponent extends BaseInventoryComponent {
    * Update form field value
    */
   updateFormField(field: string, value: any): void {
-    this.formState.updateField(field as keyof WarehouseDTO, value);
+    this.formState.updateField(field as keyof WarehouseEntity, value);
   }
 
   /**
    * Get error message for a specific field
    */
   getFieldError(field: string): string | null {
-    return this.formState.getFieldError(field as keyof WarehouseDTO);
+    return this.formState.getFieldError(field as keyof WarehouseEntity);
   }
 
   /**
    * Check if a field has an error
    */
   hasFieldError(field: string): boolean {
-    return this.formState.hasFieldError(field as keyof WarehouseDTO);
+    return this.formState.hasFieldError(field as keyof WarehouseEntity);
   }
 
   /**
@@ -254,13 +289,6 @@ export class WarehouseComponent extends BaseInventoryComponent {
   }
 
   /**
-   * Get form errors
-   */
-  formErrors() {
-    return this.formState.errors();
-  }
-
-  /**
    * Make Object available in template
    */
   Object = Object;
@@ -271,16 +299,23 @@ export class WarehouseComponent extends BaseInventoryComponent {
   createWarehouse(): void {
     if (!this.canCreateWarehouses()) {
       this.handleError(
-        { message: this.permissionService.getPermissionErrorMessage('warehouse.create') },
-        'create warehouse'
+        {
+          message:
+            this.permissionService.getPermissionErrorMessage(
+              'warehouse.create',
+            ),
+        },
+        'create warehouse',
       );
       return;
     }
 
     if (!this.formState.validateAll()) {
       this.handleError(
-        { message: 'Please fix the validation errors below before submitting.' },
-        'validate form'
+        {
+          message: 'Please fix the validation errors below before submitting.',
+        },
+        'validate form',
       );
       return;
     }
@@ -288,14 +323,17 @@ export class WarehouseComponent extends BaseInventoryComponent {
     this.creating.set(true);
 
     this.handleApiCall(
-      () => this.warehouseService.createWarehouse(this.formState.data() as WarehouseDTO),
-      (newWarehouse: WarehouseDTO) => {
+      () =>
+        this.warehouseService.createWarehouse(
+          this.formState.data() as WarehouseEntity,
+        ),
+      (newWarehouse: WarehouseEntity) => {
         const currentData = this.filterState.allData();
         this.filterState.updateData([newWarehouse, ...currentData]);
         this.hideCreateWarehouseForm();
         this.creating.set(false);
       },
-      'create warehouse'
+      'create warehouse',
     );
   }
 

@@ -89,25 +89,6 @@ export class ExportService {
   }
 
   /**
-   * Download exported file
-   * @param jobId - The export job ID
-   * @returns Observable for file download redirect
-   */
-  downloadExportedFile(jobId: string): Observable<any> {
-    return this.http
-      .get(`${ExportService.API_URL}/download/${jobId}`, {
-        observe: 'response',
-        responseType: 'blob',
-      })
-      .pipe(
-        catchError((error) => {
-          console.error('Error downloading exported file:', error);
-          throw error;
-        }),
-      );
-  }
-
-  /**
    * Get all export jobs for the authenticated user
    * @returns Observable with list of export jobs
    */

@@ -17,29 +17,11 @@ export class ProductService extends BaseInventoryService<Product> {
     entityName: 'Product',
     cacheTimeout: 5 * 60 * 1000, // 5 minutes
     retryAttempts: 3,
-    enableCache: true
+    enableCache: true,
   };
 
   // Alias methods for backward compatibility
   getAllProducts = () => this.getAll();
-  getActiveProducts = () => this.getActive();
-  getProductById = (id: string) => this.getById(id);
-  getProductByCode = (code: string) => this.getByCode(code);
-  searchProductsByName = (name: string) => this.searchByName(name);
-
-  /**
-   * Fetches products by category
-   */
-  getProductsByCategory(category: string): Observable<Product[]> {
-    return this.get<Product[]>(`category/${category}`);
-  }
-
-  /**
-   * Fetches products by brand
-   */
-  getProductsByBrand(brand: string): Observable<Product[]> {
-    return this.get<Product[]>(`brand/${brand}`);
-  }
 
   /**
    * Calculates product analytics from a list of products

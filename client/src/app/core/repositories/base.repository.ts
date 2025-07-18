@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject, timer } from 'rxjs';
-import { catchError, retry, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry, shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -34,19 +34,6 @@ export interface QueryParams {
 }
 
 /**
- * Paginated Response Interface
- */
-export interface PaginatedResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
-  first: boolean;
-  last: boolean;
-}
-
-/**
  * Repository Error Interface
  */
 export interface RepositoryError {
@@ -70,7 +57,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
 
   // Cache management
   private readonly cache = new Map<string, { data: any; timestamp: number }>();
-  private readonly refreshSubject = new BehaviorSubject<void>(undefined);
 
   /**
    * Get the full API URL for the entity
@@ -103,13 +89,16 @@ export abstract class BaseRepository<T extends BaseEntity> {
   /**
    * Generic HTTP GET request with caching and error handling
    */
-  protected get<R = T>(endpoint: string = '', params?: QueryParams): Observable<R> {
+  protected get<R = T>(
+    endpoint: string = '',
+    params?: QueryParams,
+  ): Observable<R> {
     const url = this.buildUrl(endpoint);
     const cacheKey = this.buildCacheKey(url, params);
 
     // Check cache first if enabled
     if (this.isCacheEnabled && this.isValidCache(cacheKey)) {
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(this.cache.get(cacheKey)!.data);
         observer.complete();
       });
@@ -119,52 +108,46 @@ export abstract class BaseRepository<T extends BaseEntity> {
 
     return this.http.get<R>(url, { params: httpParams }).pipe(
       retry(this.retryAttempts),
-      tap(data => {
+      tap((data) => {
         if (this.isCacheEnabled) {
           this.setCache(cacheKey, data);
         }
       }),
-      catchError(error => this.handleError(error, 'GET', url)),
-      shareReplay(1)
+      catchError((error) => this.handleError(error, 'GET', url)),
+      shareReplay(1),
     );
   }
 
   /**
    * Generic HTTP POST request with error handling
    */
-  protected post<R = T>(data: Partial<T>, endpoint: string = ''): Observable<R> {
+  protected post<R = T>(
+    data: Partial<T>,
+    endpoint: string = '',
+  ): Observable<R> {
     const url = this.buildUrl(endpoint);
 
     return this.http.post<R>(url, data).pipe(
       retry(this.retryAttempts),
       tap(() => this.invalidateCache()),
-      catchError(error => this.handleError(error, 'POST', url))
+      catchError((error) => this.handleError(error, 'POST', url)),
     );
   }
 
   /**
    * Generic HTTP PUT request with error handling
    */
-  protected put<R = T>(id: string, data: Partial<T>, endpoint: string = ''): Observable<R> {
+  protected put<R = T>(
+    id: string,
+    data: Partial<T>,
+    endpoint: string = '',
+  ): Observable<R> {
     const url = this.buildUrl(endpoint ? `${id}/${endpoint}` : id);
 
     return this.http.put<R>(url, data).pipe(
       retry(this.retryAttempts),
       tap(() => this.invalidateCache()),
-      catchError(error => this.handleError(error, 'PUT', url))
-    );
-  }
-
-  /**
-   * Generic HTTP PATCH request with error handling
-   */
-  protected patch<R = T>(id: string, data: Partial<T>, endpoint: string = ''): Observable<R> {
-    const url = this.buildUrl(endpoint ? `${id}/${endpoint}` : id);
-
-    return this.http.patch<R>(url, data).pipe(
-      retry(this.retryAttempts),
-      tap(() => this.invalidateCache()),
-      catchError(error => this.handleError(error, 'PATCH', url))
+      catchError((error) => this.handleError(error, 'PUT', url)),
     );
   }
 
@@ -177,7 +160,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
     return this.http.delete<void>(url).pipe(
       retry(this.retryAttempts),
       tap(() => this.invalidateCache()),
-      catchError(error => this.handleError(error, 'DELETE', url))
+      catchError((error) => this.handleError(error, 'DELETE', url)),
     );
   }
 
@@ -189,46 +172,10 @@ export abstract class BaseRepository<T extends BaseEntity> {
   }
 
   /**
-   * Get paginated entities
-   */
-  findAllPaginated(page: number = 0, size: number = 20, params?: QueryParams): Observable<PaginatedResponse<T>> {
-    const paginationParams = { page, size, ...params };
-    return this.get<PaginatedResponse<T>>('paginated', paginationParams);
-  }
-
-  /**
-   * Get entity by ID
-   */
-  findById(id: string): Observable<T> {
-    return this.get<T>(id);
-  }
-
-  /**
-   * Get entity by UUID
-   */
-  findByUuid(uuid: string): Observable<T> {
-    return this.get<T>(`uuid/${uuid}`);
-  }
-
-  /**
    * Create new entity
    */
   create(entity: Partial<T>): Observable<T> {
     return this.post<T>(entity);
-  }
-
-  /**
-   * Update existing entity
-   */
-  update(id: string, entity: Partial<T>): Observable<T> {
-    return this.put<T>(id, entity);
-  }
-
-  /**
-   * Partially update entity
-   */
-  partialUpdate(id: string, entity: Partial<T>): Observable<T> {
-    return this.patch<T>(id, entity);
   }
 
   /**
@@ -247,13 +194,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
   }
 
   /**
-   * Get active entities
-   */
-  findActive(params?: QueryParams): Observable<T[]> {
-    return this.get<T[]>('active', params);
-  }
-
-  /**
    * Activate entity
    */
   activate(id: string): Observable<T> {
@@ -265,21 +205,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
    */
   deactivate(id: string): Observable<T> {
     return this.put<T>(id, {}, 'deactivate');
-  }
-
-  /**
-   * Refresh cache and reload data
-   */
-  refresh(): void {
-    this.invalidateCache();
-    this.refreshSubject.next();
-  }
-
-  /**
-   * Get refresh observable for reactive updates
-   */
-  getRefreshObservable(): Observable<void> {
-    return this.refreshSubject.asObservable();
   }
 
   /**
@@ -296,11 +221,13 @@ export abstract class BaseRepository<T extends BaseEntity> {
     let httpParams = new HttpParams();
 
     if (params) {
-      Object.keys(params).forEach(key => {
+      Object.keys(params).forEach((key) => {
         const value = params[key];
         if (value !== null && value !== undefined) {
           if (Array.isArray(value)) {
-            value.forEach(v => httpParams = httpParams.append(key, v.toString()));
+            value.forEach(
+              (v) => (httpParams = httpParams.append(key, v.toString())),
+            );
           } else {
             httpParams = httpParams.set(key, value.toString());
           }
@@ -327,7 +254,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
     if (!entry) return false;
 
     const now = Date.now();
-    return (now - entry.timestamp) < this.cacheTimeout;
+    return now - entry.timestamp < this.cacheTimeout;
   }
 
   /**
@@ -336,7 +263,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
   private setCache(key: string, data: any): void {
     this.cache.set(key, {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -350,13 +277,17 @@ export abstract class BaseRepository<T extends BaseEntity> {
   /**
    * Handle HTTP errors with proper error transformation
    */
-  private handleError(error: HttpErrorResponse, method: string, url: string): Observable<never> {
+  private handleError(
+    error: HttpErrorResponse,
+    method: string,
+    url: string,
+  ): Observable<never> {
     const repositoryError: RepositoryError = {
       message: this.getErrorMessage(error),
       status: error.status || 0,
       timestamp: new Date().toISOString(),
       path: url,
-      details: error.error
+      details: error.error,
     };
 
     console.error(`Repository Error [${method}] ${url}:`, repositoryError);
