@@ -59,27 +59,38 @@ public class ProductGraphQLResolver {
 
     @MutationMapping
     public ProductDTO createProduct(@Argument("product") ProductInput input) {
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setCode(input.getCode());
-        productDTO.setName(input.getName());
-        productDTO.setDescription(input.getDescription());
-        productDTO.setPrice(input.getPrice());
-        productDTO.setCategory(input.getCategory());
-        productDTO.setBrand(input.getBrand());
-        productDTO.setSku(input.getSku());
+        ProductDTO productDTO = new ProductDTO(
+                null,                      // UUID (for create)
+                input.code(),              // code
+                input.name(),              // name
+                input.description(),       // description
+                input.price(),             // price
+                null,                      // createdAt
+                null,                      // updatedAt
+                true,                      // active (or false, as you wish)
+                input.category(),          // category
+                input.brand(),             // brand
+                input.sku()                // sku
+        );
+
         return productService.createProduct(productDTO);
     }
 
     @MutationMapping
     public ProductDTO updateProduct(@Argument String id, @Argument("product") ProductInput input) {
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setCode(input.getCode());
-        productDTO.setName(input.getName());
-        productDTO.setDescription(input.getDescription());
-        productDTO.setPrice(input.getPrice());
-        productDTO.setCategory(input.getCategory());
-        productDTO.setBrand(input.getBrand());
-        productDTO.setSku(input.getSku());
+        ProductDTO productDTO = new ProductDTO(
+                null,                      // UUID (for create)
+                input.code(),              // code
+                input.name(),              // name
+                input.description(),       // description
+                input.price(),             // price
+                null,                      // createdAt
+                null,                      // updatedAt
+                true,                      // active (or false, as you wish)
+                input.category(),          // category
+                input.brand(),             // brand
+                input.sku()                // sku
+        );
         return productService.updateProduct(UUID.fromString(id), productDTO);
     }
 

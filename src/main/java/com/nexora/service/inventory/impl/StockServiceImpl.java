@@ -11,6 +11,7 @@ import com.nexora.repository.inventory.ProductRepository;
 import com.nexora.repository.inventory.StockRepository;
 import com.nexora.repository.inventory.WarehouseRepository;
 import com.nexora.service.inventory.StockService;
+import com.nexora.util.EntityMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,20 +30,23 @@ public class StockServiceImpl implements StockService {
     private final StockRepository stockRepository;
     private final ProductRepository productRepository;
     private final WarehouseRepository warehouseRepository;
+    private final EntityMapper entityMapper;
 
     public StockServiceImpl(StockRepository stockRepository,
                             ProductRepository productRepository,
-                            WarehouseRepository warehouseRepository) {
+                            WarehouseRepository warehouseRepository,
+                            EntityMapper entityMapper) {
         this.stockRepository = stockRepository;
         this.productRepository = productRepository;
         this.warehouseRepository = warehouseRepository;
+        this.entityMapper = entityMapper;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StockDTO> getAllStocks() {
         return stockRepository.findAllWithProductAndWarehouse().stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -50,7 +54,7 @@ public class StockServiceImpl implements StockService {
     @Transactional(readOnly = true)
     public StockDTO getStockById(UUID id) {
         return stockRepository.findById(id)
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .orElseThrow(() -> new ApplicationException("Stock not found with id: " + id, "STOCK_NOT_FOUND"));
     }
 
@@ -61,7 +65,7 @@ public class StockServiceImpl implements StockService {
                 .orElseThrow(() -> new ApplicationException("Product not found with id: " + productId, "PRODUCT_NOT_FOUND"));
 
         return stockRepository.findByProduct(product).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -69,7 +73,7 @@ public class StockServiceImpl implements StockService {
     @Transactional(readOnly = true)
     public List<StockDTO> getStocksByProductCode(String productCode) {
         return stockRepository.findByProductCode(productCode).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -80,7 +84,7 @@ public class StockServiceImpl implements StockService {
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseId, "WAREHOUSE_NOT_FOUND"));
 
         return stockRepository.findByWarehouse(warehouse).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -88,7 +92,7 @@ public class StockServiceImpl implements StockService {
     @Transactional(readOnly = true)
     public List<StockDTO> getStocksByWarehouseCode(String warehouseCode) {
         return stockRepository.findByWarehouseCode(warehouseCode).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -102,7 +106,7 @@ public class StockServiceImpl implements StockService {
                 .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseId, "WAREHOUSE_NOT_FOUND"));
 
         return stockRepository.findByProductAndWarehouse(product, warehouse)
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .orElseThrow(() -> new ApplicationException(
                         "Stock not found for product id: " + productId + " and warehouse id: " + warehouseId,
                         "STOCK_NOT_FOUND"));
@@ -111,8 +115,8 @@ public class StockServiceImpl implements StockService {
     @Override
     public StockDTO createStock(StockDTO stockDTO) {
         // Get product and warehouse entities
-        Product product = getProductFromDTO(stockDTO.getProduct());
-        Warehouse warehouse = getWarehouseFromDTO(stockDTO.getWarehouse());
+        Product product = getProductFromDTO(stockDTO.product());
+        Warehouse warehouse = getWarehouseFromDTO(stockDTO.warehouse());
 
         // Check if stock already exists for this product and warehouse
         if (stockRepository.findByProductAndWarehouse(product, warehouse).isPresent()) {
@@ -126,15 +130,15 @@ public class StockServiceImpl implements StockService {
         Stock stock = new Stock();
         stock.setProduct(product);
         stock.setWarehouse(warehouse);
-        stock.setQuantity(stockDTO.getQuantity());
-        stock.setMinStockLevel(stockDTO.getMinStockLevel());
-        stock.setMaxStockLevel(stockDTO.getMaxStockLevel());
-        stock.setLastRestockDate(stockDTO.getLastRestockDate());
+        stock.setQuantity(stockDTO.quantity());
+        stock.setMinStockLevel(stockDTO.minStockLevel());
+        stock.setMaxStockLevel(stockDTO.maxStockLevel());
+        stock.setLastRestockDate(stockDTO.lastRestockDate());
         stock.setCreatedAt(LocalDateTime.now());
         stock.setUpdatedAt(LocalDateTime.now());
 
         Stock savedStock = stockRepository.save(stock);
-        return mapToDTO(savedStock);
+        return entityMapper.mapToDTO(savedStock);
     }
 
     @Override
@@ -143,8 +147,8 @@ public class StockServiceImpl implements StockService {
                 .orElseThrow(() -> new ApplicationException("Stock not found with id: " + id, "STOCK_NOT_FOUND"));
 
         // Get product and warehouse entities
-        Product product = getProductFromDTO(stockDTO.getProduct());
-        Warehouse warehouse = getWarehouseFromDTO(stockDTO.getWarehouse());
+        Product product = getProductFromDTO(stockDTO.product());
+        Warehouse warehouse = getWarehouseFromDTO(stockDTO.warehouse());
 
         // Check if changing product or warehouse would create a duplicate
         if ((existingStock.getProduct().getUuid() != product.getUuid() ||
@@ -159,14 +163,14 @@ public class StockServiceImpl implements StockService {
         // Update stock
         existingStock.setProduct(product);
         existingStock.setWarehouse(warehouse);
-        existingStock.setQuantity(stockDTO.getQuantity());
-        existingStock.setMinStockLevel(stockDTO.getMinStockLevel());
-        existingStock.setMaxStockLevel(stockDTO.getMaxStockLevel());
-        existingStock.setLastRestockDate(stockDTO.getLastRestockDate());
+        existingStock.setQuantity(stockDTO.quantity());
+        existingStock.setMinStockLevel(stockDTO.minStockLevel());
+        existingStock.setMaxStockLevel(stockDTO.maxStockLevel());
+        existingStock.setLastRestockDate(stockDTO.lastRestockDate());
         existingStock.setUpdatedAt(LocalDateTime.now());
 
         Stock updatedStock = stockRepository.save(existingStock);
-        return mapToDTO(updatedStock);
+        return entityMapper.mapToDTO(updatedStock);
     }
 
     @Override
@@ -189,7 +193,7 @@ public class StockServiceImpl implements StockService {
 
         stock.addStock(quantity);
         Stock updatedStock = stockRepository.save(stock);
-        return mapToDTO(updatedStock);
+        return entityMapper.mapToDTO(updatedStock);
     }
 
     @Override
@@ -207,14 +211,14 @@ public class StockServiceImpl implements StockService {
 
         stock.removeStock(quantity);
         Stock updatedStock = stockRepository.save(stock);
-        return mapToDTO(updatedStock);
+        return entityMapper.mapToDTO(updatedStock);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StockDTO> getLowStocks() {
         return stockRepository.findLowStock().stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -222,7 +226,7 @@ public class StockServiceImpl implements StockService {
     @Transactional(readOnly = true)
     public List<StockDTO> getOverStocks() {
         return stockRepository.findOverStock().stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -230,77 +234,10 @@ public class StockServiceImpl implements StockService {
     @Transactional(readOnly = true)
     public List<StockDTO> getZeroStocks() {
         return stockRepository.findByQuantity(0).stream()
-                .map(this::mapToDTO)
+                .map(entityMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Maps a Stock entity to a StockDTO.
-     *
-     * @param stock the Stock entity
-     * @return the StockDTO
-     */
-    private StockDTO mapToDTO(Stock stock) {
-        ProductDTO productDTO = mapProductToDTO(stock.getProduct());
-        WarehouseDTO warehouseDTO = mapWarehouseToDTO(stock.getWarehouse());
-
-        return new StockDTO(
-                stock.getUuid(),
-                productDTO,
-                warehouseDTO,
-                stock.getQuantity(),
-                stock.getMinStockLevel(),
-                stock.getMaxStockLevel(),
-                stock.getLastRestockDate(),
-                stock.getCreatedAt(),
-                stock.getUpdatedAt()
-        );
-    }
-
-    /**
-     * Maps a Product entity to a ProductDTO.
-     *
-     * @param product the Product entity
-     * @return the ProductDTO
-     */
-    private ProductDTO mapProductToDTO(Product product) {
-        return new ProductDTO(
-                product.getUuid(),
-                product.getCode(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getCreatedAt(),
-                product.getUpdatedAt(),
-                product.isActive(),
-                product.getCategory(),
-                product.getBrand(),
-                product.getSku()
-        );
-    }
-
-    /**
-     * Maps a Warehouse entity to a WarehouseDTO.
-     *
-     * @param warehouse the Warehouse entity
-     * @return the WarehouseDTO
-     */
-    private WarehouseDTO mapWarehouseToDTO(Warehouse warehouse) {
-        return new WarehouseDTO(
-                warehouse.getUuid(),
-                warehouse.getCode(),
-                warehouse.getName(),
-                warehouse.getDescription(),
-                warehouse.getAddress(),
-                warehouse.getCity(),
-                warehouse.getStateProvince(),
-                warehouse.getPostalCode(),
-                warehouse.getCountry(),
-                warehouse.getCreatedAt(),
-                warehouse.getUpdatedAt(),
-                warehouse.isActive()
-        );
-    }
 
     /**
      * Gets a Product entity from a ProductDTO.
@@ -310,12 +247,12 @@ public class StockServiceImpl implements StockService {
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
     private Product getProductFromDTO(ProductDTO productDTO) {
-        if (productDTO.getUuid() != null) {
-            return productRepository.findById(productDTO.getUuid())
-                    .orElseThrow(() -> new ApplicationException("Product not found with id: " + productDTO.getUuid(), "PRODUCT_NOT_FOUND"));
-        } else if (productDTO.getCode() != null) {
-            return productRepository.findByCode(productDTO.getCode())
-                    .orElseThrow(() -> new ApplicationException("Product not found with code: " + productDTO.getCode(), "PRODUCT_NOT_FOUND"));
+        if (productDTO.uuid() != null) {
+            return productRepository.findById(productDTO.uuid())
+                    .orElseThrow(() -> new ApplicationException("Product not found with id: " + productDTO.uuid(), "PRODUCT_NOT_FOUND"));
+        } else if (productDTO.code() != null) {
+            return productRepository.findByCode(productDTO.code())
+                    .orElseThrow(() -> new ApplicationException("Product not found with code: " + productDTO.code(), "PRODUCT_NOT_FOUND"));
         } else {
             throw new ApplicationException("Product ID or code is required", "INVALID_PRODUCT");
         }
@@ -329,12 +266,12 @@ public class StockServiceImpl implements StockService {
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
     private Warehouse getWarehouseFromDTO(WarehouseDTO warehouseDTO) {
-        if (warehouseDTO.getUuid() != null) {
-            return warehouseRepository.findById(warehouseDTO.getUuid())
-                    .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseDTO.getUuid(), "WAREHOUSE_NOT_FOUND"));
-        } else if (warehouseDTO.getCode() != null) {
-            return warehouseRepository.findByCode(warehouseDTO.getCode())
-                    .orElseThrow(() -> new ApplicationException("Warehouse not found with code: " + warehouseDTO.getCode(), "WAREHOUSE_NOT_FOUND"));
+        if (warehouseDTO.uuid() != null) {
+            return warehouseRepository.findById(warehouseDTO.uuid())
+                    .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseDTO.uuid(), "WAREHOUSE_NOT_FOUND"));
+        } else if (warehouseDTO.code() != null) {
+            return warehouseRepository.findByCode(warehouseDTO.code())
+                    .orElseThrow(() -> new ApplicationException("Warehouse not found with code: " + warehouseDTO.code(), "WAREHOUSE_NOT_FOUND"));
         } else {
             throw new ApplicationException("Warehouse ID or code is required", "INVALID_WAREHOUSE");
         }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   Router,
   RouterLink,
@@ -6,6 +6,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from './auth/services/auth.service';
 
 @Component({
@@ -21,9 +22,10 @@ import { AuthService } from './auth/services/auth.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'Nexora';
   isAuthenticated = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
@@ -31,10 +33,15 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Subscribe to the authentication state
-    this.authService.isAuthenticated$.subscribe(
-      (isAuthenticated) => (this.isAuthenticated = isAuthenticated),
-    );
+    // Subscribe to the authentication state with proper cleanup
+    this.authService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isAuthenticated) => (this.isAuthenticated = isAuthenticated));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   logout(event: Event): void {

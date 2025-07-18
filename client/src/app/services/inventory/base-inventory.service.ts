@@ -1,153 +1,105 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { BaseRepository, BaseEntity, RepositoryConfig, QueryParams } from '../../core/repositories/base.repository';
 
 /**
- * Base service class for inventory-related HTTP operations
- * Provides common CRUD operations and error handling
+ * Modern Base Inventory Service using Repository Pattern
+ * Provides common CRUD operations with caching, error handling, and retry logic
  */
 @Injectable({
   providedIn: 'root'
 })
-export abstract class BaseInventoryService<T> {
-  protected abstract readonly apiUrl: string;
-  protected abstract readonly entityName: string;
-
-  constructor(protected readonly http: HttpClient) {}
+export abstract class BaseInventoryService<T extends BaseEntity> extends BaseRepository<T> {
 
   /**
-   * Generic GET request with error handling
-   */
-  protected get<R = T>(endpoint: string = ''): Observable<R> {
-    const url = endpoint ? `${this.apiUrl}/${endpoint}` : this.apiUrl;
-    return this.http.get<R>(url).pipe(
-      catchError(error => {
-        console.error(`Error fetching ${this.entityName}:`, error);
-        throw error;
-      })
-    );
-  }
-
-  /**
-   * Generic GET request for arrays with error handling
-   */
-  protected getArray<R = T>(endpoint: string = ''): Observable<R[]> {
-    return this.get<R[]>(endpoint);
-  }
-
-  /**
-   * Generic POST request with error handling
-   */
-  protected post<R = T>(data: Partial<T>, endpoint: string = ''): Observable<R> {
-    const url = endpoint ? `${this.apiUrl}/${endpoint}` : this.apiUrl;
-    return this.http.post<R>(url, data).pipe(
-      catchError(error => {
-        console.error(`Error creating ${this.entityName}:`, error);
-        throw error;
-      })
-    );
-  }
-
-  /**
-   * Generic PUT request with error handling
-   */
-  protected put<R = T>(id: string, data: Partial<T>, endpoint: string = ''): Observable<R> {
-    const url = endpoint ? `${this.apiUrl}/${id}/${endpoint}` : `${this.apiUrl}/${id}`;
-    return this.http.put<R>(url, data).pipe(
-      catchError(error => {
-        console.error(`Error updating ${this.entityName}:`, error);
-        throw error;
-      })
-    );
-  }
-
-  /**
-   * Generic DELETE request with error handling
-   */
-  protected delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      catchError(error => {
-        console.error(`Error deleting ${this.entityName}:`, error);
-        throw error;
-      })
-    );
-  }
-
-  /**
-   * Get all entities
+   * Get all entities (alias for findAll for backward compatibility)
    */
   getAll(): Observable<T[]> {
-    return this.getArray();
+    return this.findAll();
   }
 
   /**
-   * Get entity by ID
+   * Get entity by ID (alias for findById for backward compatibility)
    */
   getById(id: string): Observable<T> {
-    return this.get(id);
+    return this.findById(id);
   }
 
   /**
    * Get entity by code
    */
   getByCode(code: string): Observable<T> {
-    return this.get(`code/${code}`);
+    return this.get<T>(`code/${code}`);
   }
 
   /**
-   * Create new entity
+   * Get entity by UUID (alias for findByUuid for backward compatibility)
    */
-  create(entity: Partial<T>): Observable<T> {
-    return this.post(entity);
-  }
-
-  /**
-   * Update existing entity
-   */
-  update(id: string, entity: Partial<T>): Observable<T> {
-    return this.put(id, entity);
-  }
-
-  /**
-   * Delete entity
-   */
-  remove(id: string): Observable<void> {
-    return this.delete(id);
+  getByUuid(uuid: string): Observable<T> {
+    return this.findByUuid(uuid);
   }
 
   /**
    * Search entities by name
    */
   searchByName(name: string): Observable<T[]> {
-    return this.http.get<T[]>(`${this.apiUrl}/search`, {
-      params: { name }
-    }).pipe(
-      catchError(error => {
-        console.error(`Error searching ${this.entityName} by name:`, error);
-        throw error;
-      })
-    );
+    return this.search(name);
   }
 
   /**
-   * Get active entities
+   * Get active entities (alias for findActive for backward compatibility)
    */
   getActive(): Observable<T[]> {
-    return this.getArray('active');
+    return this.findActive();
   }
 
   /**
-   * Activate entity
+   * Get entities with pagination
    */
-  activate(id: string): Observable<T> {
-    return this.put(id, {}, 'activate');
+  getPaginated(page: number = 0, size: number = 20, params?: QueryParams) {
+    return this.findAllPaginated(page, size, params);
   }
 
   /**
-   * Deactivate entity
+   * Bulk operations support
    */
-  deactivate(id: string): Observable<T> {
-    return this.put(id, {}, 'deactivate');
+  bulkCreate(entities: Partial<T>[]): Observable<T[]> {
+    return this.post<T[]>(entities as any, 'bulk');
+  }
+
+  /**
+   * Bulk update support
+   */
+  bulkUpdate(updates: Array<{ id: string; data: Partial<T> }>): Observable<T[]> {
+    return this.post<T[]>(updates as any, 'bulk-update');
+  }
+
+  /**
+   * Bulk delete support
+   */
+  bulkDelete(ids: string[]): Observable<void> {
+    return this.post<void>({ ids } as any, 'bulk-delete');
+  }
+
+  /**
+   * Export entities to file
+   */
+  export(format: 'csv' | 'excel' = 'excel', params?: QueryParams): Observable<Blob> {
+    const exportParams = { format, ...params };
+    return this.get<Blob>('export', exportParams);
+  }
+
+  /**
+   * Get entity statistics
+   */
+  getStatistics(): Observable<any> {
+    return this.get<any>('statistics');
+  }
+
+  /**
+   * Validate entity data
+   */
+  validate(entity: Partial<T>): Observable<{ valid: boolean; errors?: string[] }> {
+    return this.post<{ valid: boolean; errors?: string[] }>(entity, 'validate');
   }
 }
