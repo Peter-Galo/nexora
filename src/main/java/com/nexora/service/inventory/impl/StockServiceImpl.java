@@ -121,8 +121,7 @@ public class StockServiceImpl implements StockService {
         // Check if stock already exists for this product and warehouse
         if (stockRepository.findByProductAndWarehouse(product, warehouse).isPresent()) {
             throw new ApplicationException(
-                    "Stock already exists for product code: " + product.getCode() +
-                            " and warehouse code: " + warehouse.getCode(),
+                    "Stock already exists for this product and warehouse combination",
                     "STOCK_ALREADY_EXISTS");
         }
 
@@ -178,7 +177,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public StockDTO addStock(UUID id, int quantity) {
         if (quantity < 0) {
-            throw new ApplicationException("Cannot add negative stock amount", "INVALID_QUANTITY");
+            throw new ApplicationException("Quantity to add must be positive", "INVALID_QUANTITY");
         }
 
         Stock stock = stockRepository.findById(id)
@@ -192,7 +191,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public StockDTO removeStock(UUID id, int quantity) {
         if (quantity < 0) {
-            throw new ApplicationException("Cannot remove negative stock amount", "INVALID_QUANTITY");
+            throw new ApplicationException("Quantity to remove must be positive", "INVALID_QUANTITY");
         }
 
         Stock stock = stockRepository.findById(id)
@@ -239,6 +238,9 @@ public class StockServiceImpl implements StockService {
      * @throws com.nexora.exception.ApplicationException if the product is not found
      */
     private Product getProductFromDTO(ProductDTO productDTO) {
+        if (productDTO == null) {
+            throw new ApplicationException("Product information is required", "INVALID_PRODUCT");
+        }
         if (productDTO.getUuid() != null) {
             return productRepository.findById(productDTO.getUuid())
                     .orElseThrow(() -> new ApplicationException("Product not found with id: " + productDTO.getUuid(), "PRODUCT_NOT_FOUND"));
@@ -258,6 +260,9 @@ public class StockServiceImpl implements StockService {
      * @throws com.nexora.exception.ApplicationException if the warehouse is not found
      */
     private Warehouse getWarehouseFromDTO(WarehouseDTO warehouseDTO) {
+        if (warehouseDTO == null) {
+            throw new ApplicationException("Warehouse information is required", "INVALID_WAREHOUSE");
+        }
         if (warehouseDTO.getUuid() != null) {
             return warehouseRepository.findById(warehouseDTO.getUuid())
                     .orElseThrow(() -> new ApplicationException("Warehouse not found with id: " + warehouseDTO.getUuid(), "WAREHOUSE_NOT_FOUND"));
