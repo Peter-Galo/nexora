@@ -86,7 +86,7 @@ public class WarehouseGraphQLResolver {
         WarehouseDTO existingWarehouse = warehouseService.getWarehouseById(UUID.fromString(id));
 
         WarehouseDTO warehouseDTO = new WarehouseDTO(
-                existingWarehouse.uuid(),
+                existingWarehouse.getUuid(),
                 input.code(),
                 input.name(),
                 input.description(),
@@ -95,9 +95,9 @@ public class WarehouseGraphQLResolver {
                 input.stateProvince(),
                 input.postalCode(),
                 input.country(),
-                existingWarehouse.createdAt(),
-                existingWarehouse.updatedAt(),
-                existingWarehouse.active()
+                existingWarehouse.getCreatedAt(),
+                existingWarehouse.getUpdatedAt(),
+                existingWarehouse.isActive()
         );
         return warehouseService.updateWarehouse(UUID.fromString(id), warehouseDTO);
     }

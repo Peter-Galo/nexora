@@ -21,10 +21,10 @@ public class ExportServiceImpl implements ExportService {
     private final ExportJobRepository exportJobRepository;
     private final S3Client s3Client;
 
-    @Value("${do.spaces.bucket}")
+    @Value("${cos.bucket}")
     private String bucketName;
 
-    @Value("${do.spaces.public-url}")
+    @Value("${cos.public-url}")
     private String spacesPublicUrl;
 
     @Autowired

@@ -9,81 +9,161 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for Stock entity.
- * Immutable record representing stock information for a product in a warehouse.
+ * Represents stock information for a product in a warehouse.
  */
 @Schema(description = "Stock information for a product in a warehouse")
-public record StockDTO(
-        @Schema(
-                description = "Stock ID", 
-                example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        UUID uuid,
+public class StockDTO {
 
-        @Schema(description = "Product information")
-        @NotNull(message = "Product is required")
-        ProductDTO product,
+    @Schema(
+            description = "Stock ID",
+            example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private UUID uuid;
 
-        @Schema(description = "Warehouse information")
-        @NotNull(message = "Warehouse is required")
-        WarehouseDTO warehouse,
+    @Schema(description = "Product information")
+    @NotNull(message = "Product is required")
+    private ProductDTO product;
 
-        @Schema(description = "Current quantity in stock", example = "100")
-        @Min(value = 0, message = "Quantity cannot be negative")
-        Integer quantity,
+    @Schema(description = "Warehouse information")
+    @NotNull(message = "Warehouse is required")
+    private WarehouseDTO warehouse;
 
-        @Schema(description = "Minimum stock level (for low stock alerts)", example = "10")
-        @Min(value = 0, message = "Minimum stock level cannot be negative")
-        Integer minStockLevel,
+    @Schema(description = "Current quantity in stock", example = "100")
+    @Min(value = 0, message = "Quantity cannot be negative")
+    private Integer quantity;
 
-        @Schema(description = "Maximum stock level (for over stock alerts)", example = "200")
-        @Min(value = 0, message = "Maximum stock level cannot be negative")
-        Integer maxStockLevel,
+    @Schema(description = "Minimum stock level (for low stock alerts)", example = "10")
+    @Min(value = 0, message = "Minimum stock level cannot be negative")
+    private Integer minStockLevel;
 
-        @Schema(description = "Date and time of last restock", example = "2023-01-25T09:15:00")
-        LocalDateTime lastRestockDate,
+    @Schema(description = "Maximum stock level (for over stock alerts)", example = "200")
+    @Min(value = 0, message = "Maximum stock level cannot be negative")
+    private Integer maxStockLevel;
 
-        @Schema(
-                description = "Date and time when the stock record was created", 
-                example = "2023-01-15T10:30:00",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        LocalDateTime createdAt,
+    @Schema(description = "Date and time of last restock", example = "2023-01-25T09:15:00")
+    private LocalDateTime lastRestockDate;
 
-        @Schema(
-                description = "Date and time when the stock record was last updated", 
-                example = "2023-01-20T14:45:00",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        LocalDateTime updatedAt
-) {
+    @Schema(
+            description = "Date and time when the stock record was created",
+            example = "2023-01-15T10:30:00",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private LocalDateTime createdAt;
 
-    /**
-     * Constructor with default values for optional fields.
-     */
-    public StockDTO {
-        // Set default values if null
-        quantity = quantity != null ? quantity : 0;
-        minStockLevel = minStockLevel != null ? minStockLevel : 0;
+    @Schema(
+            description = "Date and time when the stock record was last updated",
+            example = "2023-01-20T14:45:00",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private LocalDateTime updatedAt;
+
+    // Default no-argument constructor
+    public StockDTO() {
     }
 
-    /**
-     * Determines if the stock is low (quantity <= minStockLevel).
-     *
-     * @return true if stock is low, false otherwise
-     */
-    @Schema(description = "Whether the stock is low (quantity <= minStockLevel)", example = "false")
-    public boolean isLowStock() {
-        return quantity != null && minStockLevel != null && quantity <= minStockLevel;
+    // All-arguments constructor
+    public StockDTO(UUID uuid, ProductDTO product, WarehouseDTO warehouse, Integer quantity,
+                    Integer minStockLevel, Integer maxStockLevel, LocalDateTime lastRestockDate,
+                    LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.uuid = uuid;
+        this.product = product;
+        this.warehouse = warehouse;
+        // Set default values if null (preserving original record logic)
+        this.quantity = quantity != null ? quantity : 0;
+        this.minStockLevel = minStockLevel != null ? minStockLevel : 0;
+        this.maxStockLevel = maxStockLevel;
+        this.lastRestockDate = lastRestockDate;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    /**
-     * Determines if the stock is over maximum level (quantity >= maxStockLevel).
-     *
-     * @return true if stock is over maximum level, false otherwise
-     */
-    @Schema(description = "Whether the stock is over maximum level (quantity >= maxStockLevel)", example = "false")
-    public boolean isOverStock() {
-        return quantity != null && maxStockLevel != null && quantity >= maxStockLevel;
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public ProductDTO getProduct() {
+        return product;
+    }
+
+    public void setProduct(ProductDTO product) {
+        this.product = product;
+    }
+
+    public WarehouseDTO getWarehouse() {
+        return warehouse;
+    }
+
+    public void setWarehouse(WarehouseDTO warehouse) {
+        this.warehouse = warehouse;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        // Apply default value logic when setting quantity
+        this.quantity = quantity != null ? quantity : 0;
+    }
+
+    public Integer getMinStockLevel() {
+        return minStockLevel;
+    }
+
+    public void setMinStockLevel(Integer minStockLevel) {
+        // Apply default value logic when setting minStockLevel
+        this.minStockLevel = minStockLevel != null ? minStockLevel : 0;
+    }
+
+    public Integer getMaxStockLevel() {
+        return maxStockLevel;
+    }
+
+    public void setMaxStockLevel(Integer maxStockLevel) {
+        this.maxStockLevel = maxStockLevel;
+    }
+
+    public LocalDateTime getLastRestockDate() {
+        return lastRestockDate;
+    }
+
+    public void setLastRestockDate(LocalDateTime lastRestockDate) {
+        this.lastRestockDate = lastRestockDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "StockDTO{" +
+                "uuid=" + uuid +
+                ", product=" + product +
+                ", warehouse=" + warehouse +
+                ", quantity=" + quantity +
+                ", minStockLevel=" + minStockLevel +
+                ", maxStockLevel=" + maxStockLevel +
+                ", lastRestockDate=" + lastRestockDate +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

@@ -107,23 +107,23 @@ public class StockGraphQLResolver {
         // Get updated product and warehouse if provided, otherwise use existing ones
         ProductDTO productDTO = input.productId() != null 
                 ? productService.getProductById(UUID.fromString(input.productId()))
-                : existingStock.product();
+                : existingStock.getProduct();
 
         WarehouseDTO warehouseDTO = input.warehouseId() != null
                 ? warehouseService.getWarehouseById(UUID.fromString(input.warehouseId()))
-                : existingStock.warehouse();
+                : existingStock.getWarehouse();
 
         // Create new StockDTO with updated values
         StockDTO updatedStock = new StockDTO(
-                existingStock.uuid(),
+                existingStock.getUuid(),
                 productDTO,
                 warehouseDTO,
-                input.quantity() != null ? input.quantity() : existingStock.quantity(),
-                input.minStockLevel() != null ? input.minStockLevel() : existingStock.minStockLevel(),
-                input.maxStockLevel() != null ? input.maxStockLevel() : existingStock.maxStockLevel(),
-                existingStock.lastRestockDate(),
-                existingStock.createdAt(),
-                existingStock.updatedAt()
+                input.quantity() != null ? input.quantity() : existingStock.getQuantity(),
+                input.minStockLevel() != null ? input.minStockLevel() : existingStock.getMinStockLevel(),
+                input.maxStockLevel() != null ? input.maxStockLevel() : existingStock.getMaxStockLevel(),
+                existingStock.getLastRestockDate(),
+                existingStock.getCreatedAt(),
+                existingStock.getUpdatedAt()
         );
 
         return stockService.updateStock(UUID.fromString(id), updatedStock);

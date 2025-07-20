@@ -50,11 +50,10 @@ rabbitmq:
     key:
       export: ${RABBITMQ_ROUTING_KEY}
 
-do:
-  spaces:
-    key: ${DO_SPACES_KEY}
-    secret: ${DO_SPACES_SECRET}
-    region: ${DO_SPACES_REGION}
-    endpoint: ${DO_SPACES_ENDPOINT}
-    bucket: ${DO_SPACES_BUCKET}
-    public-url: ${DO_SPACES_PUBLIC_URL}
+cos:
+  key: ${COS_KEY}
+  secret: ${COS_SECRET}
+  region: ${COS_REGION}
+  endpoint: ${COS_ENDPOINT}
+  bucket: ${COS_BUCKET}
+  public-url: ${COS_PUBLIC_URL}

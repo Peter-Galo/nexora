@@ -9,87 +9,206 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for Warehouse entity.
- * Immutable record representing warehouse information.
+ * Represents warehouse information.
  */
 @Schema(description = "Warehouse information")
-public record WarehouseDTO(
-        @Schema(
-                description = "Warehouse UUID", 
-                example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        UUID uuid,
+public class WarehouseDTO {
 
-        @Schema(description = "Warehouse code (unique identifier)", example = "WH-001")
-        @NotBlank(message = "Warehouse code is required")
-        @Size(min = 2, max = 50, message = "Warehouse code must be between 2 and 50 characters")
-        String code,
+    @Schema(
+            description = "Warehouse UUID",
+            example = "5ee0d5d6-5e72-4f73-adfd-691b8c9f136a",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private UUID uuid;
 
-        @Schema(description = "Warehouse name", example = "Main Distribution Center")
-        @NotBlank(message = "Warehouse name is required")
-        @Size(min = 2, max = 100, message = "Warehouse name must be between 2 and 100 characters")
-        String name,
+    @Schema(description = "Warehouse code (unique identifier)", example = "WH-001")
+    @NotBlank(message = "Warehouse code is required")
+    @Size(min = 2, max = 50, message = "Warehouse code must be between 2 and 50 characters")
+    private String code;
 
-        @Schema(description = "Warehouse description", example = "Primary distribution center for the northeast region")
-        @Size(max = 500, message = "Description cannot exceed 500 characters")
-        String description,
+    @Schema(description = "Warehouse name", example = "Main Distribution Center")
+    @NotBlank(message = "Warehouse name is required")
+    @Size(min = 2, max = 100, message = "Warehouse name must be between 2 and 100 characters")
+    private String name;
 
-        @Schema(description = "Warehouse address", example = "123 Storage Lane")
-        @NotBlank(message = "Address is required")
-        @Size(max = 200, message = "Address cannot exceed 200 characters")
-        String address,
+    @Schema(description = "Warehouse description", example = "Primary distribution center for the northeast region")
+    @Size(max = 500, message = "Description cannot exceed 500 characters")
+    private String description;
 
-        @Schema(description = "City where the warehouse is located", example = "Boston")
-        @NotBlank(message = "City is required")
-        @Size(max = 100, message = "City cannot exceed 100 characters")
-        String city,
+    @Schema(description = "Warehouse address", example = "123 Storage Lane")
+    @NotBlank(message = "Address is required")
+    @Size(max = 200, message = "Address cannot exceed 200 characters")
+    private String address;
 
-        @Schema(description = "State or province where the warehouse is located", example = "Massachusetts")
-        @Size(max = 100, message = "State/Province cannot exceed 100 characters")
-        String stateProvince,
+    @Schema(description = "City where the warehouse is located", example = "Boston")
+    @NotBlank(message = "City is required")
+    @Size(max = 100, message = "City cannot exceed 100 characters")
+    private String city;
 
-        @Schema(description = "Postal code of the warehouse location", example = "02108")
-        @Size(max = 20, message = "Postal code cannot exceed 20 characters")
-        String postalCode,
+    @Schema(description = "State or province where the warehouse is located", example = "Massachusetts")
+    @Size(max = 100, message = "State/Province cannot exceed 100 characters")
+    private String stateProvince;
 
-        @Schema(description = "Country where the warehouse is located", example = "USA")
-        @NotBlank(message = "Country is required")
-        @Size(max = 100, message = "Country cannot exceed 100 characters")
-        String country,
+    @Schema(description = "Postal code of the warehouse location", example = "02108")
+    @Size(max = 20, message = "Postal code cannot exceed 20 characters")
+    private String postalCode;
 
-        @Schema(
-                description = "Date and time when the warehouse was created", 
-                example = "2023-01-15T10:30:00",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        LocalDateTime createdAt,
+    @Schema(description = "Country where the warehouse is located", example = "USA")
+    @NotBlank(message = "Country is required")
+    @Size(max = 100, message = "Country cannot exceed 100 characters")
+    private String country;
 
-        @Schema(
-                description = "Date and time when the warehouse was last updated", 
-                example = "2023-01-20T14:45:00",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        LocalDateTime updatedAt,
+    @Schema(
+            description = "Date and time when the warehouse was created",
+            example = "2023-01-15T10:30:00",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private LocalDateTime createdAt;
 
-        @Schema(description = "Whether the warehouse is active", example = "true", defaultValue = "true")
-        boolean active
-) {
+    @Schema(
+            description = "Date and time when the warehouse was last updated",
+            example = "2023-01-20T14:45:00",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private LocalDateTime updatedAt;
 
-    /**
-     * Constructor with default values for optional fields.
-     */
-    public WarehouseDTO {
-        // Set default value for active if not specified
-        active = active; // Keep the provided value or default from record parameter
+    @Schema(description = "Whether the warehouse is active", example = "true", defaultValue = "true")
+    private boolean active;
+
+    // Default no-argument constructor
+    public WarehouseDTO() {
     }
 
-    /**
-     * Returns the warehouse name as string representation.
-     *
-     * @return the warehouse name
-     */
+    // All-arguments constructor
+    public WarehouseDTO(UUID uuid, String code, String name, String description, String address,
+                        String city, String stateProvince, String postalCode, String country,
+                        LocalDateTime createdAt, LocalDateTime updatedAt, boolean active) {
+        this.uuid = uuid;
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.address = address;
+        this.city = city;
+        this.stateProvince = stateProvince;
+        this.postalCode = postalCode;
+        this.country = country;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.active = active;
+    }
+
+    // Getters and setters
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getStateProvince() {
+        return stateProvince;
+    }
+
+    public void setStateProvince(String stateProvince) {
+        this.stateProvince = stateProvince;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     @Override
     public String toString() {
-        return name;
+        return "WarehouseDTO{" +
+                "uuid=" + uuid +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", stateProvince='" + stateProvince + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", country='" + country + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", active=" + active +
+                '}';
     }
 }

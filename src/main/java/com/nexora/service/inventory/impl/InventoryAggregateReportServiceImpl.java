@@ -180,8 +180,7 @@ public class InventoryAggregateReportServiceImpl implements InventoryAggregateRe
                     BigDecimal warehouseValue = warehouseStocks.stream()
                             .map(s -> s.getProduct().getPrice().multiply(BigDecimal.valueOf(s.getQuantity())))
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    Map.Entry<String, BigDecimal> entry = new AbstractMap.SimpleEntry<>(w.getName(), warehouseValue);
-                    return entry;
+                    return new AbstractMap.SimpleEntry<>(w.getName(), warehouseValue);
                 })
                 .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
                 .collect(Collectors.toMap(
