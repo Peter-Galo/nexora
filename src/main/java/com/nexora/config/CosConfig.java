@@ -11,18 +11,18 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.net.URI;
 
 @Configuration
-public class DigitalOceanSpacesConfig {
+public class CosConfig {
 
-    @Value("${do.spaces.key}")
+    @Value("${cos.key}")
     private String accessKey;
 
-    @Value("${do.spaces.secret}")
+    @Value("${cos.secret}")
     private String secretKey;
 
-    @Value("${do.spaces.endpoint}")
+    @Value("${cos.endpoint}")
     private String endpoint;
 
-    @Value("${do.spaces.region}")
+    @Value("${cos.region}")
     private String region;
 
     @Bean

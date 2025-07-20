@@ -78,7 +78,7 @@ prevent stockouts, and optimize warehouse operations.
 
 - **Integration Capabilities**
     - Message queue integration with RabbitMQ
-    - File storage with Digital Ocean Spaces (S3-compatible)
+    - File storage with Cloud Object Storage/Digital Ocean Spaces (S3-compatible)
     - WebSocket support for real-time updates
     - Excel export functionality
 
@@ -138,7 +138,7 @@ Nexora follows a modern microservices-inspired architecture with clear separatio
 
 - **Podman** - Containerization
 - **Podman Compose** - Multi-container orchestration
-- **Digital Ocean Spaces** - File storage (optional)
+- **Cloud Object Storage/Digital Ocean Spaces** - File storage (optional)
 - **Maven** - Build automation
 
 ## Quick Start
@@ -336,13 +336,13 @@ RABBITMQ_ROUTING_KEY=
 JWT_SECRET_KEY=
 JWT_EXPIRATION=
 
-# Digital Ocean Spaces
-DO_SPACES_KEY=
-DO_SPACES_SECRET=
-DO_SPACES_REGION=
-DO_SPACES_ENDPOINT=
-DO_SPACES_BUCKET=
-DO_SPACES_PUBLIC_URL=
+# Cloud Object Storage/Digital Ocean Spaces
+COS_KEY=
+COS_SECRET=
+COS_REGION=
+COS_ENDPOINT=
+COS_BUCKET=
+COS_PUBLIC_URL=
 ```
 
 ### 4. Deployment Commands
@@ -480,9 +480,9 @@ curl -X GET http://localhost:8080/api/products \
 - `POSTGRES_PASSWORD` - Database password
 - `RABBITMQ_PASSWORD` - RabbitMQ password
 - `JWT_SECRET_KEY` - JWT signing key (minimum 256 bits)
-- `DO_SPACES_KEY` - Digital Ocean Spaces access key
-- `DO_SPACES_SECRET` - Digital Ocean Spaces secret key
-- `DO_SPACES_BUCKET` - Digital Ocean Spaces bucket name
+- `COS_KEY` - Cloud Object Storage/Digital Ocean Spaces access key
+- `COS_SECRET` - Cloud Object Storage/Digital Ocean Spaces secret key
+- `COS_BUCKET` - Cloud Object Storage/Digital Ocean Spaces bucket name
 
 #### Optional:
 
@@ -490,7 +490,7 @@ curl -X GET http://localhost:8080/api/products \
 - `POSTGRES_USER` - Database user (default: nexora)
 - `RABBITMQ_USER` - RabbitMQ user (default: nexora)
 - `JWT_EXPIRATION` - JWT expiration time (default: 86400000ms)
-- `DO_SPACES_REGION` - Digital Ocean Spaces region (default: fra1)
+- `COS_REGION` - Cloud Object Storage/Digital Ocean Spaces region (default: fra1)
 
 ### Application Profiles
 

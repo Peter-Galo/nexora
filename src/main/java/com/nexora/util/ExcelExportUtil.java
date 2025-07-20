@@ -1,6 +1,8 @@
 package com.nexora.util;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
@@ -15,7 +17,7 @@ public class ExcelExportUtil {
         }
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet(sheetName);
-            Field[] fields = data.get(0).getClass().getDeclaredFields();
+            Field[] fields = data.getFirst().getClass().getDeclaredFields();
 
             // Header row
             Row header = sheet.createRow(0);
