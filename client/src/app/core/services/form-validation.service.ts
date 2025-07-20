@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 
 export interface ValidationRule {
   required?: boolean;
@@ -13,34 +13,20 @@ export interface ValidationConfig {
   [fieldName: string]: ValidationRule;
 }
 
-export interface ValidationResult {
-  isValid: boolean;
-  errors: { [fieldName: string]: string };
-}
-
-export interface FormState<T> {
-  data: T;
-  errors: { [key: string]: string };
-  touched: { [key: string]: boolean };
-  isValid: boolean;
-  isDirty: boolean;
-}
-
 /**
  * Modern Form Validation Service using Angular Signals
  * Provides reusable form validation logic with reactive state management
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FormValidationService {
-
   /**
    * Create a reactive form state with validation
    */
   createFormState<T extends Record<string, any>>(
     initialData: T,
-    validationConfig: ValidationConfig
+    validationConfig: ValidationConfig,
   ) {
     // Form state signals
     const _data = signal<T>({ ...initialData });
@@ -63,15 +49,27 @@ export class FormValidationService {
 
       // Methods
       updateField: (field: keyof T, value: any) => {
-        _data.update(current => ({ ...current, [field]: value }));
+        _data.update((current) => ({ ...current, [field]: value }));
         _isDirty.set(true);
-        this.validateField(field as string, value, validationConfig, _errors, _touched);
+        this.validateField(
+          field as string,
+          value,
+          validationConfig,
+          _errors,
+          _touched,
+        );
       },
 
       touchField: (field: keyof T) => {
-        _touched.update(current => ({ ...current, [field]: true }));
+        _touched.update((current) => ({ ...current, [field]: true }));
         const currentValue = _data()[field];
-        this.validateField(field as string, currentValue, validationConfig, _errors, _touched);
+        this.validateField(
+          field as string,
+          currentValue,
+          validationConfig,
+          _errors,
+          _touched,
+        );
       },
 
       validateAll: () => {
@@ -79,9 +77,13 @@ export class FormValidationService {
         const newErrors: { [key: string]: string } = {};
         const newTouched: { [key: string]: boolean } = {};
 
-        Object.keys(validationConfig).forEach(field => {
+        Object.keys(validationConfig).forEach((field) => {
           newTouched[field] = true;
-          const error = this.validateSingleField(field, currentData[field], validationConfig[field]);
+          const error = this.validateSingleField(
+            field,
+            currentData[field],
+            validationConfig[field],
+          );
           if (error) {
             newErrors[field] = error;
           }
@@ -99,14 +101,9 @@ export class FormValidationService {
         _isDirty.set(false);
       },
 
-      setData: (newData: Partial<T>) => {
-        _data.update(current => ({ ...current, ...newData }));
-        _isDirty.set(true);
-      },
-
       getFieldError: (field: keyof T) => _errors()[field as string] || null,
       hasFieldError: (field: keyof T) => !!_errors()[field as string],
-      isFieldTouched: (field: keyof T) => !!_touched()[field as string]
+      isFieldTouched: (field: keyof T) => _touched()[field as string],
     };
   }
 
@@ -118,7 +115,7 @@ export class FormValidationService {
     value: any,
     config: ValidationConfig,
     errorsSignal: any,
-    touchedSignal: any
+    touchedSignal: any,
   ): void {
     const rule = config[field];
     if (!rule) return;
@@ -139,7 +136,11 @@ export class FormValidationService {
   /**
    * Validate a single field value against a rule
    */
-  private validateSingleField(field: string, value: any, rule: ValidationRule): string | null {
+  private validateSingleField(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+  ): string | null {
     const stringValue = value?.toString().trim() || '';
 
     // Required validation
@@ -186,7 +187,7 @@ export class FormValidationService {
   private formatFieldName(field: string): string {
     return field
       .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase())
+      .replace(/^./, (str) => str.toUpperCase())
       .trim();
   }
 
@@ -204,14 +205,19 @@ export class FormValidationService {
   static readonly COMMON_RULES = {
     required: { required: true },
     email: { required: true, email: true },
-    code: { required: true, minLength: 2, maxLength: 50, pattern: /^[A-Z0-9_-]+$/i },
+    code: {
+      required: true,
+      minLength: 2,
+      maxLength: 50,
+      pattern: /^[A-Z0-9_-]+$/i,
+    },
     name: { required: true, minLength: 2, maxLength: 100 },
     description: { maxLength: 500 },
     address: { required: true, maxLength: 200 },
     city: { required: true, maxLength: 100 },
     country: { required: true, maxLength: 100 },
     postalCode: { maxLength: 20, pattern: /^[A-Z0-9\s-]+$/i },
-    phone: { pattern: /^[\+]?[1-9][\d]{0,15}$/ }
+    phone: { pattern: /^[+]?[1-9][\d]{0,15}$/ },
   };
 
   /**
@@ -225,6 +231,6 @@ export class FormValidationService {
     city: FormValidationService.COMMON_RULES.city,
     stateProvince: { maxLength: 100 },
     postalCode: FormValidationService.COMMON_RULES.postalCode,
-    country: FormValidationService.COMMON_RULES.country
+    country: FormValidationService.COMMON_RULES.country,
   };
 }

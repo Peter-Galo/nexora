@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal, computed, inject, effect } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ExportCategory, ExportUtilityService } from '../../services/inventory/export-utility.service';
 import { AppStateService } from '../../core/state/app-state.service';
@@ -23,10 +23,6 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
   // Public signals - writable for child components
   readonly loading = this._loading;
   readonly error = this._error;
-
-  // Computed signals for reactive state
-  readonly hasError = computed(() => !!this._error());
-  readonly isReady = computed(() => !this._loading() && !this.hasError());
 
   // Export state
   exportState: ReturnType<typeof this.exportUtilityService.createExportState>;
@@ -92,15 +88,7 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
    * Refresh data - triggers reactive refresh
    */
   refreshData(): void {
-    this._refreshTrigger.update(count => count + 1);
-  }
-
-  /**
-   * Force immediate data reload
-   */
-  forceReload(): void {
-    this.clearError();
-    this.loadData();
+    this._refreshTrigger.update((count) => count + 1);
   }
 
   /**
@@ -119,13 +107,6 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
    */
   downloadExport(jobId: string): void {
     this.exportUtilityService.downloadExport(jobId);
-  }
-
-  /**
-   * Download file by URL
-   */
-  downloadFileByUrl(fileUrl: string): void {
-    this.exportUtilityService.downloadFileByUrl(fileUrl);
   }
 
   /**
@@ -268,15 +249,13 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
     apiCall: () => any,
     successCallback: (data: T) => void,
     context: string,
-    retryCount: number = 3
+    retryCount: number = 3,
   ): void {
     this.setLoading(true);
     this.clearError();
 
     apiCall()
-      .pipe(
-        takeUntil(this.destroy$)
-      )
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: T) => {
           successCallback(data);
@@ -285,9 +264,16 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           if (retryCount > 0 && this.shouldRetry(error)) {
-            console.warn(`Retrying ${context}, attempts left: ${retryCount - 1}`);
+            console.warn(
+              `Retrying ${context}, attempts left: ${retryCount - 1}`,
+            );
             setTimeout(() => {
-              this.handleApiCallWithRetry(apiCall, successCallback, context, retryCount - 1);
+              this.handleApiCallWithRetry(
+                apiCall,
+                successCallback,
+                context,
+                retryCount - 1,
+              );
             }, 1000);
           } else {
             this.handleError(error, context);
@@ -302,21 +288,5 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
   private shouldRetry(error: any): boolean {
     // Retry on network errors or server errors (5xx)
     return !error.status || error.status >= 500;
-  }
-
-  /**
-   * Show success message
-   */
-  protected showSuccess(message: string): void {
-    // This could be enhanced to show toast notifications
-    console.log(`Success: ${message}`);
-  }
-
-  /**
-   * Show warning message
-   */
-  protected showWarning(message: string): void {
-    // This could be enhanced to show toast notifications
-    console.warn(`Warning: ${message}`);
   }
 }

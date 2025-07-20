@@ -6,8 +6,6 @@ import {
   StockService,
 } from '../../../services/inventory/stock.service';
 import { interval, Subscription } from 'rxjs';
-import { ExportUtilityService } from '../../../services/inventory/export-utility.service';
-import { AuthService } from '../../../auth/services/auth.service';
 import { BaseInventoryComponent } from '../base-inventory.component';
 
 type ViewType = 'dashboard' | 'all' | 'low' | 'over' | 'zero';
@@ -67,7 +65,6 @@ export class StockComponent extends BaseInventoryComponent {
   protected exportCategory = 'STOCK' as const;
 
   private stockService = inject(StockService);
-  private authService = inject(AuthService);
   private autoRefreshSubscription?: Subscription;
 
   // Signals
@@ -513,14 +510,6 @@ export class StockComponent extends BaseInventoryComponent {
     } catch {
       return 'Invalid Date';
     }
-  }
-
-  /**
-   * Check if the current user has permission to modify stocks
-   */
-  canModifyStocks(): boolean {
-    const user = this.authService.getUser();
-    return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
   // Alias for backward compatibility with template

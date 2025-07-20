@@ -5,12 +5,8 @@ import { ProductService } from '../../../services/inventory/product.service';
 import { Product, ProductAnalytics } from '../models/inventory.models';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
 import { ExportStatusAlertComponent } from '../../shared/export-status-alert/export-status-alert.component';
-import {
-  PRODUCT_COLUMNS,
-  PRODUCT_SUMMARY_SIMPLE_COLUMNS,
-} from '../../shared/data-table/table-columns/model';
+import { PRODUCT_COLUMNS } from '../../shared/data-table/table-columns/model';
 import { forkJoin } from 'rxjs';
-import { ExportUtilityService } from '../../../services/inventory/export-utility.service';
 import { BaseInventoryComponent } from '../base-inventory.component';
 
 @Component({
@@ -49,7 +45,6 @@ export class ProductComponent extends BaseInventoryComponent {
 
   // Column definitions
   protected readonly productColumns = PRODUCT_COLUMNS;
-  protected readonly productSummaryColumns = PRODUCT_SUMMARY_SIMPLE_COLUMNS;
 
   // Computed properties
   get categories(): string[] {
@@ -67,16 +62,7 @@ export class ProductComponent extends BaseInventoryComponent {
       .sort((a, b) => b.value - a.value);
   }
 
-  get brandBreakdownEntries(): Array<{ key: string; value: number }> {
-    if (!this.analytics?.brandBreakdown) return [];
-    return Object.entries(this.analytics.brandBreakdown)
-      .map(([key, value]) => ({ key, value }))
-      .sort((a, b) => b.value - a.value);
-  }
-
-  constructor(
-    private productService: ProductService,
-  ) {
+  constructor(private productService: ProductService) {
     super();
   }
 

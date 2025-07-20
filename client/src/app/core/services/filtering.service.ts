@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 
 export interface FilterConfig<T> {
   searchFields: readonly (keyof T)[];
@@ -18,37 +18,35 @@ export interface FilterState {
   showActiveOnly?: boolean;
 }
 
-export interface PaginationState {
-  page: number;
-  pageSize: number;
-  totalItems: number;
-  totalPages: number;
-}
-
 /**
  * Modern Filtering Service using Angular Signals
  * Provides reusable filtering, searching, and pagination logic
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FilteringService {
-
   /**
    * Create a reactive filter state
    */
   createFilterState<T>(
     data: T[],
     config: FilterConfig<T>,
-    initialState?: Partial<FilterState>
+    initialState?: Partial<FilterState>,
   ) {
     // Filter state signals
     const _allData = signal<T[]>(data);
     const _searchTerm = signal<string>(initialState?.searchTerm || '');
-    const _filters = signal<{ [key: string]: any }>(initialState?.filters || {});
+    const _filters = signal<{ [key: string]: any }>(
+      initialState?.filters || {},
+    );
     const _sortBy = signal<string | undefined>(initialState?.sortBy);
-    const _sortDirection = signal<'asc' | 'desc'>(initialState?.sortDirection || 'asc');
-    const _showActiveOnly = signal<boolean>(initialState?.showActiveOnly || false);
+    const _sortDirection = signal<'asc' | 'desc'>(
+      initialState?.sortDirection || 'asc',
+    );
+    const _showActiveOnly = signal<boolean>(
+      initialState?.showActiveOnly || false,
+    );
 
     // Computed filtered data
     const filteredData = computed(() => {
@@ -84,8 +82,15 @@ export class FilteringService {
     const filterStats = computed(() => ({
       totalItems: _allData().length,
       filteredItems: filteredData().length,
-      hasFilters: _searchTerm().trim() !== '' || Object.keys(_filters()).length > 0 || _showActiveOnly(),
-      activeFilters: this.getActiveFilters(_searchTerm(), _filters(), _showActiveOnly())
+      hasFilters:
+        _searchTerm().trim() !== '' ||
+        Object.keys(_filters()).length > 0 ||
+        _showActiveOnly(),
+      activeFilters: this.getActiveFilters(
+        _searchTerm(),
+        _filters(),
+        _showActiveOnly(),
+      ),
     }));
 
     return {
@@ -104,101 +109,20 @@ export class FilteringService {
 
       setSearchTerm: (term: string) => _searchTerm.set(term),
 
-      setFilter: (key: string, value: any) => {
-        _filters.update(current => ({ ...current, [key]: value }));
-      },
-
-      removeFilter: (key: string) => {
-        _filters.update(current => {
-          const updated = { ...current };
-          delete updated[key];
-          return updated;
-        });
-      },
-
-      clearFilters: () => {
-        _searchTerm.set('');
-        _filters.set({});
-        _showActiveOnly.set(false);
-      },
-
-      setSorting: (field: string, direction: 'asc' | 'desc' = 'asc') => {
-        _sortBy.set(field);
-        _sortDirection.set(direction);
-      },
-
-      toggleSortDirection: () => {
-        _sortDirection.update(current => current === 'asc' ? 'desc' : 'asc');
-      },
-
-      setShowActiveOnly: (show: boolean) => _showActiveOnly.set(show),
-
-      toggleActiveOnly: () => _showActiveOnly.update(current => !current),
-
-      // Utility methods
-      getFilteredCount: () => filteredData().length,
-      getTotalCount: () => _allData().length,
-      hasActiveFilters: () => filterStats().hasFilters,
-      getActiveFiltersList: () => filterStats().activeFilters
-    };
-  }
-
-  /**
-   * Create pagination state
-   */
-  createPaginationState(initialPageSize: number = 20) {
-    const _page = signal<number>(0);
-    const _pageSize = signal<number>(initialPageSize);
-    const _totalItems = signal<number>(0);
-
-    const totalPages = computed(() => Math.ceil(_totalItems() / _pageSize()));
-    const hasNextPage = computed(() => _page() < totalPages() - 1);
-    const hasPreviousPage = computed(() => _page() > 0);
-    const startIndex = computed(() => _page() * _pageSize());
-    const endIndex = computed(() => Math.min(startIndex() + _pageSize(), _totalItems()));
-
-    return {
-      // Readonly signals
-      page: _page.asReadonly(),
-      pageSize: _pageSize.asReadonly(),
-      totalItems: _totalItems.asReadonly(),
-      totalPages,
-      hasNextPage,
-      hasPreviousPage,
-      startIndex,
-      endIndex,
-
-      // Methods
-      setPage: (page: number) => _page.set(Math.max(0, Math.min(page, totalPages() - 1))),
-      setPageSize: (size: number) => {
-        _pageSize.set(size);
-        _page.set(0); // Reset to first page
-      },
-      setTotalItems: (total: number) => _totalItems.set(total),
-      nextPage: () => {
-        if (hasNextPage()) _page.update(current => current + 1);
-      },
-      previousPage: () => {
-        if (hasPreviousPage()) _page.update(current => current - 1);
-      },
-      firstPage: () => _page.set(0),
-      lastPage: () => _page.set(totalPages() - 1),
-
-      // Utility methods
-      getPaginatedData: <T>(data: T[]) => {
-        const start = startIndex();
-        const end = endIndex();
-        return data.slice(start, end);
-      }
+      toggleActiveOnly: () => _showActiveOnly.update((current) => !current),
     };
   }
 
   /**
    * Apply search filter to data
    */
-  private applySearch<T>(data: T[], searchTerm: string, searchFields: readonly (keyof T)[]): T[] {
-    return data.filter(item => {
-      return searchFields.some(field => {
+  private applySearch<T>(
+    data: T[],
+    searchTerm: string,
+    searchFields: readonly (keyof T)[],
+  ): T[] {
+    return data.filter((item) => {
+      return searchFields.some((field) => {
         const value = item[field];
         if (value == null) return false;
         return value.toString().toLowerCase().includes(searchTerm);
@@ -212,9 +136,9 @@ export class FilteringService {
   private applyFilters<T>(
     data: T[],
     filters: { [key: string]: any },
-    filterFields?: FilterConfig<T>['filterFields']
+    filterFields?: FilterConfig<T>['filterFields'],
   ): T[] {
-    return data.filter(item => {
+    return data.filter((item) => {
       return Object.entries(filters).every(([key, value]) => {
         if (value == null || value === '' || value === 'all') return true;
 
@@ -232,14 +156,21 @@ export class FilteringService {
             return Array.isArray(itemValue) ? itemValue.includes(value) : false;
 
           case 'range':
-            if (typeof value === 'object' && value.min !== undefined && value.max !== undefined) {
+            if (
+              typeof value === 'object' &&
+              value.min !== undefined &&
+              value.max !== undefined
+            ) {
               return itemValue >= value.min && itemValue <= value.max;
             }
             return true;
 
           default:
             // Default string comparison
-            return itemValue?.toString().toLowerCase().includes(value.toString().toLowerCase());
+            return itemValue
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toString().toLowerCase());
         }
       });
     });
@@ -248,7 +179,11 @@ export class FilteringService {
   /**
    * Apply sorting to data
    */
-  private applySorting<T>(data: T[], sortBy: string, direction: 'asc' | 'desc'): T[] {
+  private applySorting<T>(
+    data: T[],
+    sortBy: string,
+    direction: 'asc' | 'desc',
+  ): T[] {
     return [...data].sort((a, b) => {
       const aValue = (a as any)[sortBy];
       const bValue = (b as any)[sortBy];
@@ -275,7 +210,7 @@ export class FilteringService {
   private getActiveFilters(
     searchTerm: string,
     filters: { [key: string]: any },
-    showActiveOnly: boolean
+    showActiveOnly: boolean,
   ): Array<{ key: string; value: any; label: string }> {
     const activeFilters: Array<{ key: string; value: any; label: string }> = [];
 
@@ -283,7 +218,7 @@ export class FilteringService {
       activeFilters.push({
         key: 'search',
         value: searchTerm,
-        label: `Search: "${searchTerm}"`
+        label: `Search: "${searchTerm}"`,
       });
     }
 
@@ -292,7 +227,7 @@ export class FilteringService {
         activeFilters.push({
           key,
           value,
-          label: `${this.formatFilterKey(key)}: ${value}`
+          label: `${this.formatFilterKey(key)}: ${value}`,
         });
       }
     });
@@ -301,7 +236,7 @@ export class FilteringService {
       activeFilters.push({
         key: 'activeOnly',
         value: true,
-        label: 'Active items only'
+        label: 'Active items only',
       });
     }
 
@@ -314,7 +249,7 @@ export class FilteringService {
   private formatFilterKey(key: string): string {
     return key
       .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase())
+      .replace(/^./, (str) => str.toUpperCase())
       .trim();
   }
 
@@ -328,8 +263,8 @@ export class FilteringService {
         city: { type: 'exact' as const },
         country: { type: 'exact' as const },
         stateProvince: { type: 'exact' as const },
-        active: { type: 'boolean' as const }
-      }
+        active: { type: 'boolean' as const },
+      },
     },
     product: {
       searchFields: ['name', 'code', 'description', 'sku'] as const,
@@ -337,16 +272,16 @@ export class FilteringService {
         category: { type: 'exact' as const },
         brand: { type: 'exact' as const },
         active: { type: 'boolean' as const },
-        price: { type: 'range' as const }
-      }
+        price: { type: 'range' as const },
+      },
     },
     stock: {
       searchFields: ['product.name', 'product.code', 'warehouse.name'] as const,
       filterFields: {
         warehouse: { type: 'exact' as const },
         status: { type: 'exact' as const },
-        quantity: { type: 'range' as const }
-      }
-    }
+        quantity: { type: 'range' as const },
+      },
+    },
   };
 }
