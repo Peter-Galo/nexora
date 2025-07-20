@@ -5,11 +5,12 @@ import {
   ExportService,
 } from '../../../services/inventory/export.service';
 import { catchError, of, Subject, takeUntil } from 'rxjs';
+import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
 
 @Component({
   selector: 'app-export-jobs',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DataTableComponent],
   templateUrl: './export-jobs.component.html',
 })
 export class ExportJobsComponent implements OnInit, OnDestroy {
@@ -18,6 +19,16 @@ export class ExportJobsComponent implements OnInit, OnDestroy {
   exportJobs = signal<ExportJob[]>([]);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
+
+  // Define columns for the data table
+  exportJobColumns: TableColumn[] = [
+    { header: 'Category', field: 'category', customTemplate: true },
+    { header: 'Type', field: 'exportType', customTemplate: true },
+    { header: 'Status', field: 'status', customTemplate: true },
+    { header: 'Created', field: 'createdAt', customTemplate: true },
+    { header: 'Updated', field: 'updatedAt', customTemplate: true },
+    { header: 'Actions', field: 'actions', customTemplate: true },
+  ];
 
   constructor(private exportService: ExportService) {}
 

@@ -352,11 +352,11 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .btn-group {
+  .btn-group:not(.btn-group-horizontal) {
     flex-direction: column;
   }
 
-  .btn-group .btn {
+  .btn-group:not(.btn-group-horizontal) .btn {
     border-radius: 0.375rem !important;
     margin-bottom: 0.25rem;
   }

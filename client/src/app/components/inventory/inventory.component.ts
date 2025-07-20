@@ -15,4 +15,10 @@ export class InventoryComponent {
     { key: 'product', label: 'Product' },
     { key: 'export-jobs', label: 'Export Jobs' },
   ];
+
+  isNavCollapsed = true;
+
+  toggleNav() {
+    this.isNavCollapsed = !this.isNavCollapsed;
+  }
 }

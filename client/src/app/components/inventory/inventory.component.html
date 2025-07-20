@@ -1,6 +1,45 @@
 <div class="container mt-4">
   <div class="row">
-    <div class="col-3">
+    <!-- Mobile Navigation (Top) -->
+    <div class="col-12 d-md-none mb-3">
+      <div class="card">
+        <div
+          class="card-header d-flex justify-content-between align-items-center p-1"
+        >
+          <h6 class="mb-0"><i class="fas fa-bars me-2"></i>Navigation</h6>
+          <button
+            class="btn btn-outline-primary btn-sm"
+            (click)="toggleNav()"
+            [attr.aria-expanded]="!isNavCollapsed"
+            aria-controls="mobileNav"
+          >
+            <i
+              class="fas"
+              [class.fa-chevron-down]="isNavCollapsed"
+              [class.fa-chevron-up]="!isNavCollapsed"
+            ></i>
+          </button>
+        </div>
+        <div class="collapse" [class.show]="!isNavCollapsed" id="mobileNav">
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+              <li
+                *ngFor="let item of navItems"
+                class="list-group-item"
+                routerLink="/inventory/{{ item.key }}"
+                routerLinkActive="active"
+                (click)="isNavCollapsed = true"
+              >
+                {{ item.label }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Navigation (Sidebar) -->
+    <div class="col-md-3 d-none d-md-block">
       <div class="card p-0 mb-4">
         <div class="card-body p-0">
           <ul class="list-group list-group-flush">
@@ -17,7 +56,8 @@
       </div>
     </div>
 
-    <div class="col-9">
+    <!-- Content Area -->
+    <div class="col-12 col-md-9">
       <div class="card shadow">
         <div class="card-body">
           <router-outlet></router-outlet>

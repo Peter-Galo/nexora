@@ -1,47 +1,116 @@
 <!-- data-table.component.html -->
-<div class="table-responsive">
-  <table class="table table-striped table-hover">
-    <caption class="visually-hidden">
-      {{
-        title
-      }}
-    </caption>
-    <thead class="table-light">
-      <tr>
-        @for (column of columns; track column.header) {
-          <th scope="col">{{ column.header }}</th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      @for (item of data; track getPropertyValue(item, trackBy)) {
+
+<!-- Desktop Table View -->
+<div class="d-none d-md-block">
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <caption class="visually-hidden">
+        {{
+          title
+        }}
+      </caption>
+      <thead class="table-light">
         <tr>
           @for (column of columns; track column.header) {
-            <td>
-              @if (column.customTemplate) {
-                <ng-container
-                  [ngTemplateOutlet]="customCell"
-                  [ngTemplateOutletContext]="{
-                    $implicit: item,
-                    field: column.field,
-                  }"
-                >
-                </ng-container>
-              } @else if (column.isCurrency) {
-                {{ getPropertyValue(item, column.field) | currency }}
-              } @else {
-                {{ getPropertyValue(item, column.field) }}
-              }
-            </td>
+            <th scope="col">{{ column.header }}</th>
           }
         </tr>
-      } @empty {
-        <tr>
-          <td [attr.colspan]="columns.length" class="text-center py-3">
-            <i class="bi bi-info-circle me-2"></i>{{ emptyMessage }}
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @for (item of data; track getPropertyValue(item, trackBy)) {
+          <tr>
+            @for (column of columns; track column.header) {
+              <td>
+                @if (column.customTemplate) {
+                  <ng-container
+                    [ngTemplateOutlet]="customCell"
+                    [ngTemplateOutletContext]="{
+                      $implicit: item,
+                      field: column.field,
+                    }"
+                  >
+                  </ng-container>
+                } @else if (column.isCurrency) {
+                  {{ getPropertyValue(item, column.field) | currency }}
+                } @else {
+                  {{ getPropertyValue(item, column.field) }}
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="columns.length" class="text-center py-3">
+              <i class="bi bi-info-circle me-2"></i>{{ emptyMessage }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Mobile Card View -->
+<div class="d-md-none">
+  @for (item of data; track getPropertyValue(item, trackBy)) {
+    <div class="card">
+      <div class="card-body">
+        @for (column of columns; track column.header) {
+          @if (column.field === "actions") {
+            <!-- Actions section - inline with label on mobile -->
+            <div class="row mb-2">
+              <div class="col-5">
+                <strong class="text-muted">{{ column.header }}:</strong>
+              </div>
+              <div class="col-7">
+                @if (column.customTemplate) {
+                  <ng-container
+                    [ngTemplateOutlet]="customCell"
+                    [ngTemplateOutletContext]="{
+                      $implicit: item,
+                      field: column.field,
+                    }"
+                  >
+                  </ng-container>
+                } @else {
+                  {{ getPropertyValue(item, column.field) }}
+                }
+              </div>
+            </div>
+          } @else {
+            <!-- Regular fields -->
+            <div class="row mb-2">
+              <div class="col-5">
+                <strong class="text-muted">{{ column.header }}:</strong>
+              </div>
+              <div class="col-7">
+                @if (column.customTemplate) {
+                  <ng-container
+                    [ngTemplateOutlet]="customCell"
+                    [ngTemplateOutletContext]="{
+                      $implicit: item,
+                      field: column.field,
+                    }"
+                  >
+                  </ng-container>
+                } @else if (column.isCurrency) {
+                  {{ getPropertyValue(item, column.field) | currency }}
+                } @else {
+                  {{ getPropertyValue(item, column.field) }}
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  } @empty {
+    <div class="text-center py-4">
+      <div class="card">
+        <div class="card-body">
+          <i class="bi bi-info-circle me-2"></i>{{ emptyMessage }}
+        </div>
+      </div>
+    </div>
+  }
 </div>

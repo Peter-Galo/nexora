@@ -1,12 +1,12 @@
 <div class="container-fluid p-0">
   <!-- Header Section -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
+  <div class="d-md-flex justify-content-between align-items-center mb-4">
+    <div class="text-center text-md-start">
       <h3 class="mb-0 text-dark">Stock Management</h3>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-column flex-md-row gap-2 mt-3 mt-md-0">
       <button
-        class="btn btn-info"
+        class="btn btn-info w-100 w-md-auto"
         (click)="exportStocks()"
         [disabled]="exportState.exportLoading()"
       >
@@ -20,11 +20,11 @@
         }
       </button>
 
-      <button class="btn" (click)="toggleAutoRefresh()">
+      <button class="btn w-100 w-md-auto" (click)="toggleAutoRefresh()">
         <i class="fas fa-sync-alt me-1" [class.fa-spin]="autoRefresh()"></i>
         Auto-refresh {{ autoRefresh() ? "ON" : "OFF" }}
       </button>
-      <button class="btn" (click)="refresh()">
+      <button class="btn w-100 w-md-auto" (click)="refresh()">
         <i class="fas fa-sync-alt me-1"></i> Refresh
       </button>
     </div>
@@ -109,25 +109,31 @@
   <!-- Main Content -->
   @if (!loading() || allStocks().length > 0) {
     <!-- Navigation Tabs -->
-    <ul class="nav nav-pills mb-4" role="tablist">
-      @for (tab of tabs; track tab.key) {
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            [class.active]="selectedView() === tab.key"
-            [class.position-relative]="tab.badgeKey"
-            (click)="setView(tab.key)"
-          >
-            <i [class]="tab.icon + ' me-1'"></i>{{ tab.label }}
-            @if (tab.badgeKey && metrics()[tab.badgeKey] > 0) {
-              <span [class]="'badge ms-1 ' + tab.badgeClass">{{
-                metrics()[tab.badgeKey]
-              }}</span>
-            }
-          </button>
-        </li>
-      }
-    </ul>
+    <div class="d-flex overflow-auto mb-4">
+      <ul
+        class="nav nav-pills flex-nowrap"
+        role="tablist"
+        style="min-width: max-content"
+      >
+        @for (tab of tabs; track tab.key) {
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link text-nowrap"
+              [class.active]="selectedView() === tab.key"
+              [class.position-relative]="tab.badgeKey"
+              (click)="setView(tab.key)"
+            >
+              <i [class]="tab.icon + ' me-1'"></i>{{ tab.label }}
+              @if (tab.badgeKey && metrics()[tab.badgeKey] > 0) {
+                <span [class]="'badge ms-1 ' + tab.badgeClass">{{
+                  metrics()[tab.badgeKey]
+                }}</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
 
     <!-- Dashboard View -->
     @if (selectedView() === "dashboard") {
@@ -168,8 +174,10 @@
           <div class="card-body">
             @for (alert of alerts(); track alert.type) {
               <div [class]="'alert mb-3 alert-' + alert.type">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
+                <div
+                  class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center"
+                >
+                  <div class="mb-2 mb-md-0">
                     <strong>
                       <i
                         [class]="getAlertConfig(alert.type).icon + ' me-2'"
@@ -183,7 +191,7 @@
                       >
                     </div>
                   </div>
-                  <div>
+                  <div class="text-center text-md-end">
                     <button
                       [class]="
                         'btn btn-sm ' + getAlertConfig(alert.type).buttonClass
@@ -295,131 +303,93 @@
           </h5>
         </div>
         <div class="card-body p-0">
-          @if (filteredStocks().length === 0) {
-            <div class="text-center py-5">
-              <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-              <h5 class="text-muted">No Stock Items Found</h5>
-              <p class="text-muted">
-                @if (searchTerm() || selectedWarehouse() !== "all") {
-                  Try adjusting your search criteria or filters.
-                } @else {
-                  No stock items match the current view.
-                }
-              </p>
-            </div>
-          } @else {
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th scope="col">Status</th>
-                    <th scope="col">Product</th>
-                    <th scope="col">Warehouse</th>
-                    <th scope="col">Current Stock</th>
-                    <th scope="col">Stock Levels</th>
-                    <th scope="col">Last Updated</th>
-                    <th scope="col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (stock of filteredStocks(); track stock.uuid) {
-                    <tr>
-                      <!-- Status -->
-                      <td>
-                        <i
-                          [class]="
-                            getStockStatusIcon(stock) +
-                            ' ' +
-                            getStockStatusClass(stock)
-                          "
-                        ></i>
-                      </td>
-
-                      <!-- Product -->
-                      <td>
-                        <div>
-                          <strong>{{ stock.productName }}</strong>
-                          <br />
-                          <small class="text-muted">{{
-                            stock.productCode
-                          }}</small>
-                        </div>
-                      </td>
-
-                      <!-- Warehouse -->
-                      <td>
-                        <div>
-                          <span class="fw-medium">{{
-                            stock.warehouseName
-                          }}</span>
-                          <br />
-                          <small class="text-muted">{{
-                            stock.warehouseCode
-                          }}</small>
-                        </div>
-                      </td>
-
-                      <!-- Current Stock -->
-                      <td>
-                        <span [class]="'badge ' + getStockBadgeClass(stock)">
-                          {{ stock.quantity }}
-                        </span>
-                      </td>
-
-                      <!-- Stock Levels -->
-                      <td>
-                        <small class="text-muted">
-                          @if (stock.minStockLevel || stock.maxStockLevel) {
-                            @if (stock.minStockLevel) {
-                              Min: {{ stock.minStockLevel }}
-                            }
-                            @if (stock.minStockLevel && stock.maxStockLevel) {
-                              <br />
-                            }
-                            @if (stock.maxStockLevel) {
-                              Max: {{ stock.maxStockLevel }}
-                            }
-                          } @else {
-                            Not set
-                          }
-                        </small>
-                      </td>
-
-                      <!-- Last Updated -->
-                      <td>
-                        <small class="text-muted">
-                          {{ formatDate(stock.lastUpdated) }}
-                        </small>
-                      </td>
-
-                      <!-- Actions -->
-                      <td>
-                        <div class="btn-group btn-group-sm" role="group">
-                          <button
-                            type="button"
-                            class="btn"
-                            (click)="addStock(stock.uuid, 1)"
-                            title="Add 1 unit"
-                          >
-                            <i class="fas fa-plus"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn"
-                            (click)="removeStock(stock.uuid, 1)"
-                            [disabled]="stock.quantity == 0"
-                            title="Remove 1 unit"
-                          >
-                            <i class="fas fa-minus"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+          <app-data-table
+            [data]="filteredStocks()"
+            [columns]="stockColumns"
+            [trackBy]="'uuid'"
+            title="Stock List"
+            [emptyMessage]="
+              searchTerm() || selectedWarehouse() !== 'all'
+                ? 'Try adjusting your search criteria or filters.'
+                : 'No stock items match the current view.'
+            "
+          >
+            <!-- Custom templates for all columns -->
+            <ng-template #customCell let-stock let-field="field">
+              @if (field === "status") {
+                <i
+                  [class]="
+                    getStockStatusIcon(stock) + ' ' + getStockStatusClass(stock)
+                  "
+                ></i>
+              }
+              @if (field === "product") {
+                <div>
+                  <strong>{{ stock.productName }}</strong>
+                  <br />
+                  <small class="text-muted">{{ stock.productCode }}</small>
+                </div>
+              }
+              @if (field === "warehouse") {
+                <div>
+                  <span class="fw-medium">{{ stock.warehouseName }}</span>
+                  <br />
+                  <small class="text-muted">{{ stock.warehouseCode }}</small>
+                </div>
+              }
+              @if (field === "currentStock") {
+                <span [class]="'badge ' + getStockBadgeClass(stock)">
+                  {{ stock.quantity }}
+                </span>
+              }
+              @if (field === "stockLevels") {
+                <small class="text-muted">
+                  @if (stock.minStockLevel || stock.maxStockLevel) {
+                    @if (stock.minStockLevel) {
+                      Min: {{ stock.minStockLevel }}
+                    }
+                    @if (stock.minStockLevel && stock.maxStockLevel) {
+                      <br />
+                    }
+                    @if (stock.maxStockLevel) {
+                      Max: {{ stock.maxStockLevel }}
+                    }
+                  } @else {
+                    Not set
                   }
-                </tbody>
-              </table>
-            </div>
-          }
+                </small>
+              }
+              @if (field === "lastUpdated") {
+                <small class="text-muted">
+                  {{ formatDate(stock.lastUpdated) }}
+                </small>
+              }
+              @if (field === "actions") {
+                <div
+                  class="btn-group btn-group-sm btn-group-horizontal"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn"
+                    (click)="addStock(stock.uuid, 1)"
+                    title="Add 1 unit"
+                  >
+                    <i class="fas fa-plus"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    (click)="removeStock(stock.uuid, 1)"
+                    [disabled]="stock.quantity == 0"
+                    title="Remove 1 unit"
+                  >
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              }
+            </ng-template>
+          </app-data-table>
         </div>
       </div>
     }

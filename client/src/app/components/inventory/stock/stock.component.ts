@@ -7,6 +7,7 @@ import {
 } from '../../../services/inventory/stock.service';
 import { interval, Subscription } from 'rxjs';
 import { BaseInventoryComponent } from '../base-inventory.component';
+import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
 
 type ViewType = 'dashboard' | 'all' | 'low' | 'over' | 'zero';
 type AlertType = 'danger' | 'warning' | 'info';
@@ -57,7 +58,7 @@ interface QuickStat {
 
 @Component({
   selector: 'app-stock',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DataTableComponent],
   templateUrl: './stock.component.html',
 })
 export class StockComponent extends BaseInventoryComponent {
@@ -109,6 +110,17 @@ export class StockComponent extends BaseInventoryComponent {
       badgeKey: 'overStockCount',
       badgeClass: 'bg-info',
     },
+  ];
+
+  // Column definitions for data table
+  stockColumns: TableColumn[] = [
+    { header: 'Status', field: 'status', customTemplate: true },
+    { header: 'Product', field: 'product', customTemplate: true },
+    { header: 'Warehouse', field: 'warehouse', customTemplate: true },
+    { header: 'Current Stock', field: 'currentStock', customTemplate: true },
+    { header: 'Stock Levels', field: 'stockLevels', customTemplate: true },
+    { header: 'Last Updated', field: 'lastUpdated', customTemplate: true },
+    { header: 'Actions', field: 'actions', customTemplate: true },
   ];
 
   // Computed properties
