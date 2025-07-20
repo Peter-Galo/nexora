@@ -33,7 +33,7 @@
             Total Value:
             {{ dataService.inventoryValue()?.totalInventoryValue | currency }}
           </h6>
-          <div class="table-responsive">
+          <div class="card-body">
             <app-data-table
               [data]="dataService.sortedInventoryValueByWarehouse()"
               [columns]="inventoryValueColumns"

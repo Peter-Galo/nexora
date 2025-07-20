@@ -1,14 +1,16 @@
 <div class="container-fluid px-0">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 text-dark">Warehouse Management</h3>
-    <div class="d-flex gap-2">
+  <div class="d-md-flex justify-content-between align-items-center mb-4">
+    <div class="text-center text-md-start">
+      <h3 class="mb-0 text-dark">Warehouse Management</h3>
+    </div>
+    <div class="d-flex flex-column flex-md-row gap-2 mt-3 mt-md-0">
       @if (canCreateWarehouses()) {
-        <button class="btn btn-success" (click)="showCreateWarehouseForm()">
+        <button class="btn btn-success w-100 w-md-auto" (click)="showCreateWarehouseForm()">
           <i class="fas fa-plus"></i> Create New Warehouse
         </button>
       }
       <button
-        class="btn btn-info"
+        class="btn btn-info w-100 w-md-auto"
         (click)="exportWarehouses()"
         [disabled]="exportState.exportLoading()"
       >
@@ -22,7 +24,7 @@
         }
       </button>
 
-      <button class="btn btn-primary" (click)="refresh()">
+      <button class="btn btn-primary w-100 w-md-auto" (click)="refresh()">
         <i class="fas fa-sync-alt"></i> Refresh
       </button>
     </div>
@@ -482,12 +484,14 @@
               </span>
             }
             @if (field === "actions") {
-              <div class="btn-group btn-group-sm" role="group">
+              <div class="d-flex flex-nowrap gap-1" role="group">
                 @if (canModifyWarehouses()) {
                   @if (warehouse.active) {
                     <button
                       type="button"
-                      class="btn btn-outline-warning"
+                      class="btn btn-outline-warning btn-sm"
+                      [class.w-50]="canDeleteWarehouses()"
+                      [class.w-100]="!canDeleteWarehouses()"
                       (click)="deactivateWarehouse(warehouse)"
                       title="Deactivate warehouse"
                     >
@@ -496,7 +500,9 @@
                   } @else {
                     <button
                       type="button"
-                      class="btn btn-outline-success"
+                      class="btn btn-outline-success btn-sm"
+                      [class.w-50]="canDeleteWarehouses()"
+                      [class.w-100]="!canDeleteWarehouses()"
                       (click)="activateWarehouse(warehouse)"
                       title="Activate warehouse"
                     >
@@ -507,7 +513,9 @@
                 @if (canDeleteWarehouses()) {
                   <button
                     type="button"
-                    class="btn btn-outline-danger"
+                    class="btn btn-outline-danger btn-sm"
+                    [class.w-50]="canModifyWarehouses()"
+                    [class.w-100]="!canModifyWarehouses()"
                     (click)="deleteWarehouse(warehouse)"
                     title="Delete warehouse"
                   >
