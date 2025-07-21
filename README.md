@@ -473,8 +473,6 @@ curl -X GET http://localhost:8080/api/products \
 
 ### Environment Variables
 
-### Environment Variables
-
 #### Required for Production:
 
 - `POSTGRES_PASSWORD` - Database password
