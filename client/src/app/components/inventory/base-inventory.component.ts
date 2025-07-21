@@ -11,7 +11,7 @@ import { AppStateService } from '../../core/state/app-state.service';
   template: '',
 })
 export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
-  // Dependency injection using modern inject function
+  // Dependency injection using a modern inject function
   protected readonly exportUtilityService = inject(ExportUtilityService);
   protected readonly appStateService = inject(AppStateService);
 
@@ -33,10 +33,9 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
   // Abstract properties that must be implemented by child components
   protected abstract exportCategory: ExportCategory;
 
-  constructor() {
+  protected constructor() {
     this.exportState = this.exportUtilityService.createExportState();
 
-    // Set up reactive effects
     this.setupReactiveEffects();
   }
 
@@ -50,11 +49,8 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Set up reactive effects for component state management
-   */
   private setupReactiveEffects(): void {
-    // Effect to sync component loading state with global app state
+    // Effect to sync the component loading state with the global app state
     effect(() => {
       if (this._loading()) {
         this.appStateService.setLoading(true);
@@ -79,21 +75,15 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Abstract method for loading component data
-   * Must be implemented by child components
+   * Child components
+   * Must implement abstract method for loading component data
    */
   protected abstract loadData(): void;
 
-  /**
-   * Refresh data - triggers reactive refresh
-   */
   refreshData(): void {
     this._refreshTrigger.update((count) => count + 1);
   }
 
-  /**
-   * Export data to Excel
-   */
   exportData(): void {
     this.exportUtilityService.initiateExport(
       this.exportCategory,
@@ -102,9 +92,6 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Download the exported file
-   */
   downloadExport(jobId: string): void {
     this.exportUtilityService.downloadExport(jobId);
   }
@@ -117,9 +104,6 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  /**
-   * Load existing export jobs for the current user
-   */
   loadExistingExportJobs(): void {
     if (!this.canExportData()) {
       return;
@@ -132,30 +116,18 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Format date string to localized date
-   */
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString();
   }
 
-  /**
-   * Get status class for active/inactive states
-   */
   getStatusClass(active: boolean): string {
     return active ? 'badge bg-success' : 'badge bg-secondary';
   }
 
-  /**
-   * Get status text for active/inactive states
-   */
   getStatusText(active: boolean): string {
     return active ? 'Active' : 'Inactive';
   }
 
-  /**
-   * Handle errors with consistent error messaging and state management
-   */
   protected handleError(error: any, context: string): void {
     console.error(`Error in ${context}:`, error);
 
@@ -170,9 +142,6 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
     this.appStateService.setLoading(false);
   }
 
-  /**
-   * Extract meaningful error message from error object
-   */
   private extractErrorMessage(error: any, context: string): string {
     if (error?.message) {
       return error.message;
@@ -202,16 +171,10 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
     return `Failed to ${context}. Please try again.`;
   }
 
-  /**
-   * Set loading state
-   */
   protected setLoading(loading: boolean): void {
     this._loading.set(loading);
   }
 
-  /**
-   * Clear error state
-   */
   clearError(): void {
     this._error.set(null);
     this.appStateService.clearError();
@@ -242,9 +205,6 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Enhanced API call handler with retry logic
-   */
   protected handleApiCallWithRetry<T>(
     apiCall: () => any,
     successCallback: (data: T) => void,
@@ -282,9 +242,6 @@ export abstract class BaseInventoryComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Determine if an error should trigger a retry
-   */
   private shouldRetry(error: any): boolean {
     // Retry on network errors or server errors (5xx)
     return !error.status || error.status >= 500;

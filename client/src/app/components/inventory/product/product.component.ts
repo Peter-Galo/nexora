@@ -148,9 +148,6 @@ export class ProductComponent extends BaseInventoryComponent {
     this.applyFilters();
   }
 
-  /**
-   * Clear search and apply filters
-   */
   clearSearch(): void {
     this.searchTerm = '';
     this.applyFilters();
@@ -166,5 +163,4 @@ export class ProductComponent extends BaseInventoryComponent {
 
   // Alias for backward compatibility with template
   override refreshData = () => super.refreshData();
-  exportProducts = () => this.exportData();
 }

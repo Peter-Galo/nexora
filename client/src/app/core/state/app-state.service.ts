@@ -56,23 +56,14 @@ export class AppStateService {
     sidebarCollapsed: this._sidebarCollapsed(),
   }));
 
-  /**
-   * Set loading state
-   */
   setLoading(loading: boolean): void {
     this._loading.set(loading);
   }
 
-  /**
-   * Set error state
-   */
   setError(error: string | null): void {
     this._error.set(error);
   }
 
-  /**
-   * Clear error state
-   */
   clearError(): void {
     this._error.set(null);
   }

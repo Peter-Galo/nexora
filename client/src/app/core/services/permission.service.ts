@@ -167,9 +167,6 @@ export class PermissionService {
     );
   }
 
-  /**
-   * Refresh current user data
-   */
   refreshUser(): void {
     this._currentUser.set(this.authService.getUser());
   }

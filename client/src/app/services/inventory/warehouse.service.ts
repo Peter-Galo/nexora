@@ -34,48 +34,24 @@ export class WarehouseService extends BaseInventoryService<WarehouseEntity> {
     enableCache: true,
   };
 
-  /**
-   * Get all warehouses
-   * @returns Observable with the list of warehouses
-   */
   getAllWarehouses(): Observable<WarehouseEntity[]> {
     return this.getAll();
   }
 
-  /**
-   * Create a new warehouse
-   * @param warehouse - The warehouse data to create
-   * @returns Observable with the created warehouse
-   */
   createWarehouse(
     warehouse: Partial<WarehouseEntity>,
   ): Observable<WarehouseEntity> {
     return this.create(warehouse);
   }
 
-  /**
-   * Delete a warehouse
-   * @param id - The warehouse UUID
-   * @returns Observable with void response
-   */
   deleteWarehouse(id: string): Observable<void> {
     return this.remove(id);
   }
 
-  /**
-   * Activate a warehouse
-   * @param id - The warehouse UUID
-   * @returns Observable with the activated warehouse
-   */
   activateWarehouse(id: string): Observable<WarehouseEntity> {
     return this.activate(id);
   }
 
-  /**
-   * Deactivate a warehouse
-   * @param id - The warehouse UUID
-   * @returns Observable with the deactivated warehouse
-   */
   deactivateWarehouse(id: string): Observable<WarehouseEntity> {
     return this.deactivate(id);
   }

@@ -48,7 +48,7 @@ import { CommonModule } from '@angular/common';
             (exportStatus === 'FAILED' || exportStatus === 'TIMEOUT')
           ) {
             <button
-              class="btn btn-sm btn-outline-primary ms-auto"
+              class="btn btn-sm ms-auto"
               (click)="onDownloadExport(exportJobId)"
             >
               <i class="fas fa-download"></i> Try Download

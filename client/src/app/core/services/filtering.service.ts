@@ -26,9 +26,6 @@ export interface FilterState {
   providedIn: 'root',
 })
 export class FilteringService {
-  /**
-   * Create a reactive filter state
-   */
   createFilterState<T>(
     data: T[],
     config: FilterConfig<T>,
@@ -113,9 +110,6 @@ export class FilteringService {
     };
   }
 
-  /**
-   * Apply search filter to data
-   */
   private applySearch<T>(
     data: T[],
     searchTerm: string,
@@ -130,9 +124,6 @@ export class FilteringService {
     });
   }
 
-  /**
-   * Apply field filters to data
-   */
   private applyFilters<T>(
     data: T[],
     filters: { [key: string]: any },
@@ -176,9 +167,6 @@ export class FilteringService {
     });
   }
 
-  /**
-   * Apply sorting to data
-   */
   private applySorting<T>(
     data: T[],
     sortBy: string,
@@ -197,16 +185,10 @@ export class FilteringService {
     });
   }
 
-  /**
-   * Check if data has active field
-   */
   private hasActiveField<T>(data: T[]): boolean {
     return data.length > 0 && 'active' in (data[0] as any);
   }
 
-  /**
-   * Get list of active filters for display
-   */
   private getActiveFilters(
     searchTerm: string,
     filters: { [key: string]: any },
@@ -243,9 +225,6 @@ export class FilteringService {
     return activeFilters;
   }
 
-  /**
-   * Format filter key for display
-   */
   private formatFilterKey(key: string): string {
     return key
       .replace(/([A-Z])/g, ' $1')
@@ -253,9 +232,6 @@ export class FilteringService {
       .trim();
   }
 
-  /**
-   * Common filter configurations
-   */
   static readonly COMMON_CONFIGS = {
     warehouse: {
       searchFields: ['name', 'code', 'address', 'city', 'country'] as const,
