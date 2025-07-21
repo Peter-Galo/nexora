@@ -7,7 +7,10 @@ import {
 } from '../../../services/inventory/stock.service';
 import { interval, Subscription } from 'rxjs';
 import { BaseInventoryComponent } from '../base-inventory.component';
-import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
+import {
+  DataTableComponent,
+  TableColumn,
+} from '../../shared/data-table/data-table.component';
 
 type ViewType = 'dashboard' | 'all' | 'low' | 'over' | 'zero';
 type AlertType = 'danger' | 'warning' | 'info';
@@ -523,7 +526,4 @@ export class StockComponent extends BaseInventoryComponent {
       return 'Invalid Date';
     }
   }
-
-  // Alias for backward compatibility with template
-  exportStocks = () => this.exportData();
 }

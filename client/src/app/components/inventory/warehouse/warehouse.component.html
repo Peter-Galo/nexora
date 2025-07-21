@@ -5,13 +5,16 @@
     </div>
     <div class="d-flex flex-column flex-md-row gap-2 mt-3 mt-md-0">
       @if (canCreateWarehouses()) {
-        <button class="btn btn-success w-100 w-md-auto" (click)="showCreateWarehouseForm()">
+        <button
+          class="btn btn-success w-auto"
+          (click)="showCreateWarehouseForm()"
+        >
           <i class="fas fa-plus"></i> Create New Warehouse
         </button>
       }
       <button
-        class="btn btn-info w-100 w-md-auto"
-        (click)="exportWarehouses()"
+        class="btn btn-info w-auto"
+        (click)="this.exportData()"
         [disabled]="exportState.exportLoading()"
       >
         @if (exportState.exportLoading()) {
@@ -24,7 +27,7 @@
         }
       </button>
 
-      <button class="btn btn-primary w-100 w-md-auto" (click)="refresh()">
+      <button class="btn btn-primary w-auto" (click)="refresh()">
         <i class="fas fa-sync-alt"></i> Refresh
       </button>
     </div>
@@ -43,18 +46,24 @@
   }
 
   <!-- Export Status Alert -->
-  @if (exportState.exportStatus() && exportState.exportStatus() !== "COMPLETED") {
+  @if (
+    exportState.exportStatus() && exportState.exportStatus() !== "COMPLETED"
+  ) {
     <div
       class="alert"
       [class]="
-        exportState.exportStatus() === 'FAILED' || exportState.exportStatus() === 'TIMEOUT'
+        exportState.exportStatus() === 'FAILED' ||
+        exportState.exportStatus() === 'TIMEOUT'
           ? 'alert-danger'
           : 'alert-info'
       "
       role="alert"
     >
       <div class="d-flex align-items-center">
-        @if (exportState.exportStatus() === "PENDING" || exportState.exportStatus() === "PROCESSING") {
+        @if (
+          exportState.exportStatus() === "PENDING" ||
+          exportState.exportStatus() === "PROCESSING"
+        ) {
           <div class="spinner-border spinner-border-sm me-2" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
@@ -78,10 +87,11 @@
         }
         @if (
           exportState.exportJobId() &&
-          (exportState.exportStatus() === "FAILED" || exportState.exportStatus() === "TIMEOUT")
+          (exportState.exportStatus() === "FAILED" ||
+            exportState.exportStatus() === "TIMEOUT")
         ) {
           <button
-            class="btn btn-sm btn-outline-primary ms-auto"
+            class="btn btn-sm ms-auto"
             (click)="downloadExport(exportState.exportJobId()!)"
           >
             <i class="fas fa-download"></i> Try Download
@@ -484,45 +494,35 @@
               </span>
             }
             @if (field === "actions") {
+              @let actionConfig = getWarehouseActionConfig(warehouse);
               <div class="d-flex flex-nowrap gap-1" role="group">
-                @if (canModifyWarehouses()) {
-                  @if (warehouse.active) {
-                    <button
-                      type="button"
-                      class="btn btn-outline-warning btn-sm"
-                      [class.w-50]="canDeleteWarehouses()"
-                      [class.w-100]="!canDeleteWarehouses()"
-                      (click)="deactivateWarehouse(warehouse)"
-                      title="Deactivate warehouse"
-                    >
-                      <i class="fas fa-pause"></i> Deactivate
-                    </button>
-                  } @else {
-                    <button
-                      type="button"
-                      class="btn btn-outline-success btn-sm"
-                      [class.w-50]="canDeleteWarehouses()"
-                      [class.w-100]="!canDeleteWarehouses()"
-                      (click)="activateWarehouse(warehouse)"
-                      title="Activate warehouse"
-                    >
-                      <i class="fas fa-play"></i> Activate
-                    </button>
-                  }
-                }
-                @if (canDeleteWarehouses()) {
+                @if (actionConfig.primaryAction.visible) {
                   <button
                     type="button"
-                    class="btn btn-outline-danger btn-sm"
-                    [class.w-50]="canModifyWarehouses()"
-                    [class.w-100]="!canModifyWarehouses()"
-                    (click)="deleteWarehouse(warehouse)"
-                    title="Delete warehouse"
+                    [class]="actionConfig.primaryAction.class"
+                    (click)="actionConfig.primaryAction.action()"
+                    [title]="actionConfig.primaryAction.title"
                   >
-                    <i class="fas fa-trash"></i> Delete
+                    <i [class]="actionConfig.primaryAction.icon"></i
+                    ><span class="d-none d-md-inline ms-1">{{
+                      actionConfig.primaryAction.text
+                    }}</span>
                   </button>
                 }
-                @if (!canModifyWarehouses() && !canDeleteWarehouses()) {
+                @if (actionConfig.deleteAction.visible) {
+                  <button
+                    type="button"
+                    [class]="actionConfig.deleteAction.class"
+                    (click)="actionConfig.deleteAction.action()"
+                    [title]="actionConfig.deleteAction.title"
+                  >
+                    <i [class]="actionConfig.deleteAction.icon"></i
+                    ><span class="d-none d-md-inline ms-1">{{
+                      actionConfig.deleteAction.text
+                    }}</span>
+                  </button>
+                }
+                @if (!actionConfig.hasActions) {
                   <span class="text-muted small">No actions available</span>
                 }
               </div>

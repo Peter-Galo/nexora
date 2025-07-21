@@ -18,9 +18,6 @@ export type ExportCategory = 'WAREHOUSE' | 'STOCK' | 'PRODUCT';
 export class ExportUtilityService {
   constructor(private exportService: ExportService) {}
 
-  /**
-   * Creates export state signals for a component
-   */
   createExportState() {
     return {
       exportLoading: signal<boolean>(false),
@@ -169,7 +166,7 @@ export class ExportUtilityService {
       const currentFiles = exportState.exportedFiles();
       exportState.exportedFiles.set([exportedFile, ...currentFiles]);
 
-      // Clear export status after adding to list
+      // Clear export status after adding to the list
       exportState.exportStatus.set(null);
       exportState.exportJobId.set(null);
     }
@@ -200,7 +197,7 @@ export class ExportUtilityService {
         takeUntil(destroy$),
       )
       .subscribe((jobs) => {
-        // Filter for the specific category export jobs and convert to the expected format
+        // Filter for the specific category exports jobs and converts to the expected format
         const categoryExportJobs = jobs
           .filter(
             (job) =>

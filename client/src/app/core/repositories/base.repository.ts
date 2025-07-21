@@ -1,12 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
-/**
- * Base Entity Interface
- */
 export interface BaseEntity {
   id?: string;
   uuid?: string;
@@ -15,9 +16,6 @@ export interface BaseEntity {
   active?: boolean;
 }
 
-/**
- * Repository Configuration Interface
- */
 export interface RepositoryConfig {
   baseUrl: string;
   entityName: string;
@@ -26,16 +24,10 @@ export interface RepositoryConfig {
   enableCache?: boolean;
 }
 
-/**
- * Query Parameters Interface
- */
 export interface QueryParams {
   [key: string]: string | number | boolean | string[] | number[] | boolean[];
 }
 
-/**
- * Repository Error Interface
- */
 export interface RepositoryError {
   message: string;
   status: number;
@@ -58,37 +50,22 @@ export abstract class BaseRepository<T extends BaseEntity> {
   // Cache management
   private readonly cache = new Map<string, { data: any; timestamp: number }>();
 
-  /**
-   * Get the full API URL for the entity
-   */
   protected get apiUrl(): string {
     return `${environment.apiUrl}/${this.config.baseUrl}`;
   }
 
-  /**
-   * Get cache timeout in milliseconds
-   */
   protected get cacheTimeout(): number {
     return this.config.cacheTimeout || 5 * 60 * 1000; // 5 minutes default
   }
 
-  /**
-   * Get retry attempts count
-   */
   protected get retryAttempts(): number {
     return this.config.retryAttempts || 3;
   }
 
-  /**
-   * Check if caching is enabled
-   */
   protected get isCacheEnabled(): boolean {
     return this.config.enableCache !== false;
   }
 
-  /**
-   * Generic HTTP GET request with caching and error handling
-   */
   protected get<R = T>(
     endpoint: string = '',
     params?: QueryParams,
@@ -118,9 +95,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
     );
   }
 
-  /**
-   * Generic HTTP POST request with error handling
-   */
   protected post<R = T>(
     data: Partial<T>,
     endpoint: string = '',
@@ -134,9 +108,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
     );
   }
 
-  /**
-   * Generic HTTP PUT request with error handling
-   */
   protected put<R = T>(
     id: string,
     data: Partial<T>,
@@ -151,9 +122,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
     );
   }
 
-  /**
-   * Generic HTTP DELETE request with error handling
-   */
   protected delete(id: string): Observable<void> {
     const url = this.buildUrl(id);
 
@@ -164,59 +132,35 @@ export abstract class BaseRepository<T extends BaseEntity> {
     );
   }
 
-  /**
-   * Get all entities
-   */
   findAll(params?: QueryParams): Observable<T[]> {
     return this.get<T[]>('', params);
   }
 
-  /**
-   * Create new entity
-   */
   create(entity: Partial<T>): Observable<T> {
     return this.post<T>(entity);
   }
 
-  /**
-   * Delete entity
-   */
   remove(id: string): Observable<void> {
     return this.delete(id);
   }
 
-  /**
-   * Search entities
-   */
   search(query: string, params?: QueryParams): Observable<T[]> {
     const searchParams = { q: query, ...params };
     return this.get<T[]>('search', searchParams);
   }
 
-  /**
-   * Activate entity
-   */
   activate(id: string): Observable<T> {
     return this.put<T>(id, {}, 'activate');
   }
 
-  /**
-   * Deactivate entity
-   */
   deactivate(id: string): Observable<T> {
     return this.put<T>(id, {}, 'deactivate');
   }
 
-  /**
-   * Build full URL with endpoint
-   */
   private buildUrl(endpoint: string): string {
     return endpoint ? `${this.apiUrl}/${endpoint}` : this.apiUrl;
   }
 
-  /**
-   * Build HTTP parameters from query params
-   */
   private buildHttpParams(params?: QueryParams): HttpParams {
     let httpParams = new HttpParams();
 
@@ -238,17 +182,11 @@ export abstract class BaseRepository<T extends BaseEntity> {
     return httpParams;
   }
 
-  /**
-   * Build cache key from URL and parameters
-   */
   private buildCacheKey(url: string, params?: QueryParams): string {
     const paramString = params ? JSON.stringify(params) : '';
     return `${url}:${paramString}`;
   }
 
-  /**
-   * Check if cache entry is valid
-   */
   private isValidCache(key: string): boolean {
     const entry = this.cache.get(key);
     if (!entry) return false;
@@ -257,9 +195,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
     return now - entry.timestamp < this.cacheTimeout;
   }
 
-  /**
-   * Set cache entry
-   */
   private setCache(key: string, data: any): void {
     this.cache.set(key, {
       data,
@@ -267,16 +202,10 @@ export abstract class BaseRepository<T extends BaseEntity> {
     });
   }
 
-  /**
-   * Invalidate all cache entries
-   */
   private invalidateCache(): void {
     this.cache.clear();
   }
 
-  /**
-   * Handle HTTP errors with proper error transformation
-   */
   private handleError(
     error: HttpErrorResponse,
     method: string,
@@ -295,9 +224,6 @@ export abstract class BaseRepository<T extends BaseEntity> {
     return throwError(() => repositoryError);
   }
 
-  /**
-   * Extract meaningful error message from HTTP error
-   */
   private getErrorMessage(error: HttpErrorResponse): string {
     if (error.error?.message) {
       return error.error.message;

@@ -51,7 +51,6 @@ export class WarehouseComponent extends BaseInventoryComponent {
     FormValidationService.WAREHOUSE_VALIDATION,
   );
 
-  // Filter state using filtering service
   filterState = this.filteringService.createFilterState(
     [] as WarehouseEntity[],
     FilteringService.COMMON_CONFIGS.warehouse,
@@ -78,13 +77,51 @@ export class WarehouseComponent extends BaseInventoryComponent {
     }
   });
 
+  // Action button configurations
+  protected readonly actionButtonConfig = computed(() => {
+    const canModify = this.canModifyWarehouses();
+    const canDelete = this.canDeleteWarehouses();
+    const hasActions = canModify || canDelete;
+
+    return {
+      hasActions,
+      canModify,
+      canDelete,
+    };
+  });
+
+  // Get action button configuration for a specific warehouse
+  getWarehouseActionConfig = (warehouse: WarehouseEntity) => {
+    const config = this.actionButtonConfig();
+
+    return {
+      ...config,
+      primaryAction: {
+        visible: config.canModify,
+        isActivate: !warehouse.active,
+        text: warehouse.active ? 'Deactivate' : 'Activate',
+        icon: warehouse.active ? 'fas fa-pause' : 'fas fa-play',
+        title: warehouse.active ? 'Deactivate warehouse' : 'Activate warehouse',
+        action: warehouse.active
+          ? () => this.deactivateWarehouse(warehouse)
+          : () => this.activateWarehouse(warehouse),
+        class: `btn btn-sm px-3`,
+      },
+      deleteAction: {
+        visible: config.canDelete,
+        text: 'Delete',
+        icon: 'fas fa-trash',
+        title: 'Delete warehouse',
+        action: () => this.deleteWarehouse(warehouse),
+        class: `btn btn-sm px-3`,
+      },
+    };
+  };
+
   constructor() {
     super();
   }
 
-  /**
-   * Implementation of abstract loadData method from BaseInventoryComponent
-   */
   protected loadData(): void {
     this.handleApiCall(
       () => this.warehouseService.getAllWarehouses(),
@@ -100,30 +137,18 @@ export class WarehouseComponent extends BaseInventoryComponent {
   canDeleteWarehouses = () => this.permissions().canDelete;
   canCreateWarehouses = () => this.permissions().canCreate;
 
-  /**
-   * Handle search input changes
-   */
   onSearchInput(searchTerm: string): void {
     this.filterState.setSearchTerm(searchTerm);
   }
 
-  /**
-   * Toggle active only filter
-   */
   toggleActiveFilter(): void {
     this.filterState.toggleActiveOnly();
   }
 
-  /**
-   * Clear search term
-   */
   clearSearch(): void {
     this.filterState.setSearchTerm('');
   }
 
-  /**
-   * Activate a warehouse
-   */
   activateWarehouse(warehouse: WarehouseEntity): void {
     if (!this.canModifyWarehouses()) {
       this.handleError(
@@ -151,9 +176,6 @@ export class WarehouseComponent extends BaseInventoryComponent {
     );
   }
 
-  /**
-   * Deactivate a warehouse
-   */
   deactivateWarehouse(warehouse: WarehouseEntity): void {
     if (!this.canModifyWarehouses()) {
       this.handleError(
@@ -180,9 +202,6 @@ export class WarehouseComponent extends BaseInventoryComponent {
     );
   }
 
-  /**
-   * Delete a warehouse
-   */
   deleteWarehouse(warehouse: WarehouseEntity): void {
     if (!this.canDeleteWarehouses()) {
       this.handleError(
@@ -218,16 +237,10 @@ export class WarehouseComponent extends BaseInventoryComponent {
     );
   }
 
-  /**
-   * Refresh the warehouse list
-   */
   refresh(): void {
     this.refreshData();
   }
 
-  /**
-   * Show the create warehouse form
-   */
   showCreateWarehouseForm(): void {
     if (!this.canCreateWarehouses()) {
       this.handleError(
@@ -245,57 +258,31 @@ export class WarehouseComponent extends BaseInventoryComponent {
     this.showCreateForm.set(true);
   }
 
-  /**
-   * Hide the create warehouse form
-   */
   hideCreateWarehouseForm(): void {
     this.showCreateForm.set(false);
     this.formState.reset();
   }
 
-  /**
-   * Update form field value
-   */
   updateFormField(field: string, value: any): void {
     this.formState.updateField(field as keyof WarehouseEntity, value);
   }
 
-  /**
-   * Get error message for a specific field
-   */
   getFieldError(field: string): string | null {
     return this.formState.getFieldError(field as keyof WarehouseEntity);
   }
 
-  /**
-   * Check if a field has an error
-   */
   hasFieldError(field: string): boolean {
     return this.formState.hasFieldError(field as keyof WarehouseEntity);
   }
 
-  /**
-   * Get current form data
-   */
   createFormData() {
     return this.formState.data();
   }
 
-  /**
-   * Get field touched state
-   */
   fieldTouched() {
     return this.formState.touched();
   }
 
-  /**
-   * Make Object available in template
-   */
-  Object = Object;
-
-  /**
-   * Create a new warehouse
-   */
   createWarehouse(): void {
     if (!this.canCreateWarehouses()) {
       this.handleError(
@@ -337,13 +324,7 @@ export class WarehouseComponent extends BaseInventoryComponent {
     );
   }
 
-  /**
-   * Override canExportData to use warehouse-specific permissions
-   */
   override canExportData(): boolean {
     return this.permissionService.canExportData();
   }
-
-  // Alias for backward compatibility with template
-  exportWarehouses = () => this.exportData();
 }

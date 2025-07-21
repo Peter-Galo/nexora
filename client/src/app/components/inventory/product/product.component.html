@@ -7,7 +7,7 @@
     <div class="d-flex flex-column flex-md-row gap-2 mt-3 mt-md-0">
       <button
         type="button"
-        class="btn btn-outline-primary w-100 w-md-auto"
+        class="btn w-auto"
         (click)="toggleAnalytics()"
         [class.active]="showAnalytics"
       >
@@ -15,7 +15,7 @@
       </button>
       <button
         type="button"
-        class="btn btn-outline-secondary w-100 w-md-auto d-none d-md-block"
+        class="btn w-auto d-none d-md-block"
         (click)="toggleViewMode()"
       >
         <i
@@ -27,8 +27,8 @@
       </button>
       <button
         type="button"
-        class="btn btn-outline-success w-100 w-md-auto"
-        (click)="exportProducts()"
+        class="btn w-auto"
+        (click)="this.exportData()"
         [disabled]="exportState.exportLoading()"
       >
         @if (exportState.exportLoading()) {
@@ -42,7 +42,7 @@
       </button>
       <button
         type="button"
-        class="btn btn-outline-info w-100 w-md-auto"
+        class="btn w-auto"
         (click)="refreshData()"
         [disabled]="loading()"
       >
@@ -66,11 +66,7 @@
     <div class="alert alert-danger" role="alert">
       <i class="fas fa-exclamation-triangle me-2"></i>
       {{ error() }}
-      <button
-        type="button"
-        class="btn btn-sm btn-outline-danger ms-2"
-        (click)="refreshData()"
-      >
+      <button type="button" class="btn btn-sm ms-2" (click)="refreshData()">
         Try Again
       </button>
     </div>
@@ -359,7 +355,7 @@
                 </span>
                 <button
                   type="button"
-                  class="btn btn-sm btn-outline-secondary"
+                  class="btn btn-sm"
                   (click)="clearFilters()"
                 >
                   Clear Filters

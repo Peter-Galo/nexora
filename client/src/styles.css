@@ -94,10 +94,15 @@ body {
 
 .active {
   font-weight: bold;
+  color: #eeeeee !important;
 }
 
 .navbar {
   background-color: white !important;
+}
+
+.navbar .active {
+  color: #333333 !important;
 }
 
 .navbar.sticky-top {
@@ -124,7 +129,7 @@ body {
   color: #eeeeee !important;
 }
 
-.active {
+.list-group-item {
   border: none !important;
 }
 
@@ -136,7 +141,7 @@ body {
   background-color: var(--primary-color-20) !important;
   cursor: pointer;
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-  color: #333;
+  color: #333 !important;
 }
 
 .alert {
@@ -270,7 +275,6 @@ body {
 }
 
 /* Product Component Styles */
-
 .btn-group .btn.active {
   background-color: var(--bs-primary);
   color: white;

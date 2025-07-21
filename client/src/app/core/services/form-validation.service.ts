@@ -21,9 +21,6 @@ export interface ValidationConfig {
   providedIn: 'root',
 })
 export class FormValidationService {
-  /**
-   * Create a reactive form state with validation
-   */
   createFormState<T extends Record<string, any>>(
     initialData: T,
     validationConfig: ValidationConfig,
@@ -107,9 +104,6 @@ export class FormValidationService {
     };
   }
 
-  /**
-   * Validate a single field
-   */
   private validateField(
     field: string,
     value: any,
@@ -133,9 +127,6 @@ export class FormValidationService {
     });
   }
 
-  /**
-   * Validate a single field value against a rule
-   */
   private validateSingleField(
     field: string,
     value: any,
@@ -181,9 +172,6 @@ export class FormValidationService {
     return null;
   }
 
-  /**
-   * Format field name for display
-   */
   private formatFieldName(field: string): string {
     return field
       .replace(/([A-Z])/g, ' $1')
@@ -191,17 +179,11 @@ export class FormValidationService {
       .trim();
   }
 
-  /**
-   * Email validation regex
-   */
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
-  /**
-   * Common validation rules
-   */
   static readonly COMMON_RULES = {
     required: { required: true },
     email: { required: true, email: true },
@@ -220,9 +202,6 @@ export class FormValidationService {
     phone: { pattern: /^[+]?[1-9][\d]{0,15}$/ },
   };
 
-  /**
-   * Warehouse-specific validation config
-   */
   static readonly WAREHOUSE_VALIDATION: ValidationConfig = {
     code: FormValidationService.COMMON_RULES.code,
     name: FormValidationService.COMMON_RULES.name,

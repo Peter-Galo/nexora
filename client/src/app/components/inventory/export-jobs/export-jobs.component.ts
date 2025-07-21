@@ -5,7 +5,10 @@ import {
   ExportService,
 } from '../../../services/inventory/export.service';
 import { catchError, of, Subject, takeUntil } from 'rxjs';
-import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
+import {
+  DataTableComponent,
+  TableColumn,
+} from '../../shared/data-table/data-table.component';
 
 @Component({
   selector: 'app-export-jobs',
@@ -41,9 +44,6 @@ export class ExportJobsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Load all export jobs for the authenticated user
-   */
   loadExportJobs(): void {
     this.loading.set(true);
     this.error.set(null);
@@ -64,23 +64,14 @@ export class ExportJobsComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Refresh the export jobs list
-   */
   refresh(): void {
     this.loadExportJobs();
   }
 
-  /**
-   * Download an export file using the file URL
-   */
   downloadExport(fileUrl: string): void {
     window.open(fileUrl, '_blank');
   }
 
-  /**
-   * Get status badge class for styling
-   */
   getStatusBadgeClass(status: string): string {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -96,9 +87,6 @@ export class ExportJobsComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Get category display name
-   */
   getCategoryDisplayName(category: string): string {
     switch (category.toLowerCase()) {
       case 'warehouse':
@@ -112,16 +100,10 @@ export class ExportJobsComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Check if export job can be downloaded
-   */
   canDownload(job: ExportJob): boolean {
     return job.status === 'COMPLETED' && !!job.fileUrl;
   }
 
-  /**
-   * Format date for display
-   */
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleString();
   }
